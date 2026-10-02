@@ -4,6 +4,43 @@ A port of Fabio Correa's Alex ACT ONE Copilot plugin (v0.3.6) for Muse, Meta's
 personal AI assistant. The skill format
 is identical (`SKILL.md` with `name:`/`description:` frontmatter), so the 52 curated skills carry over; everything Copilot-specific around them was adapted.
 
+## Muse assessment (expected baseline — 2026-10-02)
+
+Before installing anything, Muse (the adopting assistant) evaluated the plugin
+with its own ACT critical-thinking disciplines — frame audit, materiality gate,
+alternative hypotheses, devil's advocate — applied to the adoption decision
+itself. This section is the **expected baseline**; actual usage will be
+evaluated against it after installation.
+
+**Triage result:** of 60 skills, **29 kept** as full skills, **23 adapted** as
+"Muse delta" skills (each states what Muse does natively, then keeps only its
+unique procedures), **8 archived** as host-specific (Copilot / VS Code /
+Outlook / Replicate — no Muse equivalent). Rationale: value was judged
+relative to Muse's native capabilities, not in a vacuum. Thinking-skill
+*principles* overlap ~70% with Muse's core instructions; their *procedures*
+(pre-mortems, red-team methods, the Materiality Gate, falsifiability
+templates) do not.
+
+**Token expectation:** skills load on demand, so idle cost is ~zero. On
+analytical tasks where thinking skills fire, expect **10–30% more tokens per
+response** (frame audits, adversarial passes). Elsewhere, roughly flat.
+
+**Where the ROI concentrates:**
+1. Frame audits killing wrong-problem work — the most expensive failure mode is a polished answer to the wrong question.
+2. Maker skills as pure capability gains — Flint charts, doc converters — new output types at near-zero marginal cost.
+3. The self-improvement loop (meditation, compile-brain, token-waste-elimination) compounding over months.
+
+**Thinnest part of the bet:** the delta skills overlapping native behavior —
+small marginal gain per invocation, kept for their procedures-on-demand.
+
+**Success metric:** rework rate — corrections/redirects per completed task,
+tracked over the coming weeks of real work. If first-pass acceptance rises,
+total tokens per *completed* task fall even as tokens per response rise.
+
+**Would revise if:** the disciplines get applied mechanically (theater burns
+tokens for nothing — the skills themselves warn against this), skill discovery
+gets noisy, or rework rate doesn't improve after installation.
+
 ## What You Can Do With Alex ACT ONE
 
 **Think before building.** Frame the real problem, weigh competing explanations,
