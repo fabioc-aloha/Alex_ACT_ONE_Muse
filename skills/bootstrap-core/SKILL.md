@@ -1,0 +1,147 @@
+---
+name: bootstrap-core
+description: "Activates, verifies, repairs, or removes this plugin's user-scope runtime instructions from canonical installed sources. Use after installing or updating Alex ACT ONE, when ACT behavior or Alex Finch identity is inactive, or when bootstrap receipt hashes drift."
+lastReviewed: 2026-09-19
+---
+
+# Bootstrap Core
+
+Apply the canonical, user-scope modules from this package. The canonical
+sources live in this edition's `muse-opt-in/` directory.
+
+> **Muse edition:** there is no always-on instruction mechanism and no plugin
+> loader in Muse. Activation is a deliberate user decision, not a scripted
+> install — the user copies or adapts a module into their own assistant
+> configuration. The bundled scripts (`host-readiness.cjs`, `bootstrap-core.cjs`)
+> still target Copilot host paths (`~/.copilot/instructions`, `.github/instructions`)
+> and are preserved for reference; they do not describe Muse activation. The
+> receipts mechanism below records what the scripts wrote, so any host can be
+> reconciled against the canonical sources.
+
+Skill files in the `skills/` folder and `.prompt.md` prompts in the `prompts/` folder do not need installation; they are loaded through the skill tool from the installed plugin path.
+
+## Modules
+
+This skill activates user-scope `.instructions.md` modules from the canonical
+`muse-opt-in/` sources. Each module is individually opt-in: review its
+description in `muse-opt-in/README.md` and adopt only what fits.
+
+## Preview First
+
+Preview is the decision point — consent follows the preview, not the other way
+around.
+
+```text
+node <this-skill>/scripts/host-readiness.cjs --host <host>
+```
+
+```text
+node <this-skill>/scripts/bootstrap-core.cjs --target-instructions <dir> --workspace-instructions <dir> [--apply]
+```
+
+`--host` picks the report's target host. Both commands support `--json`. See the
+scripts' usage text for the full flag list.
+
+In the Muse edition the scripts resolve the canonical `muse-opt-in/` sources
+but still default to Copilot host target paths; pass `--target-instructions`
+explicitly for any other destination. Run the preview against the resolved
+target before any `--apply`.
+
+## Host Readiness
+
+Start with a host-specific readiness report when the activation steps are
+unclear:
+
+```text
+node <this-skill>/scripts/host-readiness.cjs --host scout
+node <this-skill>/scripts/host-readiness.cjs --host scout --json
+```
+
+Supported hosts are `copilot-cli`, `vscode`, `github-copilot-app`, and `scout`.
+The report runs the bootstrap preview for the selected target and names what
+still belongs to that host. It writes no instructions or MCP registry entries,
+does not enable UI settings, and cannot prove a host has restarted or observed
+the activation.
+
+For Scout, the report also previews its separate MCP registration and names the
+required **Load Copilot CLI skills** setting and full restart. Review the
+existing bootstrap and registrar previews, then run each `--apply` command
+separately after consent.
+
+## Apply After Consent
+
+Show the resolved target, its source, exact file actions, user scope, receipt
+action, overlap report, and installed plugin version. Ask:
+
+> Activate these modules for every workspace on this machine?
+
+Quote the actual count from the preview's `expectedFiles` rather than a number
+remembered from last time.
+
+After an explicit yes, rerun the same command with `--apply`. The script writes
+only changed files, writes `.alex-act-one-bootstrap.json` atomically when its
+content needs creation or refresh, and verifies every destination and the
+receipt against canonical sources. A no-op apply preserves receipt bytes.
+
+The receipt owns only the files this plugin installed. It never claims a
+greeting instruction from another plugin or any user-authored file. A valid
+legacy mixed receipt is evidence for preserving matching bytes, not authority to
+rewrite or delete another plugin's state.
+
+Receipts written through version 0.3.0 record `alex-act-core` as
+`bootstrappedBy` and as each entry's `owner`, with a former source path. A
+subsequent `--apply` validates their hashes and migration shape, then refreshes
+them to `alex-act-one` ownership and the canonical `muse-opt-in/` source path
+without rewriting unchanged instruction files. Preview reports the legacy
+receipt as a refresh; `--remove` continues to recognize it as owned until the
+migration runs.
+
+## Repair And Idempotency
+
+A current bootstrap requires:
+
+1. Canonical source instructions matching the manifest inventory exactly.
+2. A schema-v2 receipt carrying the installed plugin version.
+3. One disjoint receipt entry per instruction.
+4. Source, destination, and receipt SHA-256 parity.
+
+Equal versions do not hide byte drift. A second preview after apply must report
+only preserve actions and a preserved receipt.
+
+## Remove Instructions
+
+Preview removal with `--remove`. Apply only after explicit removal consent by
+adding `--apply`. The script removes only receipt-owned destinations whose
+current hashes still match the receipt. Modified or unowned files are preserved
+and reported. Receipt entries must match the manifest-backed ownership set
+exactly; unsafe, duplicate, foreign, or malformed entries fail closed before
+path resolution. Clean removal verifies every deletion and removes the
+receipt. Modified owned bytes and their receipt remain as recovery evidence.
+Files owned by another plugin's receipt are never removed.
+
+## Boundaries
+
+- Self-activation is not general plugin lifecycle management.
+- Do not install, update, enable, disable, or uninstall plugins here.
+- Do not copy plugin directories, caches, settings, or unowned instructions.
+- Do not write unowned instruction or external continuity state.
+- Do not fetch instruction bodies from the network.
+- Do not silently apply during install or session start.
+- Do not delete by filename glob; receipt and hash ownership are required.
+
+## Anti-Patterns
+
+| Anti-pattern | Correction |
+| --- | --- |
+| Require another plugin before this one can activate | Run this plugin's own bootstrap command |
+| Copy instructions without preview | Show exact actions and machine-wide scope first |
+| Treat a skill as equivalent to always-applied policy | Activate the canonical instruction files |
+| Delete every `alex-act-*` file | Remove only valid receipt entries with matching hashes |
+| Claim a greeting instruction this plugin did not install | Keep separate receipts per owning plugin |
+| Assume one activation covers every host | Resolve the target per host and activate each explicitly |
+
+## Would Revise If
+
+Revise by **2026-12-07** if this plugin alone cannot activate every declared
+source, a preview mutates state, a receipt claims a file it does not own, source
+resolution fails in a delivered plugin, or removal deletes modified bytes.
