@@ -60,22 +60,22 @@ Before you promise to render a chart, confirm the tools exist. If they don't,
 install them (or ask the user to). Failing loudly early is cheaper than
 authoring a spec no one can render.
 
-### For native chart rendering (default in this skill)
+### For MCP rendering via a directly-driven Flint server (Muse edition)
 
-> **Muse edition:** there is no `flint-chart-mcp` server to register — Muse has
-> no MCP consumer, and chart rendering is a native host capability. See
-> `docs/muse-capability-map.md`. The Copilot-edition mechanics below (per-host
-> `mcp.json` paths, `setup-dependencies` provisioning, trust prompts) are
-> preserved for reference only.
+> **Muse edition:** there is no host-level MCP registration — no `mcp.json`,
+> no trust prompts. Instead, provision `flint-chart-mcp` with the
+> `setup-dependencies` skill and drive the server **directly over stdio**
+> with any MCP client (initialize → `tools/call`). The Copilot-edition
+> mechanics below (per-host `mcp.json` paths, trust prompts) are preserved
+> for reference only.
 
-1. **Check for a native chart capability.** Look in your available tool inventory
-   for chart-rendering tools. If any are present, the capability is reachable —
-   proceed to authoring.
-2. **If no chart tools are present,** state that plainly rather than inventing
-   an MCP registration flow — there is nothing to register in this edition.
-3. **Author the spec as this skill describes below** (chart choice, bindings,
-   validation), and render through the host's native capability. The authoring
-   guidance is host-agnostic.
+1. **Check the server is provisioned** (e.g.
+   `node_modules/flint-chart-mcp/dist/cli.js` exists under the runtime
+   root). If not, run the `setup-dependencies` provisioning.
+2. **Author the spec** as this skill describes below (chart choice,
+   bindings, validation) — the authoring guidance is host-agnostic.
+3. **Validate, then render** through the stdio client; save the image and
+   verify it visually before delivering (see `render-verify`).
 
 ### For project code integration
 
