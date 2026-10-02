@@ -5,7 +5,7 @@ lastReviewed: 2026-09-07
 
 # /bootstrap-core
 
-1. Read the linked [`bootstrap-core`](../skills/bootstrap-core/SKILL.md) skill.
+1. Read the linked [`bootstrap-core`](../archive/host-specific/bootstrap-core/SKILL.md) skill.
 2. Run its bundled `scripts/bootstrap-core.cjs` command without `--apply`.
 3. Show the resolved distribution target and source, all file actions, receipt
    action, installed plugin version, manifest parity, user scope, and recursive

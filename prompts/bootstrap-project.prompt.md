@@ -5,7 +5,7 @@ lastReviewed: 2026-08-15
 
 # /bootstrap-project
 
-1. Read the linked [`bootstrap-project`](../skills/bootstrap-project/SKILL.md)
+1. Read the linked [`bootstrap-project`](../archive/host-specific/bootstrap-project/SKILL.md)
    skill.
 2. Resolve one explicit repository root.
 3. Run its bundled script without `--apply` and show the exact plan.

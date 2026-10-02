@@ -1,29 +1,28 @@
 ---
 name: plan
-description: Use when the user wants a plan instead of execution, or before any non-trivial implementation (multi-file, architectural choice, > 15 min). Writes a concrete actionable markdown plan with bite-sized tasks (2-5 min each), exact file paths, complete code, and verification steps. Adapted from Hermes Agent / obra/superpowers.
-lastReviewed: 2026-08-15
+description: "Use when the user wants a plan instead of execution, or before any non-trivial implementation (multi-file, architectural choice, > 15 min). Writes a concrete actionable markdown plan with bite-sized tasks (2-5 min each), exact file paths, complete code, and verification steps. Adapted from Hermes Agent / obra/superpowers. Muse delta: Muse natively confirms before mutating and reads before acting; this skill adds the plan-only mode contract, the save-location conventions, the TDD task template with complete code and exact commands, and the zero-context implementer standard."
+lastReviewed: 2026-10-02
 ---
 
 # Plan Mode
 
-Use this skill when the user asks for a plan, says "design before building", types `/plan`, or when the work obviously spans multiple files / requires architectural choice / will take more than ~15 minutes.
+## Muse delta
 
-## Core behavior
+- **What Muse already does natively**: confirm before consequential side effects (no committing/pushing without approval), and read/inspect before acting. Those are the floor.
+- **What this skill uniquely adds**: the plan-only mode contract (deliverable is a markdown plan, never implementation); the save-location conventions (`docs/plans/`, `docs/history/`); the zero-context implementer standard (assume the implementer knows nothing about this codebase); bite-sized 2–5-minute TDD task granularity; the task template with exact file paths, complete copy-pasteable code, exact commands with expected output, and verification steps.
+- **When to load it**: the user asks for a plan, says "design before building", types `/plan`, or the work obviously spans multiple files / requires architectural choice / will take more than ~15 minutes.
 
 For this turn, you are planning only.
 
 - Do not implement code
 - Do not edit project files except the plan markdown file
-- Do not run mutating terminal commands, commit, push, or perform external actions
-    without explicit user approval in a separate execution turn
+- Do not run mutating terminal commands, commit, push, or perform external actions without explicit user approval in a separate execution turn
 - You may inspect the repo or other context with read-only commands when needed
 - Your deliverable is a markdown plan saved to a project-appropriate docs location
 
 ## Output requirements
 
-Write a markdown plan that is concrete and actionable.
-
-Include, when relevant:
+Write a markdown plan that is concrete and actionable. Include, when relevant:
 
 - Goal
 - Current context / assumptions
@@ -56,35 +55,23 @@ If the repo has no `docs/` folder, create one. If the user names a different tar
 
 # Writing the Plan Well
 
-The rest of this skill is the craft of authoring a _good_ implementation plan — the content that goes inside the markdown file above.
+The craft of authoring a _good_ implementation plan — the content that goes inside the markdown file above.
 
-## Overview
+## The implementer standard
 
-Write comprehensive implementation plans assuming the implementer has zero context for the codebase and questionable taste. Document everything they need: which files to touch, complete code, testing commands, docs to check, how to verify. Give them bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
-
-Assume the implementer is a skilled developer but knows almost nothing about the toolset or problem domain. Assume they don't know good test design very well.
+Write comprehensive implementation plans assuming the implementer has **zero context** for the codebase and questionable taste. Document everything they need: which files to touch, complete code, testing commands, docs to check, how to verify. Give them bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
 
 **Core principle:** A good plan makes implementation obvious. If someone has to guess, the plan is incomplete.
 
-## When a Full Implementation Plan Helps
+## When a full plan helps
 
-**Always use before:**
+**Always use before**: implementing multi-step features, breaking down complex requirements, delegating work to a worker subagent.
 
-- Implementing multi-step features
-- Breaking down complex requirements
-- Delegating work to a worker subagent
+**Don't skip when**: the feature seems simple (assumptions cause bugs), you plan to implement it yourself (future you needs guidance), or you're working alone (documentation matters).
 
-**Don't skip when:**
+## Bite-sized task granularity
 
-- Feature seems simple (assumptions cause bugs)
-- You plan to implement it yourself (future you needs guidance)
-- Working alone (documentation matters)
-
-## Bite-Sized Task Granularity
-
-**Each task = 2-5 minutes of focused work.**
-
-Every step is one action:
+**Each task = 2-5 minutes of focused work.** Every step is one action:
 
 - "Write the failing test" — step
 - "Run it to make sure it fails" — step
@@ -92,13 +79,7 @@ Every step is one action:
 - "Run the tests and make sure they pass" — step
 - "Propose a commit boundary" — step, only after explicit user approval
 
-**Too big:**
-
-```markdown
-### Task 1: Build authentication system
-
-[50 lines of code across 5 files]
-```
+**Too big:** "### Task 1: Build authentication system" with 50 lines of code across 5 files.
 
 **Right size:**
 
@@ -116,9 +97,9 @@ Every step is one action:
 [15 lines, 1 file]
 ```
 
-## Plan Document Structure
+## Plan document structure
 
-### Header (Required)
+### Header (required)
 
 Every plan MUST start with:
 
@@ -134,7 +115,7 @@ Every plan MUST start with:
 ---
 ```
 
-### Task Structure
+### Task structure
 
 Each task follows this format:
 
@@ -185,57 +166,14 @@ State the suggested commit scope and message. Run `git add` or `git commit` only
 after the user explicitly authorizes that action.
 ````
 
-## Writing Process
+## Writing process
 
-### Step 1: Understand Requirements
-
-Read and understand:
-
-- Feature requirements
-- Design documents or user description
-- Acceptance criteria
-- Constraints
-
-### Step 2: Explore the Codebase
-
-Use the workspace's search and read tools to understand the project:
-
-- Understand project structure — list/glob files under relevant directories
-- Look at similar features — search for related patterns
-- Check existing tests — find the test directory and conventions
-- Read key files — open the main entry points
-
-### Step 3: Design Approach
-
-Decide:
-
-- Architecture pattern
-- File organization
-- Dependencies needed
-- Testing strategy
-
-### Step 4: Write Tasks
-
-Create tasks in order:
-
-1. Setup/infrastructure
-2. Core functionality (TDD for each)
-3. Edge cases
-4. Integration
-5. Cleanup/documentation
-
-### Step 5: Add Complete Details
-
-For each task, include:
-
-- **Exact file paths** (not "the config file" but `src/config/settings.py`)
-- **Complete code examples** (not "add validation" but the actual code)
-- **Exact commands** with expected output
-- **Verification steps** that prove the task works
-
-### Step 6: Review the Plan
-
-Check:
+1. **Understand requirements** — feature requirements, design docs, acceptance criteria, constraints.
+2. **Explore the codebase** — project structure, similar features, existing tests, key files (read-only).
+3. **Design approach** — architecture pattern, file organization, dependencies, testing strategy.
+4. **Write tasks** in order: setup/infrastructure → core functionality (TDD each) → edge cases → integration → cleanup/documentation.
+5. **Add complete details** per task: exact file paths (not "the config file"), complete code examples (not "add validation"), exact commands with expected output, verification steps.
+6. **Review the plan**:
 
 - [ ] Tasks are sequential and logical
 - [ ] Each task is bite-sized (2-5 min)
@@ -249,24 +187,25 @@ Check:
 
 ### DRY (Don't Repeat Yourself)
 
-**Bad:** Copy-paste validation in 3 places
-**Good:** Extract validation function, use everywhere
+**Bad:** Copy-paste validation in 3 places.
+**Good:** Extract validation function, use everywhere.
 
 ### YAGNI (You Aren't Gonna Need It)
 
-**Bad:** Add "flexibility" for future requirements
-**Good:** Implement only what's needed now
+**Bad:** Add "flexibility" for future requirements.
 
 ```python
-# Bad — YAGNI violation
 class User:
     def __init__(self, name, email):
         self.name = name
         self.email = email
         self.preferences = {}  # Not needed yet!
         self.metadata = {}     # Not needed yet!
+```
 
-# Good — YAGNI
+**Good:** Implement only what's needed now.
+
+```python
 class User:
     def __init__(self, name, email):
         self.name = name
@@ -275,49 +214,22 @@ class User:
 
 ### TDD (Test-Driven Development)
 
-Every task that produces code should include the full TDD cycle:
+Every task that produces code includes the full cycle: write failing test → run to verify failure → write minimal code → run to verify pass. (See the `test-driven-development` skill for details.)
 
-1. Write failing test
-2. Run to verify failure
-3. Write minimal code
-4. Run to verify pass
+### Commit boundaries
 
-(See the `test-driven-development` skill for details.)
+After a cohesive implementation unit, propose a commit boundary. Do not commit from plan mode or assume permission carries from code-edit approval to Git write approval.
 
-### Commit Boundaries
+## Common mistakes
 
-After a cohesive implementation unit, propose a commit boundary. Do not commit
-from plan mode or assume permission carries from code-edit approval to Git write
-approval.
+| Mistake | Bad | Good |
+|---------|-----|------|
+| Vague tasks | "Add authentication" | "Create User model with email and password_hash fields" |
+| Incomplete code | "Step 1: Add validation function" | The step followed by the complete function code |
+| Missing verification | "Step 3: Test it works" | "Step 3: Run `pytest tests/test_auth.py -v`, expected: 3 passed" |
+| Missing file paths | "Create the model file" | "Create: `src/models/user.py`" |
 
-```bash
-git status --short
-git diff --check
-```
-
-## Common Mistakes
-
-### Vague Tasks
-
-**Bad:** "Add authentication"
-**Good:** "Create User model with email and password_hash fields"
-
-### Incomplete Code
-
-**Bad:** "Step 1: Add validation function"
-**Good:** "Step 1: Add validation function" followed by the complete function code
-
-### Missing Verification
-
-**Bad:** "Step 3: Test it works"
-**Good:** "Step 3: Run `pytest tests/test_auth.py -v`, expected: 3 passed"
-
-### Missing File Paths
-
-**Bad:** "Create the model file"
-**Good:** "Create: `src/models/user.py`"
-
-## Execution Handoff
+## Execution handoff
 
 After saving the plan, offer the execution approach:
 
@@ -336,6 +248,4 @@ DRY, YAGNI, TDD
 
 ## Would Revise If
 
-Revisit by **2026-11-15** if plans still cause unauthorized mutations, task
-granularity makes verification impractical, or users repeatedly need a
-different planning format for multi-repository work.
+Revisit by **2026-12-01** if plans still cause unauthorized mutations, task granularity makes verification impractical, or users repeatedly need a different planning format for multi-repository work.

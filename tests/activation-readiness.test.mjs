@@ -7,8 +7,8 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const READINESS = join(ROOT, 'skills', 'bootstrap-core', 'scripts', 'host-readiness.cjs');
-const BOOTSTRAP = join(ROOT, 'skills', 'bootstrap-core', 'scripts', 'bootstrap-core.cjs');
+const READINESS = join(ROOT, 'archive', 'host-specific', 'bootstrap-core', 'scripts', 'host-readiness.cjs');
+const BOOTSTRAP = join(ROOT, 'archive', 'host-specific', 'bootstrap-core', 'scripts', 'bootstrap-core.cjs');
 
 function files(root) {
     if (!readdirSync(root, { withFileTypes: true })) return [];

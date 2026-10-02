@@ -17,11 +17,11 @@ You want to add a visual artifact to a doc / book / report and none of these fit
 
 | Artifact                                            | Not this skill — use instead                                        |
 | --------------------------------------------------- | ------------------------------------------------------------------- |
-| Data chart (bar, line, scatter, distribution, KPI)  | [`flint-chart`](../flint-chart/SKILL.md)                            |
-| Technical / architectural / flow diagram            | [`markdown-mermaid`](../markdown-mermaid/SKILL.md)                      |
-| Brand banner (hero header for a doc)                | [`svg-banner`](../svg-banner/SKILL.md)                            |
-| Deterministic hand-authored figure (dataset-backed) | [`figure-generator`](../figure-generator/SKILL.md)                  |
-| Print-quality book figure with typography grammar   | [`print-svg-style-guide`](../print-svg-style-guide/SKILL.md)        |
+| Data chart (bar, line, scatter, distribution, KPI)  | [`flint-chart`](../../../skills/flint-chart/SKILL.md)                            |
+| Technical / architectural / flow diagram            | [`markdown-mermaid`](../../../skills/markdown-mermaid/SKILL.md)                      |
+| Brand banner (hero header for a doc)                | [`svg-banner`](../../../skills/svg-banner/SKILL.md)                            |
+| Deterministic hand-authored figure (dataset-backed) | [`figure-generator`](../../../skills/figure-generator/SKILL.md)                  |
+| Print-quality book figure with typography grammar   | [`print-svg-style-guide`](../../../skills/print-svg-style-guide/SKILL.md)        |
 
 Fires when the goal is one of:
 
@@ -132,8 +132,8 @@ Set a spending cap at [replicate.com/account/billing](https://replicate.com/acco
 
 ## Composition with plugin skills
 
-- **Big Idea gate first**: run [`chart-big-idea`](../chart-big-idea/SKILL.md) Step 0.5 (earn-a-figure gate) before generating. Skips wasted API calls for figures that shouldn't exist.
-- **Verify after**: run [`render-verify`](../render-verify/SKILL.md) to check the generated image actually communicates what you asked for. AI-generated images fail Prose-coupling surprisingly often (prose says X, image shows Y).
+- **Big Idea gate first**: run [`chart-big-idea`](../../../skills/chart-big-idea/SKILL.md) Step 0.5 (earn-a-figure gate) before generating. Skips wasted API calls for figures that shouldn't exist.
+- **Verify after**: run [`render-verify`](../../../skills/render-verify/SKILL.md) to check the generated image actually communicates what you asked for. AI-generated images fail Prose-coupling surprisingly often (prose says X, image shows Y).
 - **Iterate cheap, publish expensive**: FLUX-schnell for iteration, FLUX-1.1-pro or Ideogram for the final.
 - **Style-lock for a series**: for a book or multi-chapter report, lock model + seed + palette hints across figures so the visual family reads as one voice. Ideogram and Recraft handle this best.
 

@@ -111,3 +111,62 @@ Rule: Copilot-specific mechanics neutralized; intellectual content untouched.
   `install-visual-companions` mechanics): no marketplace in Muse.
 - **`alex-finch-personality` as a default**: kept as-is in `muse-opt-in/`,
   explicitly opt-in and off by default.
+
+---
+
+# v0.2.0 curation
+
+After the straight port, the 60 skills were triaged for Muse adoption using
+the plugin's own critical-thinking disciplines (frame audit, materiality
+gate, devil's advocate). Frame: value is relative to Muse's native
+capabilities — its system prompt already mandates due diligence,
+verify-before-claiming, completed/failed/blocked/unverified status
+separation, short plain warm writing, and test discipline — not absolute
+skill quality. Result: **29 keep, 23 delta-adapted, 8 archived.**
+
+## Tier 1 — Keep (29, unchanged)
+
+Genuinely new capability or method for Muse: `act-tenets`,
+`problem-framing-audit`, `adversarial-review`, `risk-analysis`,
+`evaluate-before-adopting`, `deep-review`, `code-review`,
+`systematic-debugging`, `mutation-testing`, `security-and-hardening`,
+`big-idea`, `humanizer`, `md-to-word`, `docx-to-md`, `md-to-html`,
+`html-to-md`, `markdown-sanitization-chain`, `flint-chart`, `flint-theme`,
+`chart-big-idea`, `chart-vocabulary`, `chart-interpretation`,
+`render-verify`, `meditation`, `compile-brain`,
+`project-capability-authoring`, `token-waste-elimination`, `assess-brain`,
+`setup-dependencies`.
+
+## Tier 2 — Muse delta (23, rewritten)
+
+~70% overlap with native Muse behavior; adopted as trimmed "delta" skills
+that keep only what Muse doesn't natively do. Each keeps its directory name
+and `name:` frontmatter, gains a `## Muse delta` section (what's native,
+what's uniquely added, when to load), and targets <60% of original length.
+Procedures, checklists, worked examples, templates, and scripts were kept;
+principle restatements were cut: `critical-thinking`,
+`anti-hallucination`, `ethical-reasoning`, `status-reporting`,
+`proactive-awareness`, `plan`, `spike`, `test-driven-development`,
+`terminal-command-safety`, `git-workflow`, `communication-craft`,
+`lint-clean-markdown`, `markdown-mermaid`, `ascii-chart`, `svg-banner`,
+`annotate-screenshot`, `figure-generator`, `print-svg-style-guide`,
+`docs-shell`, `doc-hygiene`, `corpus-qa-sweep`, `md-to-txt`, `md-to-eml`.
+
+## Tier 3 — Archived (8, moved to `archive/host-specific/`)
+
+Built for Copilot/VS Code/Outlook/Replicate with no Muse equivalent;
+preserved complete for other hosts, removed from the active manifest:
+`replicate-imagery`, `rich-email`, `browser-tools`, `platform-awareness`,
+`bootstrap-core`, `bootstrap-project`, `setup-enterprise-stack`,
+`install-visual-companions`. See `archive/host-specific/README.md`.
+
+## Mechanical changes in v0.2.0
+
+- `plugin.json` version → `0.2.0`.
+- `manifest.json`: `assets.skills` now lists the 52 active skills; the 8
+  archived are recorded under a new top-level `archived` key with reasons.
+- README skill table carries a Tier column (Keep / Delta); archived skills
+  moved to a separate table pointing at `archive/host-specific/`.
+- Tests: `activation-readiness` and `reinstall-release` fixtures repointed
+  from `skills/bootstrap-core/` to `archive/host-specific/bootstrap-core/`;
+  prompt cross-links to archived skills repointed the same way.

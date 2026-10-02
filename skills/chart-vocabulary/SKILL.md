@@ -16,7 +16,7 @@ This skill is the **selection and evaluation reference**. It sits upstream of th
 | **Pick the chart family + type** | **this skill** |
 | Author the Flint spec + render | [`flint-chart`](../flint-chart/SKILL.md) |
 | Structural / hand-authored SVG | [`figure-generator`](../figure-generator/SKILL.md) + [`print-svg-style-guide`](../print-svg-style-guide/SKILL.md) |
-| AI-generated illustration / hero image | [`replicate-imagery`](../replicate-imagery/SKILL.md) |
+| AI-generated illustration / hero image | [`replicate-imagery`(../../archive/host-specific/replicate-imagery/SKILL.md) |
 | Terminal, log, PR comment, or context window | [`ascii-chart`](../ascii-chart/SKILL.md) |
 | Verify after render | [`render-verify`](../render-verify/SKILL.md) |
 | Deliver / browse the gallery | [`docs-shell`](../docs-shell/SKILL.md) |

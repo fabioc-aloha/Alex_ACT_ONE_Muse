@@ -38,11 +38,11 @@ Verified across four rounds of live install testing in 2026. The round-4 column 
 | `eyeball` | `awesome-copilot` | Screenshot audit with claim-proof output doc | ✅ (see caveats) |
 | `diagram-viewer` | `awesome-copilot` | SVG / diagram drill-down preview | ✅ clean install |
 | `napkin` | `awesome-copilot` | Whiteboard for iterative chart design | ⚪ Untested |
-| `image-annotations` | `alex-mall` | PIL callouts + labels on screenshots. Optional: [`annotate-screenshot`](../annotate-screenshot/SKILL.md) covers this in-plugin; reach for the companion only for automatic multi-label placement or pixel diffing | ✅ |
+| `image-annotations` | `alex-mall` | PIL callouts + labels on screenshots. Optional: [`annotate-screenshot`](../../../skills/annotate-screenshot/SKILL.md) covers this in-plugin; reach for the companion only for automatic multi-label placement or pixel diffing | ✅ |
 | `visual-pr` | `awesome-copilot` | PR screenshot + annotation embed workflow | ⚪ Skills-only, needs real PR to exercise |
 
 > `storytelling-requirements` was a ninth companion until 2026. Its framing
-> role now ships here as [`chart-big-idea`](../chart-big-idea/SKILL.md), so it
+> role now ships here as [`chart-big-idea`](../../../skills/chart-big-idea/SKILL.md), so it
 > needs no install.
 
 ## Vision loop composition
@@ -66,10 +66,10 @@ incomplete.
 
 | Storytelling moment | Optional companion | Role |
 | --- | --- | --- |
-| **Requirements and audience** | [`chart-big-idea`](../chart-big-idea/SKILL.md) (in-plugin) | Capture audience, Big Idea, questions, evidence, and delivery target. No install needed. |
+| **Requirements and audience** | [`chart-big-idea`](../../../skills/chart-big-idea/SKILL.md) (in-plugin) | Capture audience, Big Idea, questions, evidence, and delivery target. No install needed. |
 | **Spatial ideation** | `napkin` | Sketch composition or sequence while the layout question is unresolved. |
-| **Independent reading** | [`chart-interpretation`](../chart-interpretation/SKILL.md) (in-plugin) | Read the candidate from the audience side; surface patterns, omissions, bias, and competing narratives. |
-| **Render QA** | [`render-verify`](../render-verify/SKILL.md) (in-plugin) | Console errors, failure catalog, and the look-at-it check. |
+| **Independent reading** | [`chart-interpretation`](../../../skills/chart-interpretation/SKILL.md) (in-plugin) | Read the candidate from the audience side; surface patterns, omissions, bias, and competing narratives. |
+| **Render QA** | [`render-verify`](../../../skills/render-verify/SKILL.md) (in-plugin) | Console errors, failure catalog, and the look-at-it check. |
 | **Evidence-rich review** | `eyeball` | Pair factual claims with source screenshots when auditable visual evidence is required. |
 | **Critique and handoff** | `image-annotations`, `visual-pr` | Mark specific defects and carry reviewed screenshots into a pull request. |
 
@@ -170,8 +170,8 @@ Print a summary:
 
 ## Composes with
 
-- [`render-verify`](../render-verify/SKILL.md) — this plugin's own visual-output audit skill; the vision loop extends it with cross-plugin composition
-- [`chart-big-idea`](../chart-big-idea/SKILL.md) — owns the framing gate at the input side of the vision loop since 2026-08-18, replacing the retired `storytelling-requirements` companion
+- [`render-verify`](../../../skills/render-verify/SKILL.md) — this plugin's own visual-output audit skill; the vision loop extends it with cross-plugin composition
+- [`chart-big-idea`](../../../skills/chart-big-idea/SKILL.md) — owns the framing gate at the input side of the vision loop since 2026-08-18, replacing the retired `storytelling-requirements` companion
 
 ## Falsifiability
 

@@ -434,7 +434,7 @@ The `$comment` fields in the starter manifest walk through every non-obvious cho
 
 Three ways to view the shell locally, in order of least ceremony:
 
-1. **Ask Copilot to open it in the internal browser.** `open_browser_page` launches a Playwright-driven Chromium with `file://` fetches permitted, so the shell renders directly from disk with no server. Documented in the [browser-tools skill](../../browser-tools/SKILL.md).
+1. **Ask Copilot to open it in the internal browser.** `open_browser_page` launches a Playwright-driven Chromium with `file://` fetches permitted, so the shell renders directly from disk with no server. Documented in the [browser-tools skill](../../archive/host-specific/browser-tools/SKILL.md).
 2. **VS Code Simple Browser.** Also allows `file://` fetches. Command palette → `Simple Browser: Show` → paste the `file:///c:/...` URL.
 3. **Local HTTP server.** Required for any external browser (Chrome, Firefox, Edge, Safari) since those block `file://` cross-file fetches for security. Also required for realistic HTTP status codes or service worker behavior.
 

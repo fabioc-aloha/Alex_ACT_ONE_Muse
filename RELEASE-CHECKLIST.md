@@ -23,7 +23,7 @@ does not depend on a file that is gitignored, uncommitted, or synced by hand.
 ## 2. Activation runs, and plans what the manifest declares
 
 ```text
-node skills/bootstrap-core/scripts/bootstrap-core.cjs
+node archive/host-specific/bootstrap-core/scripts/bootstrap-core.cjs
 ```
 
 Exit 0, `apply: false`, and `expectedFiles` equal to the manifest's instruction

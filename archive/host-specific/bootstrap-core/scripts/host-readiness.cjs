@@ -2,9 +2,22 @@
 'use strict';
 
 const { spawnSync } = require('node:child_process');
+const fs = require('node:fs');
 const path = require('node:path');
 
-const CORE_ROOT = path.resolve(__dirname, '..', '..', '..');
+// Package root is found by walking up to manifest.json, so this script works
+// both at skills/bootstrap-core/ and at archive/host-specific/bootstrap-core/.
+function findPackageRoot(start) {
+    let dir = path.resolve(start);
+    for (let i = 0; i < 8; i++) {
+        if (fs.existsSync(path.join(dir, 'manifest.json'))) return dir;
+        const parent = path.dirname(dir);
+        if (parent === dir) break;
+        dir = parent;
+    }
+    throw new Error('manifest.json not found above ' + start);
+}
+const CORE_ROOT = findPackageRoot(__dirname);
 const BOOTSTRAP = path.join(__dirname, 'bootstrap-core.cjs');
 const SCOUT_REGISTRAR = path.join(CORE_ROOT, 'skills', 'setup-dependencies', 'scripts', 'register-scout-mcp.mjs');
 const HOSTS = new Set(['copilot-cli', 'vscode', 'github-copilot-app', 'scout']);

@@ -63,8 +63,8 @@ if ($command -eq 'plugin uninstall alex-act-one@alex-mall') {
 if ($command -eq 'plugin install alex-act-one@alex-mall') {
   New-Item -ItemType Directory -Force -Path $installedRoot | Out-Null
     @{ name = 'alex-act-one'; version = '${VERSION}' } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $installedRoot 'plugin.json')
-  New-Item -ItemType Directory -Force -Path (Join-Path $installedRoot 'skills/bootstrap-core/scripts') | Out-Null
-    Set-Content -LiteralPath (Join-Path $installedRoot 'skills/bootstrap-core/scripts/bootstrap-core.cjs') -Value '// mocked bootstrap'
+  New-Item -ItemType Directory -Force -Path (Join-Path $installedRoot 'archive/host-specific/bootstrap-core/scripts') | Out-Null
+    Set-Content -LiteralPath (Join-Path $installedRoot 'archive/host-specific/bootstrap-core/scripts/bootstrap-core.cjs') -Value '// mocked bootstrap'
     @(@{ name = 'alex-act-one'; marketplace = 'alex-mall'; version = '${VERSION}'; enabled = $true; source = 'installed' }) | ConvertTo-Json -Compress | Set-Content -LiteralPath $statePath
   exit 0
 }

@@ -1,20 +1,18 @@
 ---
 name: "lint-clean-markdown"
-description: "Write markdown that passes markdownlint on first attempt — encode the most common rules as muscle memory"
-lastReviewed: 2026-05-01
+description: "Write markdown that passes markdownlint on first attempt — encode the most common rules as muscle memory. Muse delta: lint mechanics aren't native to Muse; this skill adds the golden rule, the MD031/032/022 quick-reference table, the backslash hard-break trap with worked example, and the Mermaid and nested-fence rules."
+lastReviewed: 2026-10-02
 ---
-
-
 
 # Lint-Clean Markdown
 
+## Muse delta
+
+- **What Muse already does natively**: Muse writes markdown, but markdownlint mechanics (which violations are common, how linters interpret blank lines, fences, and line breaks) are not native knowledge.
+- **What this skill uniquely adds**: the golden rule ("when in doubt: add a blank line"), the MD031/MD032/MD022/MD004/MD009/MD040/MD046/MD036/MD060 quick-reference table with mnemonics, the backslash hard-line-break trap with a worked example, the Mermaid-specific rules, the nested-code-fence problem, and the pre-write mental checklist.
+- **When to load it**: authoring any markdown file, reviewing a PR that touches `.md` files, or after the file just hit MD031, MD032, MD022, or MD060 errors.
+
 > Eliminate the edit-lint-fix cycle by writing markdown correctly the first time.
-
-## When to Use
-
-- Authoring any markdown file in this brain or in heir documentation
-- Reviewing a PR that touches `.md` files
-- The file just hit MD031, MD032, MD022, or MD060 errors
 
 ## The Golden Rule
 
@@ -27,7 +25,7 @@ Roughly 90% of markdown lint errors are missing blank lines. Lists, code blocks,
 | Rule | Code | Pattern | Mnemonic |
 |------|------|---------|----------|
 | Blank lines around lists | MD032 | `\n- item\n- item\n` | "Lists breathe" |
-| Blank lines around fences | MD031 | `\n\`\`\`code\`\`\`\n` | "Code breathes" |
+| Blank lines around fences | MD031 | ` ```code``` ` blocks surrounded by blank lines | "Code breathes" |
 | Blank line before headings | MD022 | `text\n\n## Head` | "Headers breathe" |
 | Use dash for lists | MD004 | `-` not `*` or `+` | "Dash dash dash" |
 | No trailing whitespace | MD009 | No spaces at line end | "Clean endings" |
@@ -42,9 +40,8 @@ Roughly 90% of markdown lint errors are missing blank lines. Lists, code blocks,
 
 ### MD032: Blank Lines Around Lists
 
-❌ Wrong: text immediately before/after list
-
-✅ Correct: blank line before first `-` AND after last `-`
+❌ Wrong: text immediately before/after list.
+✅ Correct: blank line before first `-` AND after last `-`.
 
 ```markdown
 **Why**:
@@ -57,14 +54,12 @@ Roughly 90% of markdown lint errors are missing blank lines. Lists, code blocks,
 
 ### MD031: Blank Lines Around Code Blocks
 
-❌ Wrong: text touching the fence markers
-
-✅ Correct: blank line before opening ` ``` ` AND after closing ` ``` `
+❌ Wrong: text touching the fence markers.
+✅ Correct: blank line before the opening fence AND after the closing fence.
 
 ### MD022: Blank Lines Before Headings
 
 ❌ Wrong: `Some text.\n## Heading`
-
 ✅ Correct: `Some text.\n\n## Heading`
 
 ### Hard Line Breaks in Prose (the metadata-block trap)
@@ -104,7 +99,7 @@ Roughly 90% of markdown lint errors are missing blank lines. Lists, code blocks,
 - Any list of consecutive `**Label**: value` lines that should *visually* be separate but should *not* have full paragraph spacing between them
 - Poetry, lyrics, or any prose where line breaks are semantic
 
-**Not applicable in these cases**:
+**Not applicable**:
 
 - Inside a real Markdown list (use `-` or `1.` instead)
 - Inside a table (use `<br/>` for in-cell line breaks)
@@ -113,13 +108,11 @@ Roughly 90% of markdown lint errors are missing blank lines. Lists, code blocks,
 ### MD004: Use Dash for Unordered Lists
 
 ❌ Wrong: `* item` or `+ item`
-
 ✅ Correct: `- item`
 
 ### MD040: Specify Language on Fenced Code
 
 ❌ Wrong: ` ``` ` (no language)
-
 ✅ Correct: ` ```javascript ` or ` ```text ` or ` ```markdown `
 
 ## Mermaid-Specific Rules

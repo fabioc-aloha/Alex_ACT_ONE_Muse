@@ -1,1 +1,27 @@
-{"author":{"name":"Fabio Correa","url":"https://github.com/fabioc-aloha"},"category":"foundation","commands":"prompts","description":"Alex ACT ONE, Muse edition. A user-level skills pack for the Muse personal assistant covering critical thinking and problem framing, engineering craft, prose and documentation, document conversion, visual authoring, and agent brain authoring. Skills are plain SKILL.md playbooks read from the installed skills directory. The Copilot edition's always-on instructions ship as opt-in modules under muse-opt-in/ (never auto-applied), and its MCP servers map to Muse native capabilities (see docs/muse-capability-map.md).","homepage":"https://github.com/fabioc-aloha/Alex_ACT_ONE_Muse","keywords":["alex-act","critical-thinking","epistemic-discipline","problem-framing","visual-authoring","document-conversion","Muse"],"license":"MIT","name":"alex-act-one-Muse","repository":{"type":"git","url":"https://github.com/fabioc-aloha/Alex_ACT_ONE_Muse.git"},"skills":"skills","version":"0.1.0"}
+{
+  "author": {
+    "name": "Fabio Correa",
+    "url": "https://github.com/fabioc-aloha"
+  },
+  "category": "foundation",
+  "commands": "prompts",
+  "description": "Alex ACT ONE, Muse edition. A user-level skills pack for the Muse personal assistant covering critical thinking and problem framing, engineering craft, prose and documentation, document conversion, visual authoring, and agent brain authoring. Skills are plain SKILL.md playbooks read from the installed skills directory. The Copilot edition's always-on instructions ship as opt-in modules under muse-opt-in/ (never auto-applied), and its MCP servers map to Muse native capabilities (see docs/muse-capability-map.md).",
+  "homepage": "https://github.com/fabioc-aloha/Alex_ACT_ONE_Muse",
+  "keywords": [
+    "alex-act",
+    "critical-thinking",
+    "epistemic-discipline",
+    "problem-framing",
+    "visual-authoring",
+    "document-conversion",
+    "Muse"
+  ],
+  "license": "MIT",
+  "name": "alex-act-one-Muse",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabioc-aloha/Alex_ACT_ONE_Muse.git"
+  },
+  "skills": "skills",
+  "version": "0.2.0"
+}

@@ -187,6 +187,6 @@ Track outcomes in the maintaining repo's curation log.
 
 ## Related
 
-- [`/alex-act-one setup-enterprise`](../../prompts/setup-enterprise.prompt.md) — namespaced slash-command entry point
+- [`/alex-act-one setup-enterprise`](../../../prompts/setup-enterprise.prompt.md) — namespaced slash-command entry point
 
 - Steward's user-brain inventory § 184 — source spec for this block

@@ -1,18 +1,22 @@
 ---
 name: doc-hygiene
-description: Documentation hygiene — anti-drift rules, code-documentation placement, count elimination, and living document maintenance. Use when auditing docs or comments for drift, fixing hardcoded counts and dead links, documenting code for adopters, or deciding whether a document is living or historical.
-lastReviewed: 2026-08-07
+description: "Documentation hygiene — anti-drift rules, code-documentation placement, count elimination, and living document maintenance. Use when auditing docs or comments for drift, fixing hardcoded counts and dead links, documenting code for adopters, or deciding whether a document is living or historical. Muse delta: Muse natively verifies facts before claiming them, but it has no native anti-drift doctrine; this skill adds the no-counts-in-prose rules, the canonical-source table, the code-documentation ladder, link-integrity rules with checker scripts, and the repo-wide purpose-audit signals."
+lastReviewed: 2026-10-02
 ---
 
 # Doc Hygiene
+
+## Muse delta
+
+- **What Muse already does natively**: verify facts before claiming them and keep claims current — the habits, but not the *doctrine* for documentation as a system.
+- **What this skill uniquely adds**: the anti-drift rules (no hardcoded counts in prose, single source of truth, link-don't-copy); the canonical-source table (filesystem is truth); the living-vs-historical classification with staleness indicators; the docs-as-architecture equivalence table; the code-documentation ladder (which claim belongs at which layer); link-integrity rules with executable checker scripts; orphan detection; and the repo-wide purpose-audit structural signals.
+- **When to load it**: auditing docs or comments for drift, fixing hardcoded counts and dead links, documenting code for adopters, deciding whether a document is living or historical, or asking "does every file in this repo have a purpose?"
 
 > Prevent documentation drift through structural rules — not manual vigilance.
 
 ## The Count Problem
 
 Hardcoded counts (e.g., "109 skills", "28 instructions", "6 agents") in prose become stale within days during active development. Every count is a future bug.
-
-### Rules
 
 | Rule | Do | Don't |
 |------|----|-------|
@@ -26,14 +30,14 @@ Hardcoded counts (e.g., "109 skills", "28 instructions", "6 agents") in prose be
 
 The filesystem is always the source of truth. Derive counts from directories, not from prose.
 
-| Metric | Canonical Source | Why |
-|--------|-----------------|-----|
-| Skill count | `.github/skills/` directory count (or generated catalog if present) | Filesystem is truth |
-| Instruction count | `.github/instructions/` directory listing | Filesystem is truth |
-| Prompt count | `.github/prompts/` directory listing | Filesystem is truth |
-| Agent count | `.github/agents/` directory listing | Filesystem is truth |
-| Command count | `package.json` `contributes.commands` (if applicable) | Code is truth |
-| Connection count | Brain QA validation output | Validated at runtime |
+| Metric | Canonical Source |
+|--------|-----------------|
+| Skill count | `.github/skills/` directory count (or generated catalog if present) |
+| Instruction count | `.github/instructions/` directory listing |
+| Prompt count | `.github/prompts/` directory listing |
+| Agent count | `.github/agents/` directory listing |
+| Command count | `package.json` `contributes.commands` (if applicable) |
+| Connection count | Brain QA validation output |
 
 ### Acceptable Count Locations
 
@@ -47,8 +51,6 @@ Counts are **tolerated** (not encouraged) in these specific locations because th
 All other files should use **descriptive references** instead of counts.
 
 ## Document Freshness
-
-### Staleness Indicators
 
 | Signal | Action |
 |--------|--------|
@@ -91,15 +93,13 @@ Put each claim at the narrowest layer that can own it without duplication. Comme
 | **Changelog** | What changed, compatibility impact, and required user action | The complete rationale or operating instructions |
 | **Decision record** | Why one architecture or policy won over credible alternatives | Current usage instructions or details already visible in code |
 
-### Rules
+**Rules**:
 
-| Condition | Action |
-|---|---|
-| Code changes invalidate a nearby explanation | Change or delete the comment in the same change; a stale comment is a defect, not history |
-| A load-bearing documentation claim affects routing, security, compatibility, or supported behavior | Back the claim with an executable check at the closest stable boundary |
-| Behavior changes by origin, path, exit-code, or trust-boundary semantics | Document the distinction beside the boundary and cover each material branch in tests |
-| A starter, template, or other detached bundle can leave its repository | Ship a local adoption guide with the bundle; repository-level links are supporting context, not the only instructions |
-| A list or count can be derived from files or metadata | Generate or test it instead of maintaining prose by hand |
+- Code changes that invalidate a nearby explanation → change or delete the comment in the same change; a stale comment is a defect, not history.
+- A load-bearing documentation claim affecting routing, security, compatibility, or supported behavior → back it with an executable check at the closest stable boundary.
+- Behavior changes by origin, path, exit-code, or trust-boundary semantics → document the distinction beside the boundary and cover each material branch in tests.
+- A starter, template, or detached bundle that can leave its repository → ship a local adoption guide with the bundle; repository-level links are supporting context, not the only instructions.
+- A list or count derivable from files or metadata → generate or test it instead of maintaining prose by hand.
 
 Do not narrate what each line does. Explain the constraint a future maintainer might otherwise remove, the consequence of violating it, and the evidence that protects it.
 
@@ -113,8 +113,6 @@ Do not narrate what each line does. Explain the constraint a future maintainer m
 | Copied starter points only to docs in its source repository | Include a portable guide inside the copied bundle |
 
 ## Link Integrity
-
-### Rules
 
 | Rule | Enforcement |
 |------|-------------|
@@ -191,4 +189,4 @@ The yield is decision buckets, not a per-file list. Surface the buckets and let 
 
 Revise if the anti-drift rules let stale counts ship to released artifacts twice in a quarter, or if the 'living vs historical' classification produces disputes the rules cannot resolve.
 
-By **2026-11-07**, revise the code-documentation ladder if two reviews still find stale mechanism comments, two projects duplicate one claim across three or more layers, or a recurring documentation artifact cannot be classified by the ladder.
+By **2026-12-01**, revise the code-documentation ladder if two reviews still find stale mechanism comments, two projects duplicate one claim across three or more layers, or a recurring documentation artifact cannot be classified by the ladder.

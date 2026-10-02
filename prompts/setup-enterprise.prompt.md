@@ -9,7 +9,7 @@ Load the `setup-enterprise-stack` skill and run its three-mode flow (emit / cons
 
 Steps:
 
-1. Load skill: [setup-enterprise-stack](../skills/setup-enterprise-stack/SKILL.md).
+1. Load skill: [setup-enterprise-stack](../archive/host-specific/setup-enterprise-stack/SKILL.md).
 2. Ask the user which mode they want: **emit only** (safe default), **consent-gated auto-install**, or **audit only**. If the user does not answer, default to emit.
 3. In **emit only** mode, do not create or update todos, tasks, plan items, or
    any other host planning state. Do not modify files, settings, plugins, or

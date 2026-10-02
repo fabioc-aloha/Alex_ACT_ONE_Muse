@@ -10,7 +10,7 @@ Use the `rich-email` skill to create and validate a draft-only HTML email from M
 ## Steps
 
 1. Confirm recipients, purpose, requested action, tone, and whether the user wants a draft or a send.
-2. Read `skills/rich-email/SKILL.md` and its template and style guide.
+2. Read `archive/host-specific/rich-email/SKILL.md` and its template and style guide.
 3. Create the temporary Markdown source outside the repository with unquoted email frontmatter.
 4. Convert it through `md-to-eml` without `--inline-images`.
 5. Run the helper in `--validate-only` mode and repair any header, HTML, recipient, or multipart failure.

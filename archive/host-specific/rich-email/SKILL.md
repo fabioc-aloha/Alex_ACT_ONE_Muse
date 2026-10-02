@@ -6,7 +6,7 @@ lastReviewed: 2026-08-11
 
 # Rich Email
 
-Create a reviewable, email-safe HTML message and open it as an unsent New Outlook draft. This skill composes with the existing [md-to-eml](../md-to-eml/SKILL.md) converter and adds only draft composition, validation, and Outlook opening.
+Create a reviewable, email-safe HTML message and open it as an unsent New Outlook draft. This skill composes with the existing [md-to-eml](../../../skills/md-to-eml/SKILL.md) converter and adds only draft composition, validation, and Outlook opening.
 
 ## When to Use
 

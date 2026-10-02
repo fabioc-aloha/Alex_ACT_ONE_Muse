@@ -1,12 +1,16 @@
 ---
 name: "md-to-txt"
-description: "Strip Markdown formatting and produce clean plain text via pandoc. Use when the user asks to convert to plain text or export markdown as a .txt file."
+description: "Strip Markdown formatting and produce clean plain text via pandoc. Use when the user asks to convert to plain text or export markdown as a .txt file. Muse delta: the md-to-txt.cjs option flags and the format-aware defaults (em-dash → comma ON, decorative HRs preserved) — beyond Muse's native ability to strip markdown by hand."
 lastReviewed: 2026-05-26
 ---
 
-
-
 # Md To Txt
+
+## Muse delta
+
+- **Native to Muse:** stripping markdown formatting by hand for a small excerpt.
+- **What this skill uniquely adds:** the `scripts/md-to-txt.cjs` pipeline with its **option flags** and **format-aware defaults** (em-dash → comma ON for txt, decorative HRs preserved) — consistent, repeatable conversion Muse hand-stripping can't guarantee.
+- **Load when:** the user asks to convert to plain text or export markdown as a `.txt` file.
 
 Strip all Markdown formatting and produce clean plain text. Useful for clipboard export, email body fallback, accessibility, and as input to text analysis tools.
 
@@ -46,9 +50,5 @@ Override via flags above.
 
 ## Related
 
-- Markdown linting — pre-flight the source with the project's linter or the `lint-clean-markdown` skill
+- Pre-flight the source with the project's linter or the `lint-clean-markdown` skill
 - [md-to-word](../md-to-word/SKILL.md) — for formatted output
-
-## Would Revise If
-
-Revisit this skill by **2026-08-26** (90 days) or sooner if any of the following fires: pandoc upstream changes plain-text output in a way that breaks the documented "stripped" list; the heuristic for indentation preservation produces wrong output on a real source the user converts; or a heir needs a stripped-but-not-plain output (e.g., RTF, SRT) that this skill doesn't cover — split into a sibling skill instead.

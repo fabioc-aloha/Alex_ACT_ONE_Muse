@@ -342,7 +342,7 @@ describe('activation', () => {
     // compile-brain and meditation exist to do — made activation throw while
     // every structural test stayed green. Running it is the only check that
     // would have caught that.
-    const BOOTSTRAP = join(ROOT, 'skills', 'bootstrap-core', 'scripts', 'bootstrap-core.cjs');
+    const BOOTSTRAP = join(ROOT, 'archive', 'host-specific', 'bootstrap-core', 'scripts', 'bootstrap-core.cjs');
 
     /** Preview only. Without --apply nothing is written to any profile. */
     const preview = () => JSON.parse(execFileSync(process.execPath, [BOOTSTRAP], {

@@ -5,7 +5,7 @@ lastReviewed: 2026-08-18
 
 # /alex-act-one install-visual-companions
 
-Invokes the [install-visual-companions](../skills/install-visual-companions/SKILL.md) skill to offer the 8 visual-workflow companion plugins for consent-gated per-plugin install.
+Invokes the [install-visual-companions](../archive/host-specific/install-visual-companions/SKILL.md) skill to offer the 8 visual-workflow companion plugins for consent-gated per-plugin install.
 
 Steps:
 

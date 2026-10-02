@@ -9,7 +9,20 @@ const path = require('node:path');
 // ONE ships skills at the package root (skills/<name>/scripts/), not under
 // .github/, so the package root is three levels up rather than four, and the
 // instruction sources sit at muse-opt-in/ rather than .github/instructions/.
-const CORE_ROOT = path.resolve(__dirname, '..', '..', '..');
+// Archived copies (e.g. archive/host-specific/<name>/) sit one level deeper,
+// so resolve the root by walking up to the directory that holds manifest.json
+// instead of assuming a fixed depth.
+function findPackageRoot(start) {
+    let dir = path.resolve(start);
+    for (let i = 0; i < 8; i++) {
+        if (fs.existsSync(path.join(dir, 'manifest.json'))) return dir;
+        const parent = path.dirname(dir);
+        if (parent === dir) break;
+        dir = parent;
+    }
+    throw new Error('manifest.json not found above ' + start);
+}
+const CORE_ROOT = findPackageRoot(__dirname);
 const SOURCE_ROOT = path.join(CORE_ROOT, 'muse-opt-in');
 const MANIFEST_PATH = path.join(CORE_ROOT, 'manifest.json');
 const RECEIPT_NAME = '.alex-act-one-bootstrap.json';

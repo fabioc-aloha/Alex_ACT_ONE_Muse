@@ -1,33 +1,45 @@
 ---
 name: ascii-chart
-description: "Render charts and compact dashboards as pure ASCII in a monospace grid: bar, dot, sparkline, histogram, box plot, scatter, bubble, heatmap, funnel, waterfall, treemap, gauge, KPI card, and more. No rendering engine, no SVG, no browser, no MCP server. Use when the delivery target is a terminal, a log file, a pull request comment, a commit message, a README code block, or a context window where no renderer exists, or when the user asks for a text chart, an ASCII chart, or a plain-text dashboard."
+description: "Render charts and compact dashboards as pure ASCII in a monospace grid: bar, dot, sparkline, histogram, box plot, scatter, bubble, heatmap, funnel, waterfall, treemap, gauge, KPI card, and more. No rendering engine, no SVG, no browser, no MCP server. Use when the delivery target is a terminal, a log file, a pull request comment, a commit message, a README code block, or a context window where no renderer exists, or when the user asks for a text chart, an ASCII chart, or a plain-text dashboard. Muse delta: the 78-column grid constants, construction rules, and the mandatory measure-don't-eyeball QA loop — LLMs reliably miscount characters without it."
 lastReviewed: 2026-08-18
 ---
 
 # Delivery: ASCII Dashboard
 
-Render dashboards as pure ASCII art. No emojis, no Unicode box-drawing beyond the basic set, no external renderer. The output is a monospace text block that looks correct in any terminal, any markdown code fence, any log file, any LLM context window.
+## Muse delta
 
-This is the cheapest delivery method: zero dependencies, zero tokens spent on SVG coordinates, predictable character geometry. An LLM can produce and validate the output in the same context window.
+- **Native to Muse:** ASCII-art intuition — Muse can draw a reasonable box or bar chart off the cuff.
+- **What this skill uniquely adds:** the exact **78-column grid constants**, the **construction rules** (compute widths, right-align numbers, one header per card), and the **mandatory Alignment QA Loop** — LLMs reliably produce 77/79/80-char lines they believe are 78; measure with the shell, don't eyeball.
+- **Load when:** the delivery target is a terminal, log file, PR comment, commit message, README code block, or any context window where no renderer exists.
+
+Render dashboards as pure ASCII: no emojis, no Unicode box-drawing beyond the basic set. A monospace text block that looks correct in any terminal, any markdown code fence, any LLM context window. Zero dependencies; geometry is predictable because every character is one cell.
 
 ## When to Use
 
 - Quick status snapshots in terminal output, log files, or commit messages
-- Chat-based reporting where the consumer is another LLM or a terminal user
 - Environments where SVG/HTML rendering is unavailable (CI logs, SSH sessions, plain-text email)
 - Token-constrained contexts where SVG coordinate math would waste budget
 - Rapid prototyping before committing to a richer delivery format
 
 ## When NOT to Use
 
-- The audience expects graphical output (use the `flint-chart` or `print-svg-style-guide` skills instead)
-- Charts require color encoding for meaning (ASCII is monochrome)
-- More than 80 columns of data (wrapping breaks the layout)
+- The audience expects graphical output (use `flint-chart` or `print-svg-style-guide` instead)
+- Charts require color encoding (ASCII is monochrome)
+- More than 78 columns of data (wrapping breaks the layout)
 - Interactive filtering or drill-through is required
 
 ## Module 1: Character Geometry
 
-ASCII dashboards are predictable because every character occupies exactly one cell in a monospace grid. No emoji, no CJK, no combining characters.
+ASCII is 1 cell per character, always — unlike emojis, which render as 1 or 2 cells depending on terminal, font, and OS. A `🟢` in VS Code vs Windows Terminal breaks column alignment. Status indicators use letters instead:
+
+| Status | ASCII | Meaning |
+| --- | --- | --- |
+| Complete | `[x]` | Done |
+| In progress | `[-]` | Active |
+| Not started | `[ ]` | Pending |
+| Pass | `[OK]` | Check passed |
+| Fail | `[!!]` | Check failed |
+| Warning | `[??]` | Needs attention |
 
 ### Grid Constants
 
@@ -40,37 +52,9 @@ ASCII dashboards are predictable because every character occupies exactly one ce
 | Title centering | Centered within card width | Visual anchor |
 | Number alignment | Right-aligned within column | Scannable |
 
-### Box-Drawing Characters
+### Box-Drawing Characters (basic set only)
 
-Use only the basic ASCII set for maximum portability:
-
-| Element | Characters | Example |
-| --- | --- | --- |
-| Horizontal border | `-` | `------------------` |
-| Vertical border | `|` | `| content |` |
-| Corners | `+` | `+--+` |
-| Separator | `=` or `-` | `+==================+` |
-| Bar fill | `#` | `######` |
-| Bar empty | `.` or space | `......` |
-| Sparkline up | `/` | |
-| Sparkline down | `\` | |
-| Sparkline flat | `_` | |
-| Bullet | `*` | `* item` |
-
-### Why No Emojis
-
-Emojis render as 1 or 2 cells depending on the terminal, font, and OS. A green circle `🟢` might be 1 cell in VS Code and 2 cells in Windows Terminal. This breaks column alignment. ASCII characters are always 1 cell, always predictable.
-
-Status indicators use letters instead:
-
-| Status | ASCII | Meaning |
-| --- | --- | --- |
-| Complete | `[x]` | Done |
-| In progress | `[-]` | Active |
-| Not started | `[ ]` | Pending |
-| Pass | `[OK]` | Check passed |
-| Fail | `[!!]` | Check failed |
-| Warning | `[??]` | Needs attention |
+Horizontal `-`, vertical `|`, corners `+`, separator `=` or `-`, bar fill `#`, bar empty `.` or space, sparkline up `/`, down `\`, flat `_`, peak `^`, bullet `*`.
 
 ## Module 2: Layout Patterns
 
@@ -84,7 +68,7 @@ Status indicators use letters instead:
 +----------------+  +----------------+  +----------------+
 ```
 
-Width per card = `(78 - (N-1)*2) / N` where N = number of cards. For 3 cards: 24 chars each.
+Width per card = `(78 - (N-1)*2) / N`. For 3 cards: 24 chars each.
 
 ### Horizontal Bar Chart
 
@@ -99,7 +83,7 @@ Other          | ##                   |  5%
 ==========================================
 ```
 
-Bar width = total width - label width - value width - borders. Fill character `#`, empty is space. Labels left-aligned, values right-aligned.
+Bar width = total width − label width − value width − borders. Labels left-aligned, values right-aligned.
 
 ### Sparkline Row
 
@@ -107,7 +91,7 @@ Bar width = total width - label width - value width - borders. Fill character `#
 Trend (12 months):  _/\__/\/\___/\  High: 4.2M  Low: 2.1M
 ```
 
-Characters: `/` = up, `\` = down, `_` = flat, `^` = peak. One character per data point. Keep to 20 characters max (readable at a glance).
+`/` up, `\` down, `_` flat, `^` peak. One char per data point, 20 chars max.
 
 ### Two-Column Dashboard
 
@@ -125,159 +109,47 @@ Characters: `/` = up, `\` = down, `_` = flat, `^` = peak. One character per data
 +------------------------------------+  +------------------------------------+
 ```
 
-Each column = `(78 - 2) / 2 = 38` characters wide (including borders). Gap = 2 chars.
-
-### Full Dashboard (3 rows)
-
-```text
-+==============================================================================+
-|                        FLEET STATUS -- 2026-05-02                            |
-+==============================================================================+
-
-+----------------+  +----------------+  +----------------+  +----------------+
-|  HEIRS         |  |  UPGRADED      |  |  PENDING       |  |  PLUGINS       |
-|     41         |  |      8         |  |     33         |  |    279         |
-|  total fleet   |  |  [x] v0.9.9   |  |  [-] queued    |  |  in Mall       |
-+----------------+  +----------------+  +----------------+  +----------------+
-
-+------------------------------------+  +------------------------------------+
-|  VERSION DISTRIBUTION              |  |  TOP PLUGINS                       |
-+------------------------------------+  +------------------------------------+
-|  v0.9.9    | ####           | 19%  |  |  mermaid-mode   | #########  |  7  |
-|  no-marker | ############## | 68%  |  |  academic-paper  | #          |  1  |
-|  v0.6.2    | #              |  5%  |  |  data-story      | #          |  1  |
-|  v0.9.1    | #              |  2%  |  |  chart-interp    | #          |  1  |
-|  other     | #              |  5%  |  |  exec-story      | #          |  1  |
-+------------------------------------+  +------------------------------------+
-
-+---------------------------------------------------------------------------+
-| NEXT: node scripts/fleet-upgrade.cjs --apply    33 heirs ready            |
-+---------------------------------------------------------------------------+
-```
+Each column = 38 chars (including borders); gap = 2 chars.
 
 ## Module 3: Construction Rules
 
-### Rule 1: Compute widths before drawing
-
-```text
-total_width = 78
-n_columns = 2
-gap = 2
-card_width = (total_width - (n_columns - 1) * gap) / n_columns
-bar_area = card_width - label_width - value_width - 4  (borders + padding)
-```
-
-Never eyeball widths. Compute from the grid constants, then fill.
-
-### Rule 2: Right-align numbers, left-align labels
-
-```text
-WRONG:  North America | ############ | 42%
-RIGHT:  North America  | ############ |  42%
-```
-
-Numbers scan faster when the ones digit is in a fixed column.
-
-### Rule 3: Sort bars by value (unless time-ordered)
-
-Largest bar on top. The eye scans top-down; put the story first.
-
-### Rule 4: One header per card, centered
-
-```text
-+------------------------------------+
-|          VERSION DISTRIBUTION       |
-+------------------------------------+
-```
-
-Center the title within the card width. No bold, no underline (not portable). Caps or title case for visual weight.
-
-### Rule 5: Footer row for actions
-
-The last row of the dashboard is the call to action. It spans the full width and contains the one thing the reader should do next.
-
-### Rule 6: Validate with character count
-
-After generating, count characters per line. Every line within a card must have the same length. If not, padding is wrong. This is the advantage of ASCII: you can validate by counting.
+1. **Compute widths before drawing.** `card_width = (78 - (n_columns-1)*2) / n_columns`; `bar_area = card_width - label_width - value_width - 4`. Never eyeball.
+2. **Right-align numbers, left-align labels.** Numbers scan faster with the ones digit in a fixed column.
+3. **Sort bars by value** (unless time-ordered). Largest on top; the eye scans top-down.
+4. **One header per card, centered.** Caps or title case for weight; no bold or underline (not portable).
+5. **Footer row = call to action.** Last row spans full width with the one thing the reader should do next.
+6. **Validate with character count.** Every line in a card must have identical length. Counting is the advantage of ASCII.
 
 ## Module 4: Generating from Data
 
-### Input Format
+Input: a JSON or table structure (title, date, `kpis[]` with label/value/detail, `charts[]` with title/type/items, footer). Algorithm: compute the grid layout → render each component into a string array (one string per line) → zip line arrays side by side with gap spacing → pad every line to its card width → validate identical line lengths → join with newlines → run the Alignment QA Loop below.
 
-The dashboard takes a simple JSON or table structure:
+## Module 5: Alignment QA Loop (mandatory)
 
-```json
-{
-  "title": "Fleet Status",
-  "date": "2026-05-02",
-  "kpis": [
-    { "label": "HEIRS", "value": "41", "detail": "total fleet" },
-    { "label": "UPGRADED", "value": "8", "detail": "[x] v0.9.9" }
-  ],
-  "charts": [
-    {
-      "title": "Version Distribution",
-      "type": "bar",
-      "items": [
-        { "label": "v0.9.9", "value": 19 },
-        { "label": "no-marker", "value": 68 }
-      ]
-    }
-  ],
-  "footer": "NEXT: node scripts/fleet-upgrade.cjs --apply"
-}
+LLMs cannot reliably count characters in generated text. The model produces lines it believes are 78 characters but are actually 77, 79, or 80 — on nearly every generation. The only reliable fix is to measure after generation and fix before delivery. **Do not self-report "all lines OK" without measuring. "Looks correct" is not a measurement.**
+
+### Validation method
+
+Measure every line with the shell — the ONLY acceptable validation. Mental counting or estimation is not acceptable.
+
+```bash
+f="/tmp/dashboard.txt"   # or wherever the draft lives
+awk -v f="$f" '{ if (length($0) != 78 && length($0) != 0) print FILENAME": "NR" len="length($0)": "$0 }' "$f"
 ```
 
-### Generation Algorithm
+If that prints nothing (no failing lines), the dashboard is 78-clean.
 
-1. Compute grid layout (how many columns, card widths)
-2. Render each component into a string array (one string per line)
-3. For multi-column layouts, zip the line arrays side by side with gap spacing
-4. Pad every line to its card width (right-pad with spaces inside borders)
-5. Validate: every line in a card has identical character count
-6. Join with newlines
-7. Run the Alignment QA Loop (see below)
+### Construction method (prevents most failures)
 
-## Module 5: Alignment QA Loop
+Do not freehand ASCII lines. Use padding functions to construct each line:
 
-After generating the dashboard, run a mechanical validation before writing the output file. This is mandatory. Do not skip it. Do not self-report "all lines OK" without actually measuring. "Looks correct" is not a measurement.
-
-### The Problem This Solves
-
-LLMs cannot reliably count characters in generated text. The model will produce lines it believes are 78 characters but are actually 77, 79, or 80. This is not a rare edge case; it happens on nearly every generation. The only reliable fix is to measure after generation and fix before delivery.
-
-### Validation Method
-
-Use `run_in_terminal` to measure every line. This is the ONLY acceptable validation method. Mental counting or estimation is not acceptable.
-
-PowerShell:
-```powershell
-$lines = Get-Content "<file>"
-$fails = $lines | Where-Object { $_.Length -gt 0 -and $_.Length -ne 78 }
-if ($fails) { $fails | ForEach-Object { "$($_.Length): $_" } }
-else { "ALL LINES OK (78 chars)" }
+```text
+Row(content):     "| " + content.padRight(74) + " |"
+Border(char):     "+" + (char * 76) + "+"
+DualRow(l, r):    "| " + l.padRight(34) + " |" + "  " + "| " + r.padRight(34) + " |"
 ```
 
-### Construction Method (prevents most failures)
-
-Do not freehand ASCII lines. Use a padding function to construct each line:
-
-```
-function Row(content):  return "| " + content.padRight(74) + " |"
-function Border(char):  return "+" + (char * 76) + "+"
-```
-
-For side-by-side panels:
-```
-function DualRow(left, right):
-  L = "| " + left.padRight(34) + " |"
-  R = "| " + right.padRight(34) + " |"
-  return L + "  " + R
-```
-
-Generate lines using these functions, then validate. This approach prevents most misalignment on first pass.
-
-### Width Constants (do not deviate)
+### Width constants (do not deviate)
 
 | Element | Formula | Result |
 | --- | --- | --- |
@@ -287,35 +159,27 @@ Generate lines using these functions, then validate. This approach prevents most
 | Side-by-side border | `+` + 36 + `+` + `  ` + `+` + 36 + `+` | 78 |
 | Side-by-side inner | `\| ` + 34 + ` \|` + `  ` + `\| ` + 34 + ` \|` | 78 |
 
-The width is 78, NOT 80. Common mistake: using 80 as the target because "80-column terminal." The 1-char margin on each side means content is 78.
+The width is 78, NOT 80. Common mistake: using 80 because "80-column terminal". The 1-char margin on each side means content is 78.
 
 ### Fix-and-Recheck Loop
 
-If any line fails:
-
-1. Identify the failing lines (line number + measured width + content)
-2. Determine whether the line is too long (trim trailing content before `|`) or too short (add spaces before closing `|`)
-3. Apply the fix
-4. Re-run the terminal measurement command
-5. Repeat until zero failures
-
-Do NOT write the output file until the measurement passes with zero failures. A dashboard with misaligned edges is a rendering bug, not a cosmetic issue.
+If any line fails: identify line number + measured width + content; trim trailing content before `|` if too long, add spaces before closing `|` if too short; re-run the measurement. Repeat until zero failures. **Do NOT write the output file until measurement passes.** A misaligned dashboard is a rendering bug, not a cosmetic issue.
 
 ## Anti-Patterns
 
 | Anti-pattern | Fix |
 | --- | --- |
-| Using emojis for status indicators | Use `[x]`, `[!!]`, `[OK]` -- always 1 cell per character |
+| Emojis for status indicators | `[x]`, `[!!]`, `[OK]` — always 1 cell per character |
 | Eyeballing column widths | Compute from grid constants. Count characters. |
-| Mixing Unicode box-drawing (`┌─┐`) with ASCII (`+--+`) | Pick one. ASCII `+-|` is safest across all environments |
-| Lines of different lengths within a card | Pad every line to card width. This is the #1 rendering bug |
-| More than 78 characters wide | Wrapping breaks the layout. Redesign or split into rows |
-| Putting detailed data in the dashboard | ASCII is for summaries. Link to detail elsewhere |
+| Mixing Unicode box-drawing with ASCII | Pick one. ASCII `+-|` is safest |
+| Lines of different lengths within a card | Pad every line. The #1 rendering bug |
+| More than 78 characters wide | Redesign or split into rows |
+| Detailed data in the dashboard | ASCII is for summaries; link to detail elsewhere |
 
 ## Cross-References
 
-- [`chart-big-idea`](../chart-big-idea/SKILL.md) -- the Chart Brief decides whether ASCII is the right delivery target. Start there, as with every other delivery path.
-- [`chart-vocabulary`](../chart-vocabulary/SKILL.md) -- pick the communication goal and chart type before rendering. Module 3's 5-visual rule governs dashboard density here too.
-- [`references/ascii-gallery.md`](references/ascii-gallery.md) -- 32 worked forms organized by the same seven communication goals, plus a Flint coverage matrix and the forms ASCII cannot carry.
-- [`render-verify`](../render-verify/SKILL.md) -- Steps 1 to 3 do not apply because there is no rendered artifact to open; Module 5 below replaces them. Steps 4 and 5 still apply, because checking a claim does not need a renderer.
-- [`flint-chart`](../flint-chart/SKILL.md) -- the upgrade path when ASCII is not enough, including graphical and interactive output.
+- [`chart-big-idea`](../chart-big-idea/SKILL.md) — the Chart Brief decides whether ASCII is the right delivery target
+- [`chart-vocabulary`](../chart-vocabulary/SKILL.md) — pick the communication goal and chart type before rendering
+- [`references/ascii-gallery.md`](references/ascii-gallery.md) — 32 worked forms by seven communication goals
+- [`render-verify`](../render-verify/SKILL.md) — steps 4–5 still apply (checking a claim needs no renderer)
+- [`flint-chart`](../flint-chart/SKILL.md) — the upgrade path when ASCII is not enough

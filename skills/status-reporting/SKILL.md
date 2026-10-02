@@ -1,23 +1,18 @@
 ---
 name: "status-reporting"
-description: "Create stakeholder-friendly project status updates and progress reports. Use when writing a status update, progress report, weekly or milestone recap, release summary, or any stakeholder-facing account of where work stands."
-lastReviewed: 2026-05-26
+description: "Create stakeholder-friendly project status updates and progress reports. Use when writing a status update, progress report, weekly or milestone recap, release summary, or any stakeholder-facing account of where work stands. Muse delta: Muse natively separates completed/failed/blocked/unverified and verifies before claiming; this skill adds the audience-graded templates, the technical-to-executive translation table, the traffic-light system, and the trigger/data-source protocol."
+lastReviewed: 2026-10-02
 ---
 
-# Status Reporting Skill
+# Status Reporting
 
-Generate clear, audience-appropriate project status updates. Transform technical progress into stakeholder-friendly communication.
+## Muse delta
 
-## Core Philosophy
+- **What Muse already does natively**: separate completed / failed / blocked / unverified in status, and verify numbers and dates before claiming them. Those are the floor, not the report.
+- **What this skill uniquely adds**: the four audience-graded templates (executive summary, weekly team update, stakeholder email, sprint retrospective), the technical-term → executive translation table, detail-level by audience, the traffic-light + trend indicator system, when-to-generate triggers, and the data-source protocol.
+- **When to load it**: writing any status update, progress report, weekly or milestone recap, release summary, or stakeholder-facing account of where work stands.
 
 > "Stakeholders don't need to know HOW you did it — they need to know WHAT it means for them."
-
-Status reports serve different audiences with different needs:
-
-- **Executives**: Impact, risk, timeline
-- **Managers**: Progress, blockers, resources
-- **Teams**: Details, dependencies, next steps
-- **Customers**: Value delivered, what's coming
 
 ## Report Templates
 
@@ -126,25 +121,23 @@ Happy to jump on a call if you have questions.
 
 ## Audience Adaptation
 
-### Language Translation
+| Audience | Detail level | Lead with | Avoid |
+|----------|--------------|-----------|-------|
+| **C-Suite** | Minimal | Business impact, risks, decisions | Technical detail |
+| **VP/Director** | Summary | Progress, resources, timeline | Implementation specifics |
+| **Manager** | Moderate | Tasks, blockers, team health | Jargon-heavy depth |
+| **Team** | Detailed | Technical specifics, dependencies | Marketing language |
+| **Customer** | Outcome | Value delivered, what's next | Internals |
 
-| Technical Term | Executive Translation |
+### Language translation
+
+| Technical term | Executive translation |
 |----------------|----------------------|
 | "Refactored the authentication module" | "Improved security and login reliability" |
 | "Reduced technical debt" | "Reduced maintenance costs and risk" |
 | "Implemented CI/CD pipeline" | "Automated our release process — faster, safer updates" |
 | "Fixed race condition" | "Resolved intermittent bug causing data issues" |
 | "Migrated to microservices" | "Made the system more scalable and reliable" |
-
-### Detail Levels
-
-| Audience | Detail Level | Focus On |
-|----------|--------------|----------|
-| **C-Suite** | Minimal | Business impact, risks, decisions |
-| **VP/Director** | Summary | Progress, resources, timeline |
-| **Manager** | Moderate | Tasks, blockers, team health |
-| **Team** | Detailed | Technical specifics, dependencies |
-| **Customer** | Outcome | Value delivered, what's next |
 
 ## Status Indicators
 
@@ -167,11 +160,9 @@ Happy to jump on a call if you have questions.
 | → | Stable |
 | ⚠️ | Needs attention |
 
-## Automation Triggers
+## When to Generate
 
-### When to Generate Status
-
-| Trigger | Report Type |
+| Trigger | Report type |
 |---------|-------------|
 | End of day Friday | Weekly summary |
 | Sprint end | Sprint report |
@@ -180,47 +171,16 @@ Happy to jump on a call if you have questions.
 | Blocker encountered | Escalation notice |
 | User asks "what did we do" | Session/period summary |
 
-### Data Sources
-
-Pull information from:
-
-- Git commits and PR descriptions
-- Issue tracker (completed, in-progress, blocked)
-- Calendar (milestones, deadlines)
-- Session history (what we worked on)
-- Metrics dashboards (if available)
-
-## Best Practices
-
-### DO ✅
-
-- Lead with the most important information
-- Use consistent formatting across reports
-- Include specific dates and numbers
-- Highlight decisions needed
-- Acknowledge blockers honestly
-- Show progress, not just activity
-
-### DON'T ❌
-
-- Bury bad news
-- Use jargon with non-technical audiences
-- Include unnecessary detail
-- Report activity without outcomes
-- Over-promise on timelines
-- Skip risk assessment
+Pull data from: git commits and PR descriptions; issue tracker (completed, in-progress, blocked); calendar (milestones, deadlines); session history (what we worked on); metrics dashboards if available.
 
 ## Session Protocol
 
-### Generating a Status Report
-
-1. **Clarify audience**: Who will read this?
-2. **Determine scope**: What period? What project?
-3. **Gather data**: Commits, issues, conversations
-4. **Identify highlights**: What matters most?
-5. **Draft report**: Use appropriate template
-6. **Adapt language**: Match audience level
-7. **Review for clarity**: Can a newcomer understand?
+1. **Clarify audience**: who will read this?
+2. **Determine scope**: what period? what project?
+3. **Gather data**: commits, issues, conversations
+4. **Identify highlights**: what matters most?
+5. **Draft** from the matching template, adapted to audience level
+6. **Review for clarity**: can a newcomer understand it?
 
 ### Quick Status Commands
 
@@ -231,9 +191,13 @@ Pull information from:
 /alex-act-one status email [name] → Stakeholder email draft
 ```
 
-## Integration Points
+## Best Practices
 
-### Triggers for This Skill
+**DO**: lead with the most important information; use consistent formatting; include specific dates and numbers; highlight decisions needed; acknowledge blockers honestly; show progress, not just activity.
+
+**DON'T**: bury bad news; use jargon with non-technical audiences; include unnecessary detail; report activity without outcomes; over-promise on timelines; skip risk assessment.
+
+## Triggers for This Skill
 
 - "status update", "status report"
 - "what did we accomplish", "summarize progress"
@@ -241,16 +205,9 @@ Pull information from:
 - "sprint report", "weekly summary"
 - End of day/week (proactive)
 
-## Metrics
-
-- **Clarity score**: Can reader understand in 30 seconds?
-- **Completeness**: All sections filled appropriately
-- **Accuracy**: Numbers and dates verified
-- **Audience fit**: Language matches recipient
-
 ## Would Revise If
 
-Revisit this skill by **2026-08-26** (90 days) or sooner if any of the following fires:
+Revisit by **2026-12-31** (90 days) or sooner if any of the following fires:
 
 - Stakeholder feedback reports the templates as unclear, jargon-heavy, or missing decisions-needed sections ≥3 times within a quarter
 - The audience-adaptation table produces tone mismatches when applied verbatim ≥2 times in observed reports

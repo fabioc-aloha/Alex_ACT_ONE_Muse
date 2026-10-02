@@ -1,7 +1,7 @@
 {
   "$comment": "Asset manifest for the Muse edition. The Copilot edition's always-on instructions ship as opt-in modules under muse-opt-in/ and are never auto-applied; bootstrap-core in this edition activates them only by deliberate user choice.",
   "plugin": "alex-act-one-Muse",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "status": "development",
   "shape": "skills pack for the Muse personal assistant",
   "description": "Alex ACT ONE, Muse edition. A user-level skills pack for the Muse personal assistant covering critical thinking and problem framing, engineering craft, prose and documentation, document conversion, visual authoring, and agent brain authoring. Skills are plain SKILL.md playbooks read from the installed skills directory; the Copilot edition's always-on instructions are opt-in modules under muse-opt-in/.",
@@ -42,18 +42,6 @@
       {
         "name": "big-idea",
         "path": "skills/big-idea/SKILL.md"
-      },
-      {
-        "name": "bootstrap-core",
-        "path": "skills/bootstrap-core/SKILL.md"
-      },
-      {
-        "name": "bootstrap-project",
-        "path": "skills/bootstrap-project/SKILL.md"
-      },
-      {
-        "name": "browser-tools",
-        "path": "skills/browser-tools/SKILL.md"
       },
       {
         "name": "chart-big-idea",
@@ -136,10 +124,6 @@
         "path": "skills/humanizer/SKILL.md"
       },
       {
-        "name": "install-visual-companions",
-        "path": "skills/install-visual-companions/SKILL.md"
-      },
-      {
         "name": "lint-clean-markdown",
         "path": "skills/lint-clean-markdown/SKILL.md"
       },
@@ -180,10 +164,6 @@
         "path": "skills/plan/SKILL.md"
       },
       {
-        "name": "platform-awareness",
-        "path": "skills/platform-awareness/SKILL.md"
-      },
-      {
         "name": "print-svg-style-guide",
         "path": "skills/print-svg-style-guide/SKILL.md"
       },
@@ -204,14 +184,6 @@
         "path": "skills/render-verify/SKILL.md"
       },
       {
-        "name": "replicate-imagery",
-        "path": "skills/replicate-imagery/SKILL.md"
-      },
-      {
-        "name": "rich-email",
-        "path": "skills/rich-email/SKILL.md"
-      },
-      {
         "name": "risk-analysis",
         "path": "skills/risk-analysis/SKILL.md"
       },
@@ -222,10 +194,6 @@
       {
         "name": "setup-dependencies",
         "path": "skills/setup-dependencies/SKILL.md"
-      },
-      {
-        "name": "setup-enterprise-stack",
-        "path": "skills/setup-enterprise-stack/SKILL.md"
       },
       {
         "name": "spike",
@@ -426,5 +394,47 @@
       }
     ],
     "agents": []
-  }
+  },
+  "archived": [
+    {
+      "name": "bootstrap-core",
+      "path": "archive/host-specific/bootstrap-core/SKILL.md",
+      "reason": "Copies always-on .instructions.md files into Copilot/Scout host locations."
+    },
+    {
+      "name": "bootstrap-project",
+      "path": "archive/host-specific/bootstrap-project/SKILL.md",
+      "reason": "Applies the Copilot repository scaffold and workspace settings."
+    },
+    {
+      "name": "browser-tools",
+      "path": "archive/host-specific/browser-tools/SKILL.md",
+      "reason": "VS Code 1.127+ browser-tool APIs; Muse has native browser tools instead."
+    },
+    {
+      "name": "install-visual-companions",
+      "path": "archive/host-specific/install-visual-companions/SKILL.md",
+      "reason": "Installs Copilot marketplace plugins; Muse has no plugin marketplace."
+    },
+    {
+      "name": "platform-awareness",
+      "path": "archive/host-specific/platform-awareness/SKILL.md",
+      "reason": "VS Code Copilot platform reference (deferred tools, skill-picker); not a Muse concept."
+    },
+    {
+      "name": "replicate-imagery",
+      "path": "archive/host-specific/replicate-imagery/SKILL.md",
+      "reason": "Needs REPLICATE_API_TOKEN and a paid account; Muse generates images natively."
+    },
+    {
+      "name": "rich-email",
+      "path": "archive/host-specific/rich-email/SKILL.md",
+      "reason": "Opens an unsent New Outlook draft via Windows automation; no Outlook on this host."
+    },
+    {
+      "name": "setup-enterprise-stack",
+      "path": "archive/host-specific/setup-enterprise-stack/SKILL.md",
+      "reason": "Emits the Copilot CLI settings block for the Microsoft ecosystem."
+    }
+  ]
 }

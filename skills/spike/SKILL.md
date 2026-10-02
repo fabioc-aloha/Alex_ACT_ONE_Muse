@@ -1,14 +1,18 @@
 ---
 name: spike
-description: Use when the user wants to feel out an idea before committing to a real build — "spike this out", "try it", "is this even possible?", "compare A vs B". Throwaway experiments that decompose into 2-5 feasibility questions, build minimal observable prototypes, and return VALIDATED / PARTIAL / INVALIDATED verdicts. Disposable by design. Adapted from Hermes Agent / GSD.
-lastReviewed: 2026-06-07
+description: "Use when the user wants to feel out an idea before committing to a real build — 'spike this out', 'try it', 'is this even possible?', 'compare A vs B'. Throwaway experiments that decompose into 2-5 feasibility questions, build minimal observable prototypes, and return VALIDATED / PARTIAL / INVALIDATED verdicts. Disposable by design. Adapted from Hermes Agent / GSD. Muse delta: Muse has no native disposable-prototyping discipline — this skill adds the decompose loop, Given/When/Then feasibility tables, the verdict format, and the head-to-head comparison."
+lastReviewed: 2026-10-02
 ---
 
 # Spike
 
-Use this skill when the user wants to **feel out an idea** before committing to a real build — validating feasibility, comparing approaches, or surfacing unknowns that no amount of research will answer. Spikes are disposable by design. Throw them away once they've paid their debt.
+## Muse delta
 
-Load this when the user says things like "let me try this", "I want to see if X works", "spike this out", "before I commit to Y", "quick prototype of Z", "is this even possible?", or "compare A vs B".
+- **What Muse already does natively**: research, build, and report on ideas — but nothing natively enforces the *disposable* discipline or the honest-verdict format that keeps a throwaway from becoming unplanned production.
+- **What this skill uniquely adds**: the decompose → research → build → verdict loop; breaking an idea into 2–5 independent feasibility questions with Given/When/Then framing and risk ordering; the spike numbering scheme (`001`, `002a`/`002b` for comparisons); the align-before-building step; the `VALIDATED | PARTIAL | INVALIDATED` verdict template; the head-to-head comparison for competing approaches; frontier mode for picking what to spike next.
+- **When to load it**: the user says "let me try this", "spike this out", "before I commit to Y", "quick prototype of Z", "is this even possible?", or "compare A vs B".
+
+Spikes are disposable by design. Throw them away once they've paid their debt.
 
 ## When NOT to use this
 
@@ -55,21 +59,14 @@ Present the spike table. Ask: "Build all in this order, or adjust?" Let the user
 
 ### 3. Research (per spike, before building)
 
-Spikes are not research-free — you research enough to pick the right approach, then you build. Per spike:
+Spikes are not research-free — research enough to pick the right approach, then build:
 
 1. **Brief it.** 2-3 sentences: what this spike is, why it matters, key risk.
-2. **Surface competing approaches** if there's real choice:
-
-   | Approach | Tool/Library | Pros | Cons | Status |
-   |---|---|---|---|---|
-   | ... | ... | ... | ... | maintained / abandoned / beta |
-
+2. **Surface competing approaches** if there's real choice, in an Approach | Tool/Library | Pros | Cons | Status table.
 3. **Pick one.** State why. If 2+ are credible, build quick variants within the spike.
 4. **Skip research** for pure logic with no external dependencies.
 
-Use the workspace's web/search tools for the research step — find candidates, fetch docs, check installed versions in the project venv.
-
-For libraries without docs pages, clone and read their `README.md` / `examples/` directly. If the workspace has Microsoft Learn / Context7 / other MCP docs servers configured, use those.
+Use web/search tools for the research step — find candidates, fetch docs, check installed versions. For libraries without docs pages, clone and read their `README.md` / `examples/` directly.
 
 ### 4. Build
 
@@ -88,7 +85,7 @@ spikes/
     └── parse.py
 ```
 
-**Bias toward something the user can interact with.** Spikes fail when the only output is a log line that says "it works." The user wants to *feel* the spike working. Default choices, in order of preference:
+**Bias toward something the user can interact with.** Spikes fail when the only output is a log line that says "it works." Default choices, in order:
 
 1. A runnable CLI that takes input and prints observable output
 2. A minimal HTML page that demonstrates the behavior
@@ -169,7 +166,7 @@ Propose 2-4 candidates as Given/When/Then. Let the user pick.
 ## Would Revise If
 
 - **Event-based**: zero `spikes/` directories created across the fleet within 90 days; OR all spike verdicts are PARTIAL/INVALIDATED with no VALIDATED instances (skill is being used but the decompose step is mis-sized — questions too ambitious). Sunset or revise the decompose-step guidance.
-- **Date-based**: 2026-09-07 (90 days from adoption). If by then `spike` is invoked but heirs report the decomposition step (2-5 feasibility questions) consistently feels too heavy for their work shape, simplify the table-driven approach.
+- **Date-based**: 2026-12-01 (90 days from review). If by then `spike` is invoked but users report the decomposition step (2-5 feasibility questions) consistently feels too heavy for their work shape, simplify the table-driven approach.
 - **Counter-evidence**: if spikes graduate to production (the "throwaway" discipline is violated ≥3 times), tighten the "disposable by design" framing or carve out a "spike-to-production" sibling skill.
 
 ## Attribution
