@@ -63,7 +63,7 @@ banners, then check that what rendered says what you meant.
 write project-specific skills from work you keep repeating, and consolidate what
 a session learned into something reusable.
 
-52 skills, 15 opt-in modules, and 15 chat-ready prompts. There is no MCP server
+53 skills, 15 opt-in modules, and 15 chat-ready prompts. There is no MCP server
 to install, register, or provision — the capabilities the Copilot edition's
 servers provided are native to Muse (see below).
 
