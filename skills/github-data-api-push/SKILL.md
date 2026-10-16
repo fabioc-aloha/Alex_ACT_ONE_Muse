@@ -1,7 +1,7 @@
 ---
 name: "github-data-api-push"
 description: "Push commits to GitHub through the Git Data API (blobs → trees → commit → ref) when `git push` cannot authenticate — blocked egress, no credential helper, or token-only environments. Use when git push fails with 401/auth errors but the REST API works, when pushing large trees, or when scripting pushes without a local git remote."
-lastReviewed: 2026-10-07
+lastReviewed: 2026-10-16
 ---
 
 # GitHub Data API Push
@@ -43,6 +43,16 @@ Blob creation 409s on a repo with no commits. Seed one file first with `PUT /rep
 ## Surgical updates
 
 For a few changed files, skip the full workdir walk: create the changed blobs, then `POST /git/trees` with `base_tree` set to the branch's current tree SHA and only the changed paths as entries. One small tree POST instead of hundreds of blob uploads.
+
+## Delta-push hardening
+
+The rules below come from production pushes (2026-10-15) where two trees landed on a main branch with silent deletions and misplaced files; CI caught both before anything deployed. They apply to every Git Data API push, full-tree or surgical:
+
+1. **Build delta trees on `base_tree`, never from a recursive tree listing.** A recursive listing can truncate on large repos; building a new tree from a truncated listing silently drops the missing files. The surgical route — `base_tree` set to the branch's current tree SHA plus only the changed entries — cannot drop files it never touched.
+2. **Pass paths relative to the repo root, not the workdir.** When the workdir is a subdirectory of the repo, workdir-relative paths land as stray files that shadow the real tree. Confirm the workdir-to-repo-root mapping before building the file list, and `--dry-run` when it is uncertain.
+3. **Use full 40-character SHAs** for `base_tree` and branch heads. An abbreviated prefix can resolve to the wrong tree object.
+4. **Verify the listing before merging.** Fetch the recursive tree of the new commit and diff its path set against the base commit's listing. Allow only the intended paths to differ: any unexpected new path is a misplaced file, any missing path a silent deletion. Do not open or merge a PR until the listing is clean.
+5. **Recover by rebuilding, not patching.** If verification fails, stop before merging. Rebuild the tree on the known-good base's `base_tree` with corrected paths only, push to a fresh branch, and re-verify. Report what the bad tree contained and which paths were wrong.
 
 ## Operating rules
 
