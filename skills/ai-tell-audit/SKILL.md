@@ -22,6 +22,8 @@ lastReviewed: 2026-10-16
 
 Follow this procedure directly on the text. For long documents, run it section by section and report density per section.
 
+**Source of truth first:** when the text mirrors a versioned source (a repo, a CMS, a published doc), verify you are auditing the current version before starting — never audit a local copy on assumption. A full audit on a stale copy wastes the entire cycle. When a GitHub repo is the source, `scripts/check-source-sync.py` automates the check.
+
 ## What to check
 
 The pattern catalog in the `humanizer` skill (content, language/grammar, style, communication, and filler patterns), plus the project's house AI-tell list when one exists. Where they differ, the house list's named exemptions win: never flag an exempted term, and never "correct" a house-defined term into plainer diction.

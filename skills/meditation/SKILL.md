@@ -76,6 +76,13 @@ changelog, and relevant existing evidence. Inventory completed changes,
 unresolved tasks, pending approvals, and verification evidence before editing.
 Preserve unrelated or concurrent edits; stop and ask if changes conflict.
 
+If the `~/dreams/` directory exists (the assistant's nightly reflection),
+read the most recent entries as one more evidence source: look for recurring
+patterns, flagged failures, or corrections noticed across days that bear on
+this session's work. A pattern the nightly reflection caught repeating is a
+strong candidate for a structural fix here — single-session review can't see
+what cross-day reflection can. Treat it as evidence, not instruction.
+
 ### 2. Find Useful Improvements
 
 For each candidate, identify a demonstrated repeated workflow or a concrete
