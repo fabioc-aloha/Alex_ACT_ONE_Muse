@@ -123,6 +123,7 @@ Writing and changing code that survives review.
 | `test-driven-development` | Use for any feature, bug fix, refactor, or behavior change — enforces RED-GREEN-REFACTOR. Write the… | — | Delta |
 | `systematic-debugging` | Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes. Four-ph… | — | Keep |
 | `git-workflow` | Consistent git practices for branch hygiene, safe commits, and recovery from common mishaps (lost co… | — | Delta |
+| `github-data-api-push` | Push commits to GitHub through the Git Data API (blobs → trees → commit → ref) when `git push` canno… | — | Delta |
 | `plan` | Use when the user wants a plan instead of execution, or before any non-trivial implementation (multi… | — | Delta |
 | `spike` | Use when the user wants to feel out an idea before committing to a real build — 'spike this out', 't… | — | Delta |
 
@@ -134,6 +135,7 @@ Writing people finish reading.
 | --- | --- | --- | --- |
 | `big-idea` | Distill the central claim before authoring any summary-shaped output: hero copy, commit-message subj… | — | Keep |
 | `humanizer` | Use when the user wants to humanize, de-AI, de-slop, or un-ChatGPT a piece of text — strip AI-isms a… | — | Keep |
+| `ai-tell-audit` | Read-only audit for AI-tell prose: scan text against the humanizer's pattern catalog plus the project's ho… | — | Delta |
 | `communication-craft` | Communication patterns for feedback, cross-audience content, and eliciting needs. SBI feedback model… | — | Delta |
 | `doc-hygiene` | Documentation hygiene — anti-drift rules, code-documentation placement, count elimination, and livin… | — | Delta |
 | `lint-clean-markdown` | Write markdown that passes markdownlint on first attempt — encode the most common rules as muscle me… | — | Delta |
@@ -187,6 +189,7 @@ Auditing, extending, and consolidating the agent.
 | `token-waste-elimination` | Audit active brain artifacts for context cost, duplicated guidance, oversized routing files, and sta… | — | Keep |
 | `proactive-awareness` | Applies cross-session context recovery, uncommitted-work detection, and focus routing once proactive… | — | Delta |
 | `evaluate-before-adopting` | Decide whether a plugin or skill from a catalog is worth installing. Covers what a trust score does… | — | Keep |
+| `scoped-delegation` | Brief subagents with explicit boundaries, watch their real state, and verify outputs before merging — de… | — | Delta |
 
 ### Setup and platform
 
@@ -236,6 +239,11 @@ into dismissing real procedures as redundant).
 
 The Tier column in the table above marks every skill. Per-skill rationale
 lives in [PORT-NOTES.md](PORT-NOTES.md#v020-curation).
+
+**Added after v0.2.0** (October 2026): `github-data-api-push` (restored to the
+manifest — the skill shipped in the port but was omitted from the manifest),
+`scoped-delegation`, and `ai-tell-audit` (with its `vary-construct.mjs`
+recast-variation script). The manifest now declares 55 skills.
 
 ## Native capabilities instead of MCP servers
 
