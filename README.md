@@ -2,7 +2,7 @@
 
 A port of Fabio Correa's Alex ACT ONE Copilot plugin (v0.3.6) for Muse, Meta's
 personal AI assistant. The skill format
-is identical (`SKILL.md` with `name:`/`description:` frontmatter), so the 52 curated skills carry over; everything Copilot-specific around them was adapted.
+is identical (`SKILL.md` with `name:`/`description:` frontmatter), so the curated skills carry over; everything Copilot-specific around them was adapted.
 
 ## Muse assessment (expected baseline — 2026-10-02)
 
@@ -12,7 +12,7 @@ alternative hypotheses, devil's advocate — applied to the adoption decision
 itself. This section is the **expected baseline**; actual usage will be
 evaluated against it after installation.
 
-**Triage result:** of 60 skills, **29 kept** as full skills, **23 adapted** as
+**Triage result:** of the original sixty skills, **29 kept** as full skills, **23 adapted** as
 "Muse delta" skills (each states what Muse does natively, then keeps only its
 unique procedures), **8 archived** as host-specific (Copilot / VS Code /
 Outlook / Replicate — no Muse equivalent). Rationale: value was judged
@@ -63,7 +63,7 @@ banners, then check that what rendered says what you meant.
 write project-specific skills from work you keep repeating, and consolidate what
 a session learned into something reusable.
 
-53 skills, 15 opt-in modules, and 15 chat-ready prompts. There is no MCP server
+55 skills, 15 opt-in modules, and 15 chat-ready prompts. There is no MCP server
 to install, register, or provision — the capabilities the Copilot edition's
 servers provided are native to Muse (see below).
 

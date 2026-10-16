@@ -6,7 +6,7 @@ edition (Alex ACT ONE v0.3.6).
 
 ## Working Today
 
-- The package declares 52 skills, 15 chat-ready prompts, and 15 opt-in modules.
+- The package declares 55 skills, 15 chat-ready prompts, and 15 opt-in modules.
   There are no MCP servers to register — the Copilot edition's three servers map
   to native Muse capabilities (see `docs/muse-capability-map.md`)
 - Skills are used straight from the `skills/` directory the assistant reads;

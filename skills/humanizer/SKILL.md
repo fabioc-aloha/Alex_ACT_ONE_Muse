@@ -1,7 +1,7 @@
 ---
 name: humanizer
-description: Use when the user wants to humanize, de-AI, de-slop, or un-ChatGPT a piece of text — strip AI-isms and add real voice — or wants a copywriter pass that reviews existing copy for a named audience (e.g., non-native English readers) using an idiom/tone/register/ambiguity/grammar/naturalness taxonomy and an approval-gated before/after table workflow. Scans for 29 documented AI-writing patterns (Wikipedia's "Signs of AI writing") and produces a draft → self-audit → final rewrite. Optional voice-calibration from a user-provided writing sample. Adapted from Hermes Agent / blader/humanizer.
-lastReviewed: 2026-09-13
+description: Use when the user wants to humanize, de-AI, de-slop, or un-ChatGPT a piece of text — strip AI-isms and add real voice — or wants a copywriter pass that reviews existing copy for a named audience (e.g., non-native English readers) using an idiom/tone/register/ambiguity/grammar/naturalness taxonomy and an approval-gated before/after table workflow. Scans for 32 documented AI-writing patterns (Wikipedia's "Signs of AI writing") and produces a draft → self-audit → final rewrite. Optional voice-calibration from a user-provided writing sample. Adapted from Hermes Agent / blader/humanizer.
+lastReviewed: 2026-10-16
 ---
 
 # Humanizer: AI-Tell Removal and Audience Copy Review
@@ -25,7 +25,7 @@ Also apply this skill to **your own** output when writing user-facing prose — 
 
 **Composes with — not replaces — other prose disciplines:**
 
-- A prose-authoring worker agent (like `markdown-author` in projects that ship one) typically carries a short banned-vocabulary filter (`delve`, `myriad`, `tapestry`, `seamlessly`, `leverage`, etc.) and a quick audit that fires on every markdown task. Humanizer is the **deeper, on-demand pass** — 29 patterns with before/after examples, voice calibration, and an iterative draft-audit-final loop.
+- A prose-authoring worker agent (like `markdown-author` in projects that ship one) typically carries a short banned-vocabulary filter (`delve`, `myriad`, `tapestry`, `seamlessly`, `leverage`, etc.) and a quick audit that fires on every markdown task. Humanizer is the **deeper, on-demand pass** — 32 patterns with before/after examples, voice calibration, and an iterative draft-audit-final loop.
 - Some project brains ban em-dashes outright in shipped prose (Alex ACT itself does). Humanizer Pattern 14 documents the _reason_ (em-dash overuse is a well-known AI tell), useful when humanizing third-party text that already contains them.
 
 ## How to apply it
@@ -42,12 +42,16 @@ Always show the rewrite to the user. For file edits, show a diff or the changed 
 
 When given text to humanize:
 
-1. **Identify AI patterns** — scan for the 29 patterns listed below.
+1. **Identify AI patterns** — scan for the 32 patterns listed below.
 2. **Rewrite problematic sections** — replace AI-isms with natural alternatives.
 3. **Preserve meaning** — keep the core message intact.
 4. **Maintain voice** — match the intended tone (formal, casual, technical, etc.). If a voice sample was provided, match it specifically.
 5. **Apply the right voice** — don't just remove bad patterns. Match an explicit author or brand voice when supplied; otherwise use the Practitioner-Editor Default below.
 6. **Do a final anti-AI pass** — ask yourself: "What makes the below so obviously AI generated?" Answer briefly with any remaining tells, then revise one more time.
+
+## House lists (project or book)
+
+If the project supplies a house AI-tell list, it is authoritative: its named exemptions override this catalog (a flagged word the house list exempts stays), and its additions extend it. Never "correct" a house-defined term into plainer diction. When no house list is supplied, the catalog alone governs.
 
 ## Voice Calibration (optional)
 
@@ -408,6 +412,8 @@ engineering audience) is in
 
 **Problem:** These words appear far more frequently in post-2023 text. They often co-occur.
 
+**Era note (Wikipedia, current as of 2026):** the overused vocabulary shifts with the model era. *Delve* was the 2023–2024 marker and dropped off sharply in 2025; the current-era markers are *emphasizing*, *enhance*, *highlighting*, *showcasing*. Weight the current era's words more heavily when auditing — and remember the article's caution: one or two of these words is coincidence; high density is the tell.
+
 **Nuance on "load-bearing":** legitimate as canonical vocabulary in ACT-derived work, where it means "a claim that if wrong would break the argument" (analogous to a load-bearing wall). It becomes an AI-tell in three cases: used as a synonym for "important / key / central / vital" where those simpler words would do, repeated ≥3 times within a single document, or applied to soft nouns (a load-bearing feeling, a load-bearing moment). Heuristic: if "important" or "central" substitutes without loss, it was decorative.
 
 **Before:**
@@ -505,6 +511,8 @@ engineering audience) is in
 ### 14. Em Dash Overuse
 
 **Problem:** LLMs use em dashes (—) more than humans, mimicking "punchy" sales writing. In practice, most of these can be rewritten more cleanly with commas, periods, or parentheses.
+
+> **Era note:** this tell is weakening — newer models are tuned to suppress em dashes, though some still overuse them. Use it in combination with other patterns, never alone.
 
 > **Note:** Alex ACT bans em-dashes in shipped prose outright. This pattern is relevant when humanizing _third-party_ text that already contains em-dashes, or when reviewing why heir-authored prose felt AI-flavored before the rule was internalized.
 
@@ -725,6 +733,42 @@ When users hit a slow page, they leave.
 When users hit a slow page, they leave.
 ```
 
+### 30. Vague Expression of Connection or Association
+
+**Words to watch:** in connection with/to, connected with/to, in association with, associated with
+
+**Problem:** newer LLMs reach for indirect constructions to paper over a relationship they cannot define precisely, instead of using of/for/by or naming the actual relationship (working in/with, used in/for, caused by). Often combined with promotional buzzspeak, e.g. "widely associated with".
+
+**Before:**
+
+> The system has been associated with residential water management applications including swimming-pool backwash and sump-pump discharge.
+
+**After:**
+
+> The system handles residential water tasks such as swimming-pool backwash and sump-pump discharge.
+
+### 31. Section Summaries and Restatements
+
+**Words to watch:** In summary, In conclusion, Overall (as closers)
+
+**Problem:** models trained on essay templates end sections or paragraphs by restating the core idea. In most prose the summary adds nothing the section did not already say.
+
+**Before:**
+
+> In summary, the training trajectory typically involves a master's degree followed by postdoctoral training, ensuring researchers acquire the necessary knowledge and skills.
+
+**After:**
+
+> (Cut. If the section needs a closer, end on the consequence or the next step, not a restatement.)
+
+### 32. Leftover Scaffolding
+
+**Watch for:** unfilled bracketed placeholders ([Your Name], [link to...], [Enter text here]), model-internal citation fragments (contentReference, oaicite, turn0search0-style tokens), and "as an AI language model" refusal language pasted into drafts.
+
+**Problem:** these are unambiguous markers of unreviewed model output. Placeholders are the most common: a template the user forgot to fill in.
+
+**Fix:** fill the placeholder, delete the sentence, or replace the artifact with a real citation.
+
 ---
 
 ## Process
@@ -763,7 +807,7 @@ section, and stop for explicit approval before applying anything.
 
 ## Full Example
 
-End-to-end demonstration of the draft → self-audit → final rewrite loop is in [`examples/full-example.md`](examples/full-example.md). Read it once on first invocation to see how all 29 patterns compound in a single piece of AI-flavored prose and how the iterative pass strips them out.
+End-to-end demonstration of the draft → self-audit → final rewrite loop is in [`examples/full-example.md`](examples/full-example.md). Read it once on first invocation to see how all 32 patterns compound in a single piece of AI-flavored prose and how the iterative pass strips them out.
 
 A Copywriter Mode worked example is in [`examples/copywriter-mode-example.md`](examples/copywriter-mode-example.md).
 
@@ -781,7 +825,7 @@ A Copywriter Mode worked example is in [`examples/copywriter-mode-example.md`](e
 
 - **Event-based**: zero observed invocations across the fleet within 90 days — sunset (skill is decorative on top of `markdown-author`'s always-on prose discipline). Sink to Mall rather than removing entirely so heirs who write a lot of public-facing prose can install on demand.
 - **Date-based**: 2026-09-07 (90 days from adoption). If by then `humanizer` is invoked but consistently overrides heir voice in ways the heir reverts ≥3 times, the Voice Calibration section is failing — either tighten the calibration discipline or rebalance toward voice-preserving rewrites.
-- **Counter-evidence**: if a heir reports that the 29-pattern catalog flags legitimate stylistic choices (e.g., humor that uses Rule of Three intentionally) as AI tells ≥3 times in a quarter, the patterns are too aggressive — add explicit "false positive" carve-outs.
+- **Counter-evidence**: if a heir reports that the 32-pattern catalog flags legitimate stylistic choices (e.g., humor that uses Rule of Three intentionally) as AI tells ≥3 times in a quarter, the patterns are too aggressive — add explicit "false positive" carve-outs.
 - **Copywriter Mode, event-based**: if a heir reports Copywriter Mode flagging domain acronyms or jargon as findings ≥2 times despite the Scope section above, tighten the "confirm scope first" instruction — the mode is drifting back into acronym-expansion territory it was explicitly narrowed away from.
 - **Copywriter Mode, counter-evidence**: if a heir reports the taxonomy tags being applied inconsistently (the same finding tagged differently across sessions) ≥3 times, the six-tag definitions need sharper examples, not more tags.
 - **Copywriter Mode, counter-evidence**: if a heir reports the hero-first staging feels slower than a single full-page table on short pages, add an explicit "skip hero-first staging for pages under N words" exception rather than dropping the staged approach for every page.
@@ -792,6 +836,6 @@ A Copywriter Mode worked example is in [`examples/copywriter-mode-example.md`](e
 
 This skill is adapted from [Hermes Agent's port](https://github.com/NousResearch/hermes-agent) of [blader/humanizer](https://github.com/blader/humanizer) (MIT licensed), which is itself based on [Wikipedia: Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing), maintained by WikiProject AI Cleanup. The patterns documented there come from observations of thousands of instances of AI-generated text on Wikipedia.
 
-Original author: Siqi Chen ([@blader](https://github.com/blader)). Source upstream: <https://github.com/blader/humanizer> (version 2.5.1). The 29 patterns, personality/soul section, and full worked example are preserved verbatim from the source. Adapted for Edition with neutral tool references (workspace read/edit) replacing Hermes-native tool names (`read_file`, `patch`, `write_file`), composition notes with `markdown-author` agent and Cardinal Rule 2, and ACT-shape frontmatter + `## Would Revise If` falsifier. Original MIT license preserved upstream. **Copywriter Mode** (the six-tag taxonomy, hero-first approval-gated workflow, and before/after table format) is an Alex ACT addition, not part of the upstream `blader/humanizer` port — derived from a real audience-language-review engagement, then genericized.
+Original author: Siqi Chen ([@blader](https://github.com/blader)). Source upstream: <https://github.com/blader/humanizer> (version 2.5.1). The 29 patterns, personality/soul section, and full worked example are preserved verbatim from the source. Patterns 30–32 (vague connection/association, section summaries, leftover scaffolding) and the era notes on patterns 7 and 14 were added 2026-10-16 from a re-read of the Wikipedia article — the article is the living source of truth; re-check it when the catalog feels stale, since its model-era sections age and it carries an update banner when they do. Adapted for Edition with neutral tool references (workspace read/edit) replacing Hermes-native tool names (`read_file`, `patch`, `write_file`), composition notes with `markdown-author` agent and Cardinal Rule 2, and ACT-shape frontmatter + `## Would Revise If` falsifier. Original MIT license preserved upstream. **Copywriter Mode** (the six-tag taxonomy, hero-first approval-gated workflow, and before/after table format) is an Alex ACT addition, not part of the upstream `blader/humanizer` port — derived from a real audience-language-review engagement, then genericized.
 
 Key insight from Wikipedia: "LLMs use statistical algorithms to guess what should come next. The result tends toward the most statistically likely result that applies to the widest variety of cases."
