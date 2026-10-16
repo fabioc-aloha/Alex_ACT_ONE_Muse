@@ -61,7 +61,7 @@ node scripts/vary-construct.mjs --pattern contrast-cadence --count 9
 node scripts/vary-construct.mjs --pattern contrast-cadence --count 9 --seed 42   # reproducible
 ```
 
-Supported families: contrast-cadence, rule-of-three, rhetorical-monotony, throat-clearer, slogan-ending, section-summary, significance-inflation. Strategies are emitted in document order with no adjacent duplicates where possible. Exempted or kept instances do not consume strategy slots.
+Supported families: contrast-cadence, rule-of-three, rhetorical-monotony, throat-clearer, slogan-ending, section-summary, significance-inflation, vague-connection, copula-avoidance, elegant-variation, hedge-cluster. Strategies are emitted in document order with no adjacent duplicates where possible. Exempted or kept instances do not consume strategy slots.
 
 ## Output
 
