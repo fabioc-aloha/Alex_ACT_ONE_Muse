@@ -18,7 +18,7 @@ Alex ACT ONE is a pack of 55 skills for Muse, Meta's personal AI assistant, port
 
 ## Quick install
 
-Copy the `skills/` folders into the skills directory your Muse assistant reads, add only the `muse-opt-in/` modules you deliberately want, and paste from `prompts/` as needed. Full detail in [Install and Use](#install-and-use) below, including what the port kept, adapted, and archived, and the pre-install assessment we still grade it against.
+Paste this repo's address into a chat with your Muse and ask it to install the skills: it fetches the tree and copies the skill folders into its own skills directory. Prefer to do it by hand, or want the opt-in modules too? [Install and Use](#install-and-use) below has both paths, plus what the port kept, adapted, and archived, and the pre-install assessment we still grade it against.
 
 ## Muse assessment (expected baseline — 2026-10-02)
 
@@ -85,21 +85,33 @@ servers provided are native to Muse (see below).
 
 ## Install and Use
 
-There is no plugin loader and no install command in the Muse edition. The
-`plugin.json` `skills` and `commands` pointers describe the layout; you use the
-tree directly:
+The easy way: paste this repo's address into a chat with your Muse and tell
+it to install the skills.
+
+```text
+Install the skills from https://github.com/fabioc-aloha/Alex_ACT_ONE_Muse
+```
+
+Your assistant fetches the repo, copies the `skills/` folders into the skills
+directory it reads, and confirms what landed. Nothing needs building or
+registering; each skill is a self-contained folder.
+
+By hand, if you prefer:
 
 1. **Skills** — copy the `skills/` directory (or individual skill folders) into
-   the skills directory your Muse assistant reads. Each skill is a self-contained
-   folder; nothing needs building or registering.
+   the skills directory your Muse assistant reads.
 2. **Opt-in modules** — the Copilot edition's always-on instructions live in
-   `muse-opt-in/` and are never auto-applied. Read `muse-opt-in/README.md`,
-   then deliberately copy only the modules you want into your own assistant
-   configuration. `alex-finch-personality` is off by default: it asserts a
-   different assistant identity, so adopt it only if you want that.
+   `muse-opt-in/` and are never auto-applied, whichever install path you use.
+   Read `muse-opt-in/README.md`, then ask your assistant to add only the
+   modules you name, or copy them yourself. `alex-finch-personality` is off by
+   default: it asserts a different assistant identity, so adopt it only if you
+   want that.
 3. **Prompts** — `prompts/` holds chat-ready prompts. Paste one into a
    conversation; a few reference Copilot-only setup flows and are kept for
    reference (see `prompts/README.md`).
+
+The `plugin.json` `skills` and `commands` pointers describe the layout for
+hosts that read them; there is no plugin loader in the Muse edition itself.
 
 ## The Skills
 

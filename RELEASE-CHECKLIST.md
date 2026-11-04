@@ -134,9 +134,11 @@ and installed manifest, applies the canonical instructions, and checks the
 receipt's ownership, version, and instruction entries. It proves installed
 bytes and receipt state, not that a host observed activation after restart.
 
-> **Muse edition:** `reinstall-and-check.ps1` exercises the Copilot marketplace
-> reinstall flow and is preserved for reference; it does not apply to the Muse
-> edition.
+> **Muse edition:** this step is Copilot-edition machinery. The script it ran
+> (`reinstall-and-check.ps1`) was removed from the Muse edition on 2026-11-04;
+> there is no marketplace reinstall to verify here. Installation is asking your
+> Muse to fetch the repo and copy the `skills/` folders in (or copying them by
+> hand), and step 1's fresh-clone suite is this edition's release gate.
 
 ## What is deliberately not here
 
