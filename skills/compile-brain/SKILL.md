@@ -73,8 +73,9 @@ Before presenting a draft:
 1. Compare the draft against the behavior inventory item by item.
 2. Run at least two representative scenarios, including one failure, edge, or
    safety case, and confirm the draft produces the same required behavior.
-3. Verify that relative links resolve at the intended destination. Never
-   substitute machine-specific absolute paths. Preserve required supporting
+3. Verify that relative links resolve at the intended destination: run
+   `scripts/check-links.cjs` on the source and the draft and resolve every
+   miss it reports. Never substitute machine-specific absolute paths. Preserve required supporting
    resources beside an in-place replacement, or explicitly include them in a
    standalone output.
 4. Produce a preservation receipt naming retained invariants, deliberately
@@ -82,9 +83,12 @@ Before presenting a draft:
 
 ### High-reduction review
 
-Measure source and draft length using a model-specific tokenizer when available,
-or state a comparable estimate such as characters divided by four. A
-**conservative first pass** removes no more than 20% of estimated tokens or
+Measure source and draft length with `scripts/measure-reduction.cjs`: it
+prints both character counts and the percent reduction, and uses a tokenizer
+CLI when one is supplied via `--tokenizer`. Read every gate below off its
+output; never estimate the reduction in prose, and never use characters
+divided by four as the measurement. A
+**conservative first pass** removes no more than 20% of measured tokens or
 characters. Prefer deleting clear duplication and stale host residue while
 retaining detailed procedures, examples, tables, citations, and resources unless
 their lack of operational meaning is established.
@@ -92,7 +96,7 @@ their lack of operational meaning is established.
 Before a **second pass**, present and review the first pass's preservation
 receipt and measured reduction. Perform a second pass only when the user
 explicitly requests it. A **high-reduction** draft, one that exceeds 35%
-cumulative estimated reduction, requires an explicit rationale and a
+cumulative measured reduction, requires an explicit rationale and a
 fresh-context semantic review before it is presented as execution-ready. Above
 50%, the review must specifically challenge whether compressed tables, examples,
 citations, or resource links carried operational meaning. A reviewer finding is
@@ -224,7 +228,8 @@ new vocabulary.
    | Brain contract | `BRAIN.md` |
 
 10. Run the semantic comparison, scenario review, and intended-destination link
-    check. Resolve blocking losses before presenting the draft.
+    check (`scripts/check-links.cjs` on the draft). Resolve blocking losses
+    before presenting the draft.
 11. Present the artifact type, destination, complete draft, behavior
     preservation receipt, and measured reduction. State material behavioral
     changes, if any. When the human-facing gate fired, state the audience and

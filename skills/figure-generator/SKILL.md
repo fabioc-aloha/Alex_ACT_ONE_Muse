@@ -114,10 +114,10 @@ When an approved sample SVG exists but its dataset is missing, do not reconstruc
 
 ### Procedure
 
-1. **Extract axis tick coordinates and their labeled values** from the sample (look for `<text>` elements near axis lines with numeric content; match each label to the `<line>` coordinate it labels).
-2. **Solve two ticks for the linear scale**: `pxPerUnit = (y1 - y2) / (v2 - v1)`.
-3. **Invert every data-point coordinate through the scale**: `dataValue = (yAxisBase - pointY) / pxPerUnit + valueBase`. Round to the domain's natural precision.
-4. **Fidelity test**: every derived value must resolve to an EXACT value on the natural grid (e.g., all integers). If not, the scale is wrong or the sample draws something other than the dataset you think.
+1. **Extract axis ticks with the script.** Run `node scripts/invert-dataset.mjs <sample.svg>`. It parses the numeric `<text>` tick labels and groups them by cross-axis alignment; do not transcribe tick coordinates by eye.
+2. **Solve the scale from the script's output.** The script solves the linear scale from the two extreme ticks (`pxPerUnit = (y1 - y2) / (v2 - v1)`) and prints it; quote that number rather than recomputing it.
+3. **Invert every data-point coordinate through the solved scale.** The script inverts the polyline and circle coordinates and prints the derived values. **Never hand-adjust values** to make them rounder or closer to what the prose suggests: a value the script reports is the value the sample carries.
+4. **Fidelity test**: the script asserts every derived value resolves to an EXACT value on the coarsest natural grid (e.g., all integers) and exits non-zero when no grid fits. If it fails, the scale is wrong or the sample draws something other than the dataset you think.
 5. **Feed derived values into the generator and verify byte-identity** — the output polylines should be byte-identical to the sample. The strongest possible verification.
 
 **Why inversion beats prose reconstruction:** prose fabricates. In a shipped case, prose said *"EMEA is the only region falling"* — the sample proved three regions decline and the two lines diverge (gaps 10 → 15 → 20 → 30). The sample doesn't lie.

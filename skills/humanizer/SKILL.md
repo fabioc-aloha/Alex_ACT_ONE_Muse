@@ -58,7 +58,7 @@ If the project supplies a house AI-tell list, it is authoritative: its named exe
 If the user provides a writing sample (their own previous writing), analyze it before rewriting:
 
 1. **Read the sample first.** Note:
-   - Sentence length patterns (short and punchy? Long and flowing? Mixed?)
+   - Sentence length patterns (short and punchy? Long and flowing? Mixed?) — when the sample is a file, measure instead of eyeballing: `node scripts/sentence-stats.mjs <sample-file>` prints the sentence count and the mean, median, and spread of words per sentence
    - Word choice level (casual? academic? somewhere between?)
    - How they start paragraphs (jump right in? Set context first?)
    - Punctuation habits (lots of dashes? Parenthetical asides? Semicolons?)
@@ -225,6 +225,11 @@ normal outcome, not a failure. The rejection rate is a health signal: **zero rej
 list is too narrow** to be doing real work, and **near-total rejection means it is too noisy** to
 be worth running. A quarter rejected is a working list.
 
+**Keep a disposition log so the rate is computed, not remembered.** Record every Phase 1
+candidate in a plain-text log, one per line: `candidate | origin | disposition`, where origin is
+`sweep` or `close-read` and disposition is `accepted` or `rejected`. When Phase 2 closes, run
+`node scripts/tally-rejections.mjs <log-file>` and read the rejection rate from its output.
+
 **Phase 2 — close read.** Read every sentence and judge comprehension and naturalness. Do not work
 down the Phase 1 list; read the prose. For each passage: does every phrase mean its literal words,
 and is any figurative sense recoverable from context? Could a sentence be parsed a second way?
@@ -269,6 +274,12 @@ wrong in public — **run the close read more than once and union the results**:
 5. Where runs **disagree on a recommendation** rather than on existence, a further run arbitrates.
    In the comparison a third pass dropped one over-flagged finding and confirmed one that a single
    pass had missed.
+
+**Tally agreement with the merge script, not by eye.** Each run writes its findings to its own
+file, one finding per line: `pattern | location | phrase`. After the runs finish, run
+`node scripts/merge-runs.mjs <run-file>...`: it groups identical findings across runs and prints
+each finding's agreement count. Read the confidence tiers in step 4 off that output. A manual
+union both loses single-run findings and manufactures agreement.
 
 Elsewhere, one pass plus the sweep is the right cost. Ensembling is cheap relative to publishing
 copy that misleads a reader, and it is the correct response to a stochastic instrument.
@@ -414,7 +425,7 @@ engineering audience) is in
 
 **Era note (Wikipedia, current as of 2026):** the overused vocabulary shifts with the model era. *Delve* was the 2023–2024 marker and dropped off sharply in 2025; the current-era markers are *emphasizing*, *enhance*, *highlighting*, *showcasing*. Weight the current era's words more heavily when auditing — and remember the article's caution: one or two of these words is coincidence; high density is the tell.
 
-**Nuance on "load-bearing":** legitimate as canonical vocabulary in ACT-derived work, where it means "a claim that if wrong would break the argument" (analogous to a load-bearing wall). It becomes an AI-tell in three cases: used as a synonym for "important / key / central / vital" where those simpler words would do, repeated ≥3 times within a single document, or applied to soft nouns (a load-bearing feeling, a load-bearing moment). Heuristic: if "important" or "central" substitutes without loss, it was decorative.
+**Nuance on "load-bearing":** legitimate as canonical vocabulary in ACT-derived work, where it means "a claim that if wrong would break the argument" (analogous to a load-bearing wall). It becomes an AI-tell in three cases: used as a synonym for "important / key / central / vital" where those simpler words would do, repeated ≥3 times within a single document, or applied to soft nouns (a load-bearing feeling, a load-bearing moment). Count the repetitions before applying that threshold: `node scripts/count-occurrences.mjs "load-bearing" <file>` prints the count and the lines it appears on; judge from the printed count, not from an impression formed while reading. Heuristic: if "important" or "central" substitutes without loss, it was decorative.
 
 **Before:**
 
@@ -823,8 +834,6 @@ A Copywriter Mode worked example is in [`examples/copywriter-mode-example.md`](e
 
 ## Would Revise If
 
-- **Event-based**: zero observed invocations across the fleet within 90 days — sunset (skill is decorative on top of `markdown-author`'s always-on prose discipline). Sink to Mall rather than removing entirely so heirs who write a lot of public-facing prose can install on demand.
-- **Date-based**: 2026-09-07 (90 days from adoption). If by then `humanizer` is invoked but consistently overrides heir voice in ways the heir reverts ≥3 times, the Voice Calibration section is failing — either tighten the calibration discipline or rebalance toward voice-preserving rewrites.
 - **Counter-evidence**: if a heir reports that the 32-pattern catalog flags legitimate stylistic choices (e.g., humor that uses Rule of Three intentionally) as AI tells ≥3 times in a quarter, the patterns are too aggressive — add explicit "false positive" carve-outs.
 - **Copywriter Mode, event-based**: if a heir reports Copywriter Mode flagging domain acronyms or jargon as findings ≥2 times despite the Scope section above, tighten the "confirm scope first" instruction — the mode is drifting back into acronym-expansion territory it was explicitly narrowed away from.
 - **Copywriter Mode, counter-evidence**: if a heir reports the taxonomy tags being applied inconsistently (the same finding tagged differently across sessions) ≥3 times, the six-tag definitions need sharper examples, not more tags.

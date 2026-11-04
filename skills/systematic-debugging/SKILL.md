@@ -194,9 +194,17 @@ You MUST complete each phase before proceeding to the next.
    - No other tests broken?
    - Issue actually resolved?
 
+**Attempt log:** keep a file named `debug-attempts.log` in the project root. Append one line per fix attempt, once its outcome is known:
+
+```text
+<ISO timestamp> | hypothesis: <what you believed> | change: <what you changed> | result: worked | failed | inconclusive
+```
+
+The log is the attempt count. Never reconstruct the count from memory; step 4 reads it from the file.
+
 4. **If Fix Doesn't Work**
    - STOP
-   - Count: How many fixes have you tried?
+   - Count attempts from the log, not from memory: `wc -l debug-attempts.log` (PowerShell: `(Get-Content debug-attempts.log | Measure-Object -Line).Lines`)
    - If < 3: Return to Phase 1, re-analyze with new information
    - **If ≥ 3: STOP and question the architecture (step 5 below)**
    - DON'T attempt Fix #4 without architectural discussion
@@ -297,9 +305,8 @@ Bundled in this skill's `references/` directory:
 
 ## Would Revise If
 
-Revise by **2026-08-26 (90 days)** or sooner if any of the following fires:
+Revise if any of the following fires:
 
-- The four-phase method blocks emergency hotfixes ≥2 times (the iron law is too strict for time-critical scenarios)
 - Heirs report the structured method produces no observed change in debugging outcomes over 90 days (skill is decorative)
 - The "3+ fixes failed → question architecture" rule produces premature architectural rewrites where simple Phase 1 re-analysis would have sufficed
 - Adjacent skills (`critical-thinking`, `problem-framing-audit`) cover Phase 1 + 3 sufficiently that this skill is redundant

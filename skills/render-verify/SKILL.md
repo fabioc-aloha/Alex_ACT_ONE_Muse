@@ -98,7 +98,7 @@ Before declaring a figure done in a document / chapter / report / worked solutio
 | **Big Idea sentence**                       | The chapter or section's one-line takeaway still holds against the data, and it matches the figure's own subtitle       |
 | **Caption / alt text**                      | Describes what the figure now shows. Alt text IS the caption in most publication workflows                              |
 | **Anchoring paragraph**                     | Introduces the figure with the correct panels in the correct order (BEFORE-left, AFTER-right for paired panels)         |
-| **Numeric claims**                          | Every number the prose cites (`$4.2M`, `2.18×`, `78%`) appears in the dataset. Include category names and sort order, not just values |
+| **Numeric claims**                          | Run the scan-mode diff: `node scripts/check-numeric-claims.mjs --prose <doc> --dataset <data.json>` extracts every numeric token the prose cites (`$4.2M`, `2.18×`, `78%`) and diffs it against the dataset values. Every unmatched token is a triage candidate: fix the prose, or name the non-data lever it comes from. Include category names and sort order, not just values |
 | **Figure text that belongs in the chapter** | Sentence-length exposition inside the SVG is a smell — propose relocation to the chapter body                             |
 
 ### Look for the non-data lever first
@@ -243,7 +243,11 @@ is rendered as a page. Then, for multi-figure artifacts:
   screenshot visually hides defects in unfocused figures.
 - **Check the axes have real domains** — not `[0, 0]`, not a collapsed range,
   no `undefined` ticks.
-- **Count the marks** against what the data should produce.
+- **Count the marks, and report both numbers.** Derive the expected count
+  from the dataset or spec first (the rows, series, or categories the data
+  implies), then count the rendered marks in the DOM or the accessibility
+  tree. Report expected and actual side by side; a mismatch is a defect
+  even when the picture looks right.
 - **Search the rendered text for placeholders** — `TODO`, `undefined`, `NaN`,
   `{{`, `Lorem`. Search what rendered, not the source that produced it.
 
@@ -256,6 +260,10 @@ defect.**
 
 - **Verify prose claims arithmetically against the plotted or tabulated values.**
   If the caption says "less than a fifth of the noise", compute it.
+  Ratios are computed with a script, never in your head: run
+  `node scripts/check-numeric-claims.mjs --dataset <data.json> --numerator <key> --denominator <key>`
+  (ratio mode; dotted key paths, numeric arrays are summed) and quote the
+  printed ratio.
   Order-of-magnitude overstatements in captions survive every automated check
   there is.
 - **Re-read the claim and ask whether the picture shows it.** If the claim is
@@ -369,11 +377,7 @@ verified.
 
 ## Would Revise If
 
-Revise this skill by 2026-10-25 (90 days) or sooner if:
-
-- **The mutation check never fails on a real figure across ~10 shipped charts.**
-  Either the pipeline is genuinely sound, or the check is being run as a
-  formality. Confirm by seeding one deliberate defect before cutting the step.
+Revise this skill if:
 
 - **The host's built-in browser tools gain or lose console-error access.**
   `browser_console_messages` is currently the main capability that justifies the
@@ -397,9 +401,3 @@ Revise this skill by 2026-10-25 (90 days) or sooner if:
   row about installed-Chrome-by-channel would then be wrong.
 - **A failure mode recurs that is not in either catalog above.** The tables are
   the load-bearing content; extend them rather than adding tooling.
-- **The general catalog stays unused across several sessions.** That would mean
-  this skill is really chart-only in practice and the broader name overpromises —
-  either narrow the name back or delete the general table.
-- **Verification is consistently skipped by users**, indicating the step is too
-  heavy and should collapse into the `flint-chart` render step instead of
-  standing as its own skill.

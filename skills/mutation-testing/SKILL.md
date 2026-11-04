@@ -34,11 +34,20 @@ For each load-bearing branch / guard / constant in the module:
    entry point, with any required root override targeting the copy.
 4. **Expect ≥ 1 failure.** If the suite still passes, that branch has no real coverage.
 5. **Discard the copy** before applying the next mutation.
-6. **Record the result** — caught / survived / precondition-not-found.
+6. **Record the result in the run log**: append one line per mutation to a run-log file, using the harness's own output line: `[Name] CAUGHT`, `[Name] *** SURVIVED ***`, or `[Name] PRECONDITION-NOT-FOUND`. One line per mutation, in run order. The log is the record; do not tally the run from memory.
 
 The source files must remain unchanged. A mutation run that requires restoring a
 working-tree file is already too risky: an interrupted process, a failed write,
 or another tool reading the file can leave a real defect behind.
+
+### Tallying the results
+
+Count the run log mechanically; never tally from memory:
+
+- Bash: `grep -c "CAUGHT" <run-log>`, `grep -c "SURVIVED" <run-log>`, `grep -c "PRECONDITION-NOT-FOUND" <run-log>`
+- PowerShell: `(Select-String -Path <run-log> -Pattern "CAUGHT").Count`, with the same shape for the other two patterns
+
+Report the caught ratio as caught / (caught + survived). PRECONDITION-NOT-FOUND lines stay out of the ratio: the mutation never applied, so fix the find string and re-run that mutation before counting it as tested.
 
 ## Isolated Mutation Harness
 
@@ -146,7 +155,7 @@ A mutation-testing pass is complete when:
 
 - Every named branch in the production module has a mutation entry in your run log
 - Every survivor was either closed by a new test or explicitly accepted with a reason (e.g., "behavior is internal-only, no public contract")
-- The total mutations-caught ratio is recorded (e.g., "15 of 16 mutations caught; M8 deferred")
+- The mutations-caught ratio is recorded from the run-log counts (see "Tallying the results"), e.g. "15 of 16 mutations caught; M8 deferred"
 - The working tree's source files remain unchanged throughout the run, and the
     temporary copy is removed after each mutation
 
@@ -163,7 +172,6 @@ A mutation-testing pass is complete when:
 ## Falsifiability — would revise if
 
 - Event-based: if a formal mutation-testing tool (Stryker, mutmut) is adopted in CI, this skill becomes documentation for the manual fallback only; trim the protocol section accordingly.
-- Counter-evidence: if applying the protocol consistently catches zero mutations on three consecutive new test files, either the tests are unusually rigorous (good — note it) or the mutation set is too shallow (revise the "high-value patterns" table).
 
 ## Origin
 

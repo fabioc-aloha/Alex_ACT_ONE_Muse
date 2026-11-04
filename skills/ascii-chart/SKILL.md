@@ -68,7 +68,14 @@ Horizontal `-`, vertical `|`, corners `+`, separator `=` or `-`, bar fill `#`, b
 +----------------+  +----------------+  +----------------+
 ```
 
-Width per card = `(78 - (N-1)*2) / N`. For 3 cards: 24 chars each.
+Width per card = `(78 - (N-1)*2) / N`, taken from this table (or `node scripts/ascii-gen.cjs layout --cols N`), never divided in your head. When the division is uneven, every card gets the floor and the remainder goes +1 per card from the left until it runs out:
+
+| Cards (N) | Widths | Cards + gaps |
+| --- | --- | --- |
+| 1 | 78 | 78 |
+| 2 | 38, 38 | 78 |
+| 3 | 25, 25, 24 | 78 |
+| 4 | 18, 18, 18, 18 | 78 |
 
 ### Horizontal Bar Chart
 
@@ -85,13 +92,15 @@ Other          | ##                   |  5%
 
 Bar width = total width − label width − value width − borders. Labels left-aligned, values right-aligned.
 
+Fill counts are computed, never eyeballed: fill = round(value / max × bar width), via `node scripts/ascii-gen.cjs bars --values <csv> --width <bar width>`. After drafting the block, verify it with the same script's `check` mode against the source values (see Module 4); the Alignment QA Loop measures line lengths, but only `check` catches a bar whose fill is not proportional to its value.
+
 ### Sparkline Row
 
 ```text
 Trend (12 months):  _/\__/\/\___/\  High: 4.2M  Low: 2.1M
 ```
 
-`/` up, `\` down, `_` flat, `^` peak. One char per data point, 20 chars max.
+`/` up, `\` down, `_` flat, `^` peak. One char per data point, 20 chars max. Derive the characters from the numeric series with `node scripts/ascii-gen.cjs spark --values <csv>` (pairwise comparisons and peak detection are exactly what eyeballing gets wrong) and transcribe the script's string.
 
 ### Two-Column Dashboard
 
@@ -113,7 +122,7 @@ Each column = 38 chars (including borders); gap = 2 chars.
 
 ## Module 3: Construction Rules
 
-1. **Compute widths before drawing.** `card_width = (78 - (n_columns-1)*2) / n_columns`; `bar_area = card_width - label_width - value_width - 4`. Never eyeball.
+1. **Compute widths before drawing.** `card_width = (78 - (n_columns-1)*2) / n_columns`, taken from the Module 2 table or `scripts/ascii-gen.cjs layout` (uneven divisions: floor for every card, remainder +1 per card from the left); `bar_area = card_width - label_width - value_width - 4`. Never eyeball.
 2. **Right-align numbers, left-align labels.** Numbers scan faster with the ones digit in a fixed column.
 3. **Sort bars by value** (unless time-ordered). Largest on top; the eye scans top-down.
 4. **One header per card, centered.** Caps or title case for weight; no bold or underline (not portable).
@@ -123,6 +132,8 @@ Each column = 38 chars (including borders); gap = 2 chars.
 ## Module 4: Generating from Data
 
 Input: a JSON or table structure (title, date, `kpis[]` with label/value/detail, `charts[]` with title/type/items, footer). Algorithm: compute the grid layout → render each component into a string array (one string per line) → zip line arrays side by side with gap spacing → pad every line to its card width → validate identical line lengths → join with newlines → run the Alignment QA Loop below.
+
+**Delegate the error-prone geometry to `scripts/ascii-gen.cjs`.** Bar fills (`bars`), sparkline direction characters (`spark`), card widths (`layout`), and centered titles (`center`) come from the script's output; the model transcribes, it does not compute. After rendering a bar block, run `node scripts/ascii-gen.cjs check --values <csv> --width <bar width> <draft-file>`: it re-derives every fill from the source values and diffs them against the rendered block. A mismatch is a rendering bug; fix it and re-check before the Alignment QA Loop.
 
 ## Module 5: Alignment QA Loop (mandatory)
 
@@ -147,6 +158,8 @@ Do not freehand ASCII lines. Use padding functions to construct each line:
 Row(content):     "| " + content.padRight(74) + " |"
 Border(char):     "+" + (char * 76) + "+"
 DualRow(l, r):    "| " + l.padRight(34) + " |" + "  " + "| " + r.padRight(34) + " |"
+Center(text, w):  left = floor((w - len(text)) / 2); spaces(left) + text + spaces(w - len(text) - left)
+                  (titles are centered by construction, never by eye; `ascii-gen.cjs center` emits the padded string)
 ```
 
 ### Width constants (do not deviate)

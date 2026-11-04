@@ -268,9 +268,26 @@ and the missing test rather than reporting that the lesson has been learned.
 ## Verify Persistence Before Compaction
 
 After all six steps, including any post-mortem, read back saved records and
-verify local links, task accounting, and applicable repository checks. Report
-exact files written, duplicate candidates skipped, and any blocked or incomplete
-writes. A partial write is not completion.
+verify local links, task accounting, and applicable repository checks.
+
+Verify local links with a checker, not by reading: run the relative-link
+checker bundled with the sibling compile-brain skill
+(`../compile-brain/scripts/check-links.cjs`) over `HANDOFF.md`, `TODO.md`,
+`CHANGELOG.md`, and `AGENTS.md`, and resolve every miss it reports. That
+script is the single implementation of this check; do not re-implement it
+here and do not eyeball link targets instead.
+
+Reconcile task accounting by count, not by reading. Before cleanup, take
+the open-item count from the authoritative task list (for a checkbox list,
+`grep -c '^- \[ \]' TODO.md`; use the equivalent count for the project's
+own convention). After cleanup, count the open items again, and count the
+items closed with evidence and the items explicitly cancelled in the
+changelog or decision record. The run is reconciled only when
+before = after + completed + cancelled; report all four numbers from the
+count output, not from memory of the list.
+
+Report exact files written, duplicate candidates skipped, and any blocked
+or incomplete writes. A partial write is not completion.
 
 Do not compact before this verification succeeds. Use host compaction only if
 available and authorized; otherwise state it was not performed. Do not claim a

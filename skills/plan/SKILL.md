@@ -248,4 +248,4 @@ DRY, YAGNI, TDD
 
 ## Would Revise If
 
-Revisit by **2026-12-01** if plans still cause unauthorized mutations, task granularity makes verification impractical, or users repeatedly need a different planning format for multi-repository work.
+Revisit if plans still cause unauthorized mutations, task granularity makes verification impractical, or users repeatedly need a different planning format for multi-repository work.

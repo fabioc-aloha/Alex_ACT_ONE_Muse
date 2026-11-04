@@ -46,4 +46,4 @@ Terminal output can be silently lost or truncated. When you need the full, unfil
 
 ## Would Revise If
 
-Revisit by **2026-11-18** if the redirect-to-file fallback stops being needed (exec results reliably carry full output), host behavior makes any procedure above wrong, or a terminal failure reaches the user because these procedures alone were insufficient.
+Revisit if the redirect-to-file fallback stops being needed (exec results reliably carry full output), host behavior makes any procedure above wrong, or a terminal failure reaches the user because these procedures alone were insufficient.

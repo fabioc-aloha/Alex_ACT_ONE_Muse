@@ -46,6 +46,8 @@ At 7×10in with figure width 4.39in: `printPoints = fontSizePx × 4.39 × 72 ÷ 
 
 **Rule:** minimum instructional px = `viewBoxWidth ÷ 54.5`. At 640 → 11.74px, so 12px is the floor. A wider viewBox raises the floor — recompute, don't assume 12px.
 
+**The gate ships as a script:** `node scripts/check-print-floor.mjs <figure.svg>` (in this skill's `scripts/` folder) computes print points for every `<text>` element from the formula above and fails on: below-floor text with no `data-print-role` marker, note/micro text below 2.9pt, a missing font-size, an unknown `data-print-role` value, and micro-role text of 40 or more characters. Run it on every shipped figure; a floor that lives only in prose is not a gate.
+
 **The micro marker is not an escape hatch.** It exists for text the reader never needs to read at size. Marking instructional content `micro` to clear the gate is gaming it. The `note` role's auto-promote (≥40 chars) catches the class where this happens by accident.
 
 ### When text won't fit at 12px, the answer is never to shrink it
@@ -84,7 +86,7 @@ A figure whose subject IS bad typography must still clear 5.8pt. **Demonstrate t
 ## `data-print-role` markers
 
 - **`data-print-role="micro"`** — attribution, provenance, hash stamps, source notes. Reader never needs to read at size.
-- **`data-print-role="note"`** — annotation text the reader IS meant to read, below body copy. Auto-promoted from `micro` at ≥40 characters.
+- **`data-print-role="note"`** — annotation text the reader IS meant to read, below body copy. Auto-promoted from `micro` at ≥40 characters. The promotion is counted, not eyeballed: `check-print-floor.mjs` counts the characters of every micro-marked element and fails it at 40 or more.
 
 The taxonomy exists because a coverage scanner otherwise cannot distinguish "this is a hash stamp" from "this is a caption the reader is expected to read."
 

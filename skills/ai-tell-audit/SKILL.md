@@ -24,6 +24,14 @@ Follow this procedure directly on the text. For long documents, run it section b
 
 **Source of truth first:** when the text mirrors a versioned source (a repo, a CMS, a published doc), verify you are auditing the current version before starting — never audit a local copy on assumption. A full audit on a stale copy wastes the entire cycle. When a GitHub repo is the source, `scripts/check-source-sync.py` automates the check.
 
+**Mechanical pre-pass:** before the read, run the bundled counter on the text:
+
+```
+node scripts/count-tells.mjs <file>
+```
+
+It counts, per paragraph, the mechanically detectable tells (em dashes, boldface spans, bracketed placeholders, catalog-word occurrences) and flags paragraphs at or over the cluster threshold. Use its counts for the scaffolding and density steps below and for the Major cluster rule; judge whether an instance is decorative yourself, but never tally instances by eye.
+
 ## What to check
 
 The pattern catalog in the `humanizer` skill (content, language/grammar, style, communication, and filler patterns), plus the project's house AI-tell list when one exists. Where they differ, the house list's named exemptions win: never flag an exempted term, and never "correct" a house-defined term into plainer diction.
@@ -45,7 +53,7 @@ Audit in this order:
 
 ## Severity
 
-- **Major:** unambiguous scaffolding; 3+ tells clustered in one paragraph; promotional or superficial analysis that obscures what the sentence claims.
+- **Major:** unambiguous scaffolding; 3+ tells clustered in one paragraph (per the pre-pass counts); promotional or superficial analysis that obscures what the sentence claims.
 - **Minor:** an isolated decorative instance with a low-cost recast; a borderline case the author should see and decide.
 
 ## House rules for recasts
@@ -68,6 +76,8 @@ Supported families: contrast-cadence, rule-of-three, rhetorical-monotony, throat
 ## Output
 
 A one-line density verdict first ("clean", "light — N minors", "heavy — N majors, M minors"), then only actionable findings, ordered by severity:
+
+**Count the verdict from the table.** N and M are counts of the findings table's own Major and Minor rows. When the report is written to a file, get them with `grep -c '| Major |' <file>` and `grep -c '| Minor |' <file>`; otherwise write the table to a scratch file and count that. Never tally findings in your head.
 
 | Severity | Pattern | Location | Flagged text (short exact quote) | Why it flags | Minimal recast |
 | --- | --- | --- | --- | --- | --- |

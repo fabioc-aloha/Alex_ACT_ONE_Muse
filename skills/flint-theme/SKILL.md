@@ -32,9 +32,13 @@ Theme Lab iteration, and visual verification.
    <https://microsoft.github.io/flint-chart/#/theme-lab>, confirm `Valid
    ThemeSpec`, and inspect line, matrix, part-to-whole, multiseries,
    distribution, and diverging charts. One attractive sample is not a corpus.
-6. **Look, diagnose, and iterate.** Check primary and secondary text contrast,
-   categorical separation, ordered ramps, first focal point, label collisions,
-   grid/axis hierarchy, mark geometry, nonblank renders, and page overflow. If
+6. **Look, diagnose, and iterate.** Check primary and secondary text contrast
+   **with `scripts/contrast-check.cjs`, never by eye**: pass each text/surface
+   hex pair from the ThemeSpec (`node scripts/contrast-check.cjs "#1f2937:#ffffff" "#6b7280:#ffffff:large"`); the script computes the WCAG
+   contrast ratio and fails any pair under AA (4.5:1 for normal text, 3:1 for
+   large text). Check categorical separation, ordered ramps, first focal point, label collisions,
+   grid/axis hierarchy, mark geometry, nonblank renders, and page overflow by
+   inspection. If
    a visible defect exists, change the smallest responsible theme role and
    inspect the corpus again.
 7. **Hand off to `render-verify`.** Verify representative charts at useful size,
@@ -65,7 +69,6 @@ Theme Lab iteration, and visual verification.
 
 ## Would Revise If
 
-Revise by **2026-11-14** if the MCP resource and Theme Lab accept different
-ThemeSpec contracts, two authored themes pass validation but fail corpus review
-for the same missing check, or ThemeSpec gains supported backends that make the
+Revise if the MCP resource and Theme Lab accept different
+ThemeSpec contracts, or ThemeSpec gains supported backends that make the
 Vega-Lite-only boundary stale.

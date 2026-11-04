@@ -125,7 +125,7 @@ Delete the code and restart with TDD if you catch yourself: writing code before 
 
 Before marking work complete:
 
-- [ ] Every new function/method has a test
+- [ ] Every new function/method has a test, evidenced by the coverage tool's per-function report (`pytest --cov --cov-report=term-missing`, `nyc report`, `go tool cover -func`), not by eyeballing test files
 - [ ] Watched each test fail before implementing, for the expected reason (feature missing, not typo)
 - [ ] Wrote minimal code to pass each test
 - [ ] All tests pass; output pristine (no errors, warnings)

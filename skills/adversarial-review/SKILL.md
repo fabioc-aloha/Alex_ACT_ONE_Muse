@@ -173,6 +173,4 @@ Every adversarial review should produce:
 - Adversarial review consistently fails to surface real weaknesses (protocol is decorative)
 - The protocol creates analysis paralysis that blocks shipping more than it prevents defects
 - A lighter-weight challenge method achieves equivalent defect-detection at lower cost
-- Method 6 (Cross-Model External Critic) is invoked <2 times across 90 days from adoption
-- Heirs report choosing cross-model in chat when the manual overhead wasn't warranted ≥2 times in a quarter — the "when same-model is enough" guard is too weak
 - The purpose-built code-critique or general-purpose agents materially change shape (rename, retirement, model-override syntax change) — refresh the routing table
