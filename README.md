@@ -110,8 +110,6 @@ edition needed an MCP server, this edition uses the native equivalent (see
 
 <!-- BEGIN GENERATED SKILL TABLE -->
 
-<!-- BEGIN GENERATED SKILL TABLE -->
-
 ### Reasoning and judgment
 
 How to think through a problem before acting on it.

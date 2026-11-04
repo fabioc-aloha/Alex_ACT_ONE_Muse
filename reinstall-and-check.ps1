@@ -1,3 +1,8 @@
+# NOTE (Muse edition): this script exercises the COPILOT edition's marketplace
+# reinstall flow (alex-act-one@alex-mall). It is preserved in this repo for
+# reference only and is NOT part of the Muse edition, which has no marketplace
+# and no install step: you copy the skills/ folders in. See RELEASE-CHECKLIST.md
+# step 9 and the README's Install and Use section.
 [CmdletBinding()]
 param(
     [string]$Plugin = 'alex-act-one',
