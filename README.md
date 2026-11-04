@@ -1,8 +1,24 @@
 # Alex ACT ONE — Muse edition
 
-A port of Fabio Correa's Alex ACT ONE Copilot plugin (v0.3.6) for Muse, Meta's
-personal AI assistant. The skill format
-is identical (`SKILL.md` with `name:`/`description:` frontmatter), so the curated skills carry over; everything Copilot-specific around them was adapted.
+![Alex ACT ONE, Muse edition](assets/banner.svg)
+
+**Your assistant is fast, confident, and too often wrong. Give it a discipline.**
+
+Alex ACT ONE is a pack of 55 skills for Muse, Meta's personal AI assistant, ported from the [Copilot edition](https://github.com/fabioc-aloha/Alex_ACT_ONE). It changes how the assistant works: frame the problem before solving it, look for evidence against its first answer, and check what it produced before calling it done. There is no plugin loader and nothing to register: copy the skill folders in and they are live.
+
+**See the difference:** the same loaded prompt, "Our dashboard takes 8 seconds to load. Rust rewrite, or Redis caching?", handled two ways. Try it yourself with [the evaluation guide](docs/launch/evaluation-guide.md).
+
+|  | Without Alex ACT ONE | With Alex ACT ONE |
+|---|---|---|
+| First move | Jumps straight to an answer | Stops and checks the question first |
+| The answer | Picks Rust or Redis, and sounds sure | Asks where the 8 seconds are actually spent |
+| Evidence | Does not ask for any | Says what to measure, and what result would change the answer |
+| Confidence | Sounds certain either way | Marks what is known, reported, estimated, or guessed |
+| The result | A plan, handed over as final | The work gets checked before it ships |
+
+## Quick install
+
+Copy the `skills/` folders into the skills directory your Muse assistant reads, add only the `muse-opt-in/` modules you deliberately want, and paste from `prompts/` as needed. Full detail in [Install and Use](#install-and-use) below, including what the port kept, adapted, and archived, and the pre-install assessment we still grade it against.
 
 ## Muse assessment (expected baseline — 2026-10-02)
 

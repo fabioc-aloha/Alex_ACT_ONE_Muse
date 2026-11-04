@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="Alex ACT ONE: A skills pack for GitHub Copilot. Install once, use in CLI, VS Code, and Scout.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="Alex ACT ONE, Muse edition: a skills pack for Muse, Meta's personal AI assistant. Copy the skills in; no servers to run.">
   <title>Alex ACT ONE</title>
-  <desc>A skills pack for GitHub Copilot. Install once, use in CLI, VS Code, and Scout.</desc>
+  <desc>A skills pack for Muse, Meta's personal AI assistant. Copy the skills in; no servers to run.</desc>
 
   <defs>
     <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
-    <stop offset="0%" stop-color="#10b981"/>
-    <stop offset="50%" stop-color="#14b8a6"/>
-    <stop offset="100%" stop-color="#06b6d4"/>
+    <stop offset="0%" stop-color="#2563eb"/>
+    <stop offset="50%" stop-color="#7c3aed"/>
+    <stop offset="100%" stop-color="#c026d3"/>
     </linearGradient>
   </defs>
 
@@ -25,7 +25,7 @@
 
   <!-- Brand label -->
   <text x="40" y="72" font-family="Segoe UI, Helvetica, Arial, sans-serif"
-      font-size="15" font-weight="700" fill="#10b981" letter-spacing="0">ALEX</text>
+      font-size="15" font-weight="700" fill="#2563eb" letter-spacing="0">ALEX</text>
   <text x="88" y="72" font-family="Segoe UI, Helvetica, Arial, sans-serif"
       font-size="13" font-weight="600" fill="#94a3b8" letter-spacing="0">ARTIFICIAL CRITICAL THINKING</text>
   <rect x="40" y="88" width="244" height="3" rx="1.5" fill="url(#accent)"/>
@@ -36,5 +36,5 @@
 
   <!-- Subtitle -->
   <text x="40" y="224" font-family="Segoe UI, Helvetica, Arial, sans-serif"
-      font-size="18" font-weight="600" fill="#94a3b8" letter-spacing="0">A skills pack for GitHub Copilot. Install once, use in CLI, VS Code, and Scout.</text>
+      font-size="18" font-weight="600" fill="#94a3b8" letter-spacing="0">A skills pack for Muse, Meta's personal AI assistant. Copy the skills in; no servers to run.</text>
 </svg>
