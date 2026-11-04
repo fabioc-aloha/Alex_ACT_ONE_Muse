@@ -1,6 +1,6 @@
 # Alex ACT ONE — Muse edition
 
-![Alex ACT ONE, Muse edition](assets/banner.svg)
+![Alex ACT ONE, Muse edition](assets/banner-muse.svg)
 
 **Your assistant is fast, confident, and too often wrong. Give it a discipline.**
 
