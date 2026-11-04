@@ -19,7 +19,13 @@ node scripts/brain-qa.cjs --json
 node scripts/brain-semantic-qa.cjs --json
 ```
 
-If your project doesn't ship equivalents, measure by listing active `applyTo: "**"` and `applyTo: "**/*"` instruction files and their line counts by hand.
+If your project doesn't ship equivalents, use the fallback counter bundled with this skill instead of measuring by hand:
+
+```pwsh
+node scripts/count-instructions.cjs <project-root>
+```
+
+It lists the active `applyTo: "**"` and `applyTo: "**/*"` instruction files with their line counts grouped by scope, and flags any skill file that exceeds 500 lines.
 
 Then measure active instructions by scope and line count. Treat `applyTo: "**"`
 and `applyTo: "**/*"` as the highest-frequency group. Skill and prompt bodies
@@ -64,8 +70,16 @@ strong removal candidate.
    node scripts/brain-semantic-qa.cjs
    ```
 
-6. Report artifact-count and high-frequency-line deltas. Do not claim token
-   savings unless measured by the actual loader or a documented approximation.
+6. Report artifact-count and high-frequency-line deltas, computed from the
+   baseline and post-change snapshots by the differ bundled with this skill
+   rather than subtracted in prose:
+
+   ```pwsh
+   node scripts/diff-brain-qa.cjs baseline.json after.json
+   ```
+
+   Do not claim token savings unless measured by the actual loader or a
+   documented approximation.
 
 ## Anti-Patterns
 
@@ -79,7 +93,7 @@ strong removal candidate.
 
 ## Would Revise If
 
-Revisit by **2026-10-28** or sooner if loader semantics change, a trimming pass
+Revisit if loader semantics change, a trimming pass
 removes behavior that later regresses, the semantic muscle misses a stale
 contract class it declares, or measured context cost does not improve after a
 pass that claimed savings.

@@ -178,6 +178,8 @@ Executive dashboards that work follow this constraint:
 
 A sixth visual is a table for drill-down, placed below the fold or on demand.
 
+**Count mechanically when the page is machine-readable.** For HTML or docs-shell pages, never count visuals by eye: run `node scripts/count-visuals.cjs <page.html>`; it counts each canvas, `data-chart` element, and chart-class container once and fails the page if the total exceeds 5. A page that looks airy can still carry six visuals, and a dense-looking one may carry four; the count is the rule.
+
 ### Composition by Audience
 
 | Audience | Visuals | Time budget | Design priority |
@@ -247,12 +249,9 @@ FT Visual Vocabulary, Data-to-Viz, Data Viz Catalog, Vega-Lite examples, and Sto
 
 ## Would Revise If
 
-Revisit by 2026-10-30 (90 days) or sooner if:
+Revise if:
 
-- ≥3 chart types in Module 1 are reported as miscategorised or missing a "best when / avoid when" pair
-- The CSAR override decision table produces the wrong verdict for a real chart choice ≥2 times in observation
 - The 5-visual rule is contradicted by a working dashboard that ships more visuals without density complaints (rule too strict)
 - One of the five galleries in Module 4 retires or moves; the URL check fails
 - A heir installs `chart-vocabulary` and `visual-vocabulary` from the Mall on the same brain and reports confusion about which is canonical (the absorption story isn't landing)
-- The selection tree in Module 5 sends a heir to the wrong plugin skill ≥2 times (routing miscalibrated)
-- Zero heirs invoke this skill in the 90-day window (decoration, not load-bearing)
+

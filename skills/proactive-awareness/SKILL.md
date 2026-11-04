@@ -38,10 +38,11 @@ At the start of every relevant conversation:
 
 When starting a session or after completing a task that touched files:
 
-1. **Check git status** — look for staged but uncommitted changes, or modified tracked files.
-2. **Privacy**: surface file *count* only, not file names or paths, in nudges.
-3. **Threshold**: only alert if uncommitted changes are >24 hours old (based on file modification time).
-4. **Nudge format**: *"You have N uncommitted changes from [timeframe]. Want to review and commit?"*
+1. **Get the counts from commands, never by scanning a status listing.** Staged count: `git diff --cached --name-only | wc -l`. Unstaged count: `git diff --name-only | wc -l`. PowerShell equivalents: `(git diff --cached --name-only | Measure-Object -Line).Lines` and `(git diff --name-only | Measure-Object -Line).Lines`.
+2. **Get the oldest change's age from file times.** Bash: `git diff --cached --name-only | xargs -d '\n' stat -c %Y | sort -n | head -1` prints the oldest staged file's modification time as epoch seconds; run the same pipeline over `git diff --name-only` for unstaged changes. Age is now minus that value. PowerShell: `(git diff --cached --name-only | Get-Item | Sort-Object LastWriteTime | Select-Object -First 1).LastWriteTime`.
+3. **Privacy**: surface file *count* only, not file names or paths, in nudges. The commands above use names internally to compute the count and the age; the nudge itself reports count and timeframe only.
+4. **Threshold**: only alert if uncommitted changes are >24 hours old (based on the file modification time from step 2).
+5. **Nudge format**: *"You have N uncommitted changes from [timeframe]. Want to review and commit?"* Quote N and the timeframe from the command output in steps 1 and 2; never estimate either by eye.
 
 | Condition | Priority | Message |
 | --- | --- | --- |
@@ -73,4 +74,4 @@ Read `.github/config/goals.json` for the user's active focus (heir-authored; abs
 
 ## Would Revise If
 
-Revisit by **2026-12-01** if the detailed procedure fails to load after the resident route, a continuity nudge interrupts flow despite the inhibitory gate, or a handoff response uses session memory instead of `HANDOFF.md`.
+Revisit if the detailed procedure fails to load after the resident route, a continuity nudge interrupts flow despite the inhibitory gate, or a handoff response uses session memory instead of `HANDOFF.md`.

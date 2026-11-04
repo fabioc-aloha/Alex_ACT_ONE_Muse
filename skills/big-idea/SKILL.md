@@ -83,6 +83,8 @@ Analogous to TRADITIONAL vs. INNOVATIVE in `chart-big-idea`. The stance sets qua
 
 The Saint-Exupéry rule is the actual gate. Draft the Big Idea, then apply the **removal test**: try deleting each sentence. If deleting it leaves the claim intact, delete it. Repeat until removing another sentence would break the claim. What remains is the Big Idea.
 
+**Count with the script, not by eye.** The ceilings below are sentence counts, and a count is a calculation. Run `node scripts/count-sentences.mjs <draft-file>` (save an inline draft to a scratch file first) and check the printed count against the ceiling for the format. Do not estimate the count while reading.
+
 Length ceiling depends on format:
 
 | Format                       | Natural ceiling | Why                                                    |
@@ -105,7 +107,7 @@ Discipline for every sentence that survives the removal test:
 - **No hedge stacking**: pick one hedge or none.
 - **No compression theater**: if a semicolon or colon is doing the work of a full stop and the second clause could stand as its own sentence, split it. Compression is real only when the removal test would break the claim.
 - **American English** by default (if your project defines a language rule in its agent instructions (e.g. `AGENTS.md`), follow it — Alex ACT itself uses American English). Use `color`, `behavior`, `center`, `catalog`, `license`, `analyze`, `favor`, `honor`, `defense`. Avoid `colour`, `behaviour`, `centre`, `catalogue`, `licence`, `analyse`, `favour`, `honour`, `defence`. Three carveouts stay: the `[behaviour]` commit-tag API string, ACT framework canonical terms, and ported material that retains its source spelling.
-- **No AI-tells.** Alex ACT bans em-dashes as sentence separators in shipped prose; the full 29-pattern catalog is in [humanizer](../humanizer/SKILL.md). No em-dashes as sentence separators (use commas, colons, semicolons, parentheses, or full stops instead); no filler intensifiers (`comprehensive`, `robust`, `leverage`, `seamlessly`, `delve into`, `tapestry`, `weave`, `testament`); no `load-bearing` as a synonym for `important / central / key` (see humanizer Pattern 7 for the technical-vs-decorative carveout); no performative openers (`Certainly!`, `Great question!`, `Let me...`); no meta-description (`This document explains...`, `The following is...`); no ceremonial rule-of-three parallelism used as decoration rather than argument.
+- **No AI-tells.** Alex ACT bans em-dashes as sentence separators in shipped prose; the full 29-pattern catalog is in [humanizer](../humanizer/SKILL.md). No em-dashes as sentence separators (use commas, colons, semicolons, parentheses, or full stops instead); no filler intensifiers (`comprehensive`, `robust`, `leverage`, `seamlessly`, `delve into`, `tapestry`, `weave`, `testament`); no `load-bearing` as a synonym for `important / central / key` (see humanizer Pattern 7 for the technical-vs-decorative carveout); no performative openers (`Certainly!`, `Great question!`, `Let me...`); no meta-description (`This document explains...`, `The following is...`); no ceremonial rule-of-three parallelism used as decoration rather than argument. Before emit, run `node scripts/lint-ai-tells.mjs <draft-file>`: it scans for the banned wordlist, decorative `load-bearing`, performative openers, and em dashes mechanically and reports line numbers, so this gate does not rest on spotting them while reading.
 
 ## Anti-patterns
 
@@ -163,10 +165,8 @@ From the 2026-07-28 hero-copy sweep on this repo. Note the shape: before is enum
 
 ## Falsifiability
 
-This skill has failed if any of the following occur by **2027-01-28** (6 months from adoption):
+This skill has failed if any of the following occur:
 
-- **Inert**: zero invocations outside the hero-copy sweep that inspired it — the discipline never got exercised in a second domain
-- **Doesn't land**: Big Ideas authored via this skill still read tactical (TOC-shaped, position-statement-shaped, feature-enumeration-shaped) ≥3 times in a quarter
 - **Decorative steps**: the four-step distill (context read → claim → arc → stance → emit) consistently produces identical output to skipping steps 3–5 — the extra steps are ritual, not method
 - **Drifts from parent**: `chart-big-idea` upstream evolves in a way this skill can't accommodate — the specialization relationship broke
 
@@ -174,6 +174,4 @@ Track in your project's audit trail (Alex ACT itself tracks in `operations/ledge
 
 ## Would Revise If
 
-- The skill proves out (≥3 invocations across ≥2 non-hero-copy domains by **2026-10-28**, no drift in the chart-plugin relationship) → **earn promotion**: refactor `chart-big-idea` upstream to depend on this skill as its four-step foundation, so the specialization relationship becomes structural rather than documentary
-- The user flags 3 or more authored Big Ideas as overreach or mis-claim within the falsification window → the skill's discipline is calibrated wrong; add stronger _"honest to what the artifact delivers"_ language and re-test
 - A domain surfaces where step 3 (story arc) doesn't map cleanly to the five listed arcs → extend the table with the missing arc, or reduce to arcs-are-optional guidance

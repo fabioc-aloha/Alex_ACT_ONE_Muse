@@ -111,16 +111,16 @@ For safety-critical projects, apply NASA/JPL Power of 10 rules during review:
 | Rule | Check For | Detection |
 | ---- | --------- | --------- |
 | **R1** | Recursive function without `maxDepth` parameter | `grep -rn "function.*\(" \| xargs grep -l "walk\|traverse\|recurse"` |
-| **R2** | `while` loop without iteration counter | Manual review of all `while` statements |
+| **R2** | `while` loop without iteration counter | `grep -rn "while" src/` enumerates every loop; judgment applies only to whether each loop's counter actually bounds it |
 | **R3** | Unbounded array growth | `push()` in loops without size checks |
 
 ### High Priority (Strong Recommendation)
 
 | Rule | Check For | Detection |
 | ---- | --------- | --------- |
-| **R4** | Function > 60 lines | Line count per function |
+| **R4** | Function > 60 lines | Linter count, never eyeballing: ESLint `max-lines-per-function` (max 60) or the language's equivalent rule |
 | **R5** | Missing entry assertions | Public functions without precondition checks |
-| **R8** | Nesting > 4 levels | Visual inspection of indentation |
+| **R8** | Nesting > 4 levels | Linter count, never visual inspection: ESLint `max-depth` (max 4) or the language's equivalent rule |
 
 ### Medium Priority (Consider)
 
@@ -160,14 +160,21 @@ For safety-critical projects, apply NASA/JPL Power of 10 rules during review:
 | **Menu Validation** | All commands/buttons work | Manual testing + error logs | Broken commands, missing handlers |
 | **Dependencies** | Unused packages, leftover references | package.json vs import analysis | Removable dependencies |
 
+### Counting Procedure (deterministic)
+
+The report's numbers come from `scripts/audit-tally.cjs`, never from counting grep output by hand:
+
+1. **Console statements:** `grep -rn "console\." src/ > console-audit.txt`. During the categorization pass, append `[legitimate]` or `[removable]` to each line (the keep/drop call stays human judgment). Run `node scripts/audit-tally.cjs console-audit.txt` and quote its output for X (remaining), Y (legitimate), Z (removable).
+2. **Menu validation:** record one line per command tested in `menu-audit.txt`, tagged `[working]` or `[broken]`. Run the same script and quote its working/broken ratio.
+
 ### Audit Report Template
 
 ```markdown
 ## Executive Summary
-- Console statements: X remaining (Y legitimate, Z removable)
+- Console statements: X remaining (Y legitimate, Z removable) — from `scripts/audit-tally.cjs`
 - Dead code: [commands/UI/dependencies list]
 - Performance: [blocking operations count]
-- Menu validation: [working/broken ratio]
+- Menu validation: [working/broken ratio] — from `scripts/audit-tally.cjs`
 
 ## Recommendations
 1. [Category]: [Issue] → [Action] (Priority: Critical/High/Medium)

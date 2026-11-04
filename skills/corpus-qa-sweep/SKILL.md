@@ -108,10 +108,9 @@ Four of six first-pass findings were the harness. That ratio is the reason Step 
 
 ## Would Revise If
 
-Revise this skill by **2026-12-01** (90 days) or sooner if any of the following fires:
+Revise this skill if any of the following fires:
 
 - A sweep run by this method reports violations that are later found to be entirely harness defects, meaning Step 4 was performed but did not work.
 - A corpus-wide sweep passes and a user still hits a defect of a class the invariants in Step 2 were meant to cover.
 - The harness-first triage posture causes a real product defect to be dismissed as a false positive.
 - Enumerating from a manifest proves impossible for a corpus this skill is invoked on, and Step 3 needs a discovery fallback.
-- Zero sweeps are run by this method in the window, which would mean the skill is decorative for its intended audience.

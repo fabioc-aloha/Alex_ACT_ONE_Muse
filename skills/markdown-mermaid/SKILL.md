@@ -50,6 +50,8 @@ Apply `:::<class>` to every node:
 | `:::red`     | Error, warning, failure           | `E[Retry]:::red`        |
 | `:::neutral` | Context, optional, out-of-scope   | `F[Cache]:::neutral`    |
 
+Verify coverage mechanically: `node scripts/lint-mermaid-classes.mjs <file.md>` extracts every Mermaid block, lints the flowchart and graph blocks for nodes with no `:::class` (a node assigned through a `class` statement counts as covered), reports other diagram types as skipped, and exits non-zero when any node is uncovered.
+
 Consistency across the fleet matters more than per-diagram creativity.
 
 ## Mode fragility (renderer footguns)

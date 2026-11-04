@@ -173,6 +173,14 @@ Happy to jump on a call if you have questions.
 
 Pull data from: git commits and PR descriptions; issue tracker (completed, in-progress, blocked); calendar (milestones, deadlines); session history (what we worked on); metrics dashboards if available.
 
+## Numbers Come From the Tracker, Not From Counting
+
+Every number in a template comes from a tool's output, quoted as returned:
+
+- **Tracker metrics** (bugs open, bugs closed, velocity, coverage %): take them from the issue tracker's own count or query output, or from a script run over its export. Never count items by eye from a list or a board.
+- **Derived values** go in a script or a spreadsheet formula, never mental arithmetic. Carry-over = planned - completed. % complete = completed / planned x 100. Timeline impact = the difference between the scheduled date and the forecast date.
+- If no query, script, or formula can produce a number, leave the field blank or write "not tracked". A blank field is honest; an eyeballed count is not.
+
 ## Session Protocol
 
 1. **Clarify audience**: who will read this?
@@ -207,10 +215,8 @@ Pull data from: git commits and PR descriptions; issue tracker (completed, in-pr
 
 ## Would Revise If
 
-Revisit by **2026-12-31** (90 days) or sooner if any of the following fires:
+Revise if any of the following fires:
 
-- Stakeholder feedback reports the templates as unclear, jargon-heavy, or missing decisions-needed sections ≥3 times within a quarter
-- The audience-adaptation table produces tone mismatches when applied verbatim ≥2 times in observed reports
 - Reports generated via these templates consistently bury bad news or miss escalation triggers that surface later as preventable surprises
 
 ---

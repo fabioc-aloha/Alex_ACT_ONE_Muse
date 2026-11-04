@@ -219,7 +219,7 @@ Get-ChildItem *.docx | ForEach-Object {
 
 ## Muscle Script
 
-`skills/docx-to-md/scripts/docx-to-md.cjs`
+`skills/docx-to-md/scripts/docx-to-md.cjs`, plus `scripts/validate-md.cjs` for the post-conversion acceptance checks (heading-level continuity, footnote sequence, image existence)
 
 ---
 
@@ -229,13 +229,13 @@ Get-ChildItem *.docx | ForEach-Object {
 
 | Condition | Verdict | Action |
 |-----------|---------|--------|
-| All headings mapped to correct `#` levels | Accept | Verify no skipped heading levels |
+| All headings mapped to correct `#` levels | Accept | Run `scripts/validate-md.cjs` on the output; it asserts no skipped heading levels |
 | Headings rendered as bold paragraphs instead of `#` | Reject | Check pandoc `--shift-heading-level` and source styles |
 | Tables converted to valid Markdown pipe tables | Accept | Spot-check alignment |
 | Complex tables (merged cells) lose structure | Warning | Manual restructure or use HTML table fallback |
-| Images extracted and linked with relative paths | Accept | Verify image files exist in output dir |
+| Images extracted and linked with relative paths | Accept | `scripts/validate-md.cjs` checks that every referenced image file exists in the output dir |
 | Images lost or referenced with absolute Windows paths | Reject | Use `--extract-media` with correct output dir |
-| Footnotes converted to Markdown footnote syntax | Accept | Verify numbering is sequential |
+| Footnotes converted to Markdown footnote syntax | Accept | `scripts/validate-md.cjs` asserts footnote definitions are sequential, with no gaps or orphan references |
 | Footnotes lost or inlined as parenthetical text | Warning | Check pandoc footnote handling |
 | Code blocks preserve monospace and indentation | Accept | Verify language fence tags present |
 | Track changes / comments stripped from output | Accept | Expected — Markdown has no change tracking |
