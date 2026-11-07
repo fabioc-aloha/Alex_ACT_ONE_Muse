@@ -7,7 +7,9 @@ lastReviewed: 2026-05-26
 
 Run the step-back protocol on a non-trivial problem before committing to a solution. The most expensive class of error is solving the wrong problem precisely (Type III error). The always-on [`problem-framing-audit.instructions.md`](../muse-opt-in/problem-framing-audit.instructions.md) keeps a passive frame check active; this prompt forces a deliberate audit when the work earns it.
 
-Skill: [problem-framing-audit](../skills/problem-framing-audit/SKILL.md). Always-on rule: [problem-framing-audit.instructions.md](../muse-opt-in/problem-framing-audit.instructions.md).
+Skill: [problem-framing-audit](../skills/problem-framing-audit/SKILL.md), run in **framing** mode. Always-on rule: [problem-framing-audit.instructions.md](../muse-opt-in/problem-framing-audit.instructions.md). Pass the user's arguments, inputs, and explicit constraints unchanged; clarify only missing material inputs. The canonical skill owns the compatibility command constraints, execution, and validation.
+
+Return the owning skill's required result and verification limits. This entrypoint grants no additional authority: preserve the owner's approval, privacy, read-only, draft-only, and installation/publication boundaries as applicable. Resolve links from the canonical installed alex-act-one package, never an assumed adopter checkout; report a missing skill/reference and stop rather than silently skipping the workflow.
 
 If the generic skill tool is unavailable for the plugin-shipped skill, read the linked installed `problem-framing-audit/SKILL.md` directly and continue with the steps below. Do not report the skill as missing from tool inventory alone.
 
@@ -60,9 +62,9 @@ If the generic skill tool is unavailable for the plugin-shipped skill, read the 
 
 ## Would Revise If
 
-Revisit this prompt by **2026-08-26** (90 days) or sooner if any of the following fires:
+Revisit this prompt if any of the following fires:
 
-- The 8 step-back checks produce the same reframe (always invert, or always five-whys) on ≥3 invocations in a quarter (checks have collapsed to one default — prune the rest)
-- Reframe proposals are rejected by the user ≥3 of 5 times when surfaced (the audit is finding false alternatives; tighten the cause-frame discipline)
-- Silent passes (frame holds, no markers) cluster on the same work type ≥3 times without surfacing anything (the materiality gate let through tasks below threshold; tighten triggers)
-- The Output Format markers are skipped ≥3 times when the audit *did* surface a reframe (drift to ritual rather than visible discipline)
+- The 8 step-back checks keep producing the same reframe (always invert, or always five-whys) (checks have collapsed to one default — prune the rest)
+- Reframe proposals are rejected by the user when surfaced, repeatedly enough to show a pattern (the audit is finding false alternatives; tighten the cause-frame discipline)
+- Silent passes (frame holds, no markers) cluster on the same work type without surfacing anything (the materiality gate let through tasks below threshold; tighten triggers)
+- The Output Format markers are skipped when the audit *did* surface a reframe (drift to ritual rather than visible discipline)

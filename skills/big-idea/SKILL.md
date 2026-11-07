@@ -1,7 +1,7 @@
 ---
 name: big-idea
 description: "Distill the central claim before authoring any summary-shaped output: hero copy, commit-message subject, PR title, ADR title, slide title, executive summary, skill description, abstract. Length is format-dependent (1 sentence for titles, up to a short paragraph for complex theses), tested against the Saint-Exupéry rule (remove sentences until removing another would break the claim). Chart summaries use the bundled chart-big-idea skill."
-lastReviewed: 2026-09-18
+lastReviewed: 2026-11-07
 ---
 
 # Big Idea
@@ -33,7 +33,7 @@ Generalized from [`chart-big-idea`](../chart-big-idea/SKILL.md), which specializ
 - **Bullet lists inside a doc** — each bullet doesn't need its own thesis. The section header carries the Big Idea if any bullet does.
 - **Code comments** — unless the comment IS a thesis (rare — most code comments explain _how_, not _why anything changes_).
 - **README intro paragraphs** — those get to be longer than one sentence. Use Big Idea for the README's title tagline, not its opening paragraph.
-- **Chart summaries** — use the bundled `chart-big-idea` skill instead. That skill's step 5 emits a Chart Brief; this skill's step 5 emits prose.
+- **Chart workflow** — when called by chart-big-idea, complete the shared distillation here and return the claim, audience, and stance. Do not load chart-big-idea again: the caller owns the Chart Brief and chart-specific constraints.
 
 ## The four-step distill (plus emit)
 
@@ -83,8 +83,6 @@ Analogous to TRADITIONAL vs. INNOVATIVE in `chart-big-idea`. The stance sets qua
 
 The Saint-Exupéry rule is the actual gate. Draft the Big Idea, then apply the **removal test**: try deleting each sentence. If deleting it leaves the claim intact, delete it. Repeat until removing another sentence would break the claim. What remains is the Big Idea.
 
-**Count with the script, not by eye.** The ceilings below are sentence counts, and a count is a calculation. Run `node scripts/count-sentences.mjs <draft-file>` (save an inline draft to a scratch file first) and check the printed count against the ceiling for the format. Do not estimate the count while reading.
-
 Length ceiling depends on format:
 
 | Format                       | Natural ceiling | Why                                                    |
@@ -97,6 +95,8 @@ Length ceiling depends on format:
 | Executive summary / abstract | 2–4 sentences   | Reader has committed; density is the point             |
 | Complex-thesis Big Idea      | Short paragraph | Some claims genuinely need setup + insight + qualifier |
 
+Count the draft's sentences with the script, not by eye: `node scripts/count-sentences.cjs <draft-file> --ceiling <N>`, where N is the format's ceiling from the table above. The gate reads the script's count.
+
 Discipline for every sentence that survives the removal test:
 
 - **Answers "what changes for the reader?"**
@@ -107,7 +107,7 @@ Discipline for every sentence that survives the removal test:
 - **No hedge stacking**: pick one hedge or none.
 - **No compression theater**: if a semicolon or colon is doing the work of a full stop and the second clause could stand as its own sentence, split it. Compression is real only when the removal test would break the claim.
 - **American English** by default (if your project defines a language rule in its agent instructions (e.g. `AGENTS.md`), follow it — Alex ACT itself uses American English). Use `color`, `behavior`, `center`, `catalog`, `license`, `analyze`, `favor`, `honor`, `defense`. Avoid `colour`, `behaviour`, `centre`, `catalogue`, `licence`, `analyse`, `favour`, `honour`, `defence`. Three carveouts stay: the `[behaviour]` commit-tag API string, ACT framework canonical terms, and ported material that retains its source spelling.
-- **No AI-tells.** Alex ACT bans em-dashes as sentence separators in shipped prose; the full 29-pattern catalog is in [humanizer](../humanizer/SKILL.md). No em-dashes as sentence separators (use commas, colons, semicolons, parentheses, or full stops instead); no filler intensifiers (`comprehensive`, `robust`, `leverage`, `seamlessly`, `delve into`, `tapestry`, `weave`, `testament`); no `load-bearing` as a synonym for `important / central / key` (see humanizer Pattern 7 for the technical-vs-decorative carveout); no performative openers (`Certainly!`, `Great question!`, `Let me...`); no meta-description (`This document explains...`, `The following is...`); no ceremonial rule-of-three parallelism used as decoration rather than argument. Before emit, run `node scripts/lint-ai-tells.mjs <draft-file>`: it scans for the banned wordlist, decorative `load-bearing`, performative openers, and em dashes mechanically and reports line numbers, so this gate does not rest on spotting them while reading.
+- **No AI-tells.** Alex ACT bans em-dashes as sentence separators in shipped prose; the full 29-pattern catalog is in [humanizer](../humanizer/SKILL.md). No em-dashes as sentence separators (use commas, colons, semicolons, parentheses, or full stops instead); no filler intensifiers (`comprehensive`, `robust`, `leverage`, `seamlessly`, `delve into`, `tapestry`, `weave`, `testament`); no `load-bearing` as a synonym for `important / central / key` (see humanizer Pattern 7 for the technical-vs-decorative carveout); no performative openers (`Certainly!`, `Great question!`, `Let me...`); no meta-description (`This document explains...`, `The following is...`); no ceremonial rule-of-three parallelism used as decoration rather than argument. The fixed-string part of this check (banned intensifiers, performative openers, meta-description, em dashes) is mechanical: run `node scripts/lint-ai-tells.cjs <draft-file>` and read its hits instead of scanning by eye. The judgment tells (rule-of-three, compression theater) stay with the reader.
 
 ## Anti-patterns
 
@@ -169,8 +169,6 @@ This skill has failed if any of the following occur:
 
 - **Decorative steps**: the four-step distill (context read → claim → arc → stance → emit) consistently produces identical output to skipping steps 3–5 — the extra steps are ritual, not method
 - **Drifts from parent**: `chart-big-idea` upstream evolves in a way this skill can't accommodate — the specialization relationship broke
-
-Track in your project's audit trail (Alex ACT itself tracks in `operations/ledgers/curation-log.md`) tagged `[BIG-IDEA-DRIFT]`.
 
 ## Would Revise If
 

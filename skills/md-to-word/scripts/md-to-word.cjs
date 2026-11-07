@@ -60,7 +60,10 @@ process.on("uncaughtException", (err) => {
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { crc32, inflateSync } = require('node:zlib');
 const { runTool } = require(path.join(__dirname, '..', '..', '..', 'scripts', 'shared', 'tool-runner.cjs'));
+const { runtimeRoot } = require(path.join(__dirname, '..', '..', '..', 'scripts', 'shared', 'runtime-status.cjs'));
+const { publishFiles } = require(path.join(__dirname, '..', '..', '..', 'scripts', 'shared', 'output-publication.cjs'));
 
 // ---------------------------------------------------------------------------
 // JSZip loading -- try multiple resolution paths
@@ -72,7 +75,7 @@ try {
   // Fallback: search known locations. plugin-data comes first because that is
   // where setup-dependencies installs it, and it survives plugin updates.
   const fallbackPaths = [
-    path.join(os.homedir(), '.copilot', 'plugin-data', 'alex-act-one', 'runtime', 'node_modules', 'jszip'),
+    path.join(runtimeRoot(), 'node_modules', 'jszip'),
     path.join(__dirname, '..', '..', '..', 'node_modules', 'jszip'), // plugin root
     path.join(__dirname, '..', '..', 'node_modules', 'jszip'),       // heir/node_modules
     path.join(__dirname, 'node_modules', 'jszip'),                   // skill/node_modules
@@ -106,6 +109,7 @@ const MAX_IMAGE_HEIGHT_RATIO = 0.60; // 60% of printable height
 let MAX_IMAGE_WIDTH = PAGE_SIZES.letter.printableWidth * MAX_IMAGE_WIDTH_RATIO;
 let MAX_IMAGE_HEIGHT = PAGE_SIZES.letter.printableHeight * MAX_IMAGE_HEIGHT_RATIO;
 const PNG_DPI = 96;
+const MAX_PNG_RASTER_BYTES = 256 * 1024 * 1024;
 
 function configurePageSize(pageSize) {
   const size = PAGE_SIZES[pageSize] || PAGE_SIZES.letter;
@@ -193,22 +197,93 @@ function determineImageSizeHeuristic(mmdContent) {
 // Mermaid / SVG conversion
 // ---------------------------------------------------------------------------
 
+function validateRenderedPng(png) {
+  const fail = reason => { throw new Error(`Invalid rendered PNG: ${reason}`); };
+  if (png.length < 8 || !png.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex'))) fail('signature');
+  let header;
+  let paletteEntries = 0;
+  const imageData = [];
+  let dataEnded = false;
+  let end = false;
+  for (let offset = 8; offset < png.length;) {
+    if (png.length - offset < 12) fail('truncated chunk');
+    const length = png.readUInt32BE(offset);
+    if (length > 0x7fffffff || length > png.length - offset - 12) fail('chunk length');
+    const type = png.toString('ascii', offset + 4, offset + 8);
+    if (!/^[A-Za-z]{2}[A-Z][A-Za-z]$/.test(type)) fail('chunk type');
+    const data = png.subarray(offset + 8, offset + 8 + length);
+    if (crc32(png.subarray(offset + 4, offset + 8 + length)) !== png.readUInt32BE(offset + 8 + length)) fail(`${type} checksum`);
+    offset += length + 12;
+    if (!header && type !== 'IHDR') fail('IHDR must be first');
+    if (type !== 'IDAT' && imageData.length) dataEnded = true;
+    if (type === 'IHDR') {
+      if (header || length !== 13) fail('IHDR structure');
+      const width = data.readUInt32BE(0);
+      const height = data.readUInt32BE(4);
+      const depth = data[8];
+      const color = data[9];
+      const depths = { 0: [1, 2, 4, 8, 16], 2: [8, 16], 3: [1, 2, 4, 8], 4: [8, 16], 6: [8, 16] };
+      if (!width || !height || width > 0x7fffffff || height > 0x7fffffff ||
+          !depths[color]?.includes(depth) || data[10] !== 0 || data[11] !== 0 || data[12] > 1) fail('IHDR values');
+      header = { width, height, depth, color, interlace: data[12] };
+    } else if (type === 'PLTE') {
+      if (paletteEntries || imageData.length || !length || length % 3 || length > 768 ||
+          [0, 4].includes(header.color)) fail('palette structure');
+      paletteEntries = length / 3;
+      if (header.color === 3 && paletteEntries > 2 ** header.depth) fail('palette size');
+    } else if (type === 'IDAT') {
+      if (dataEnded || (header.color === 3 && !paletteEntries)) fail('IDAT order');
+      imageData.push(data);
+    } else if (type === 'IEND') {
+      if (length || !imageData.length || offset !== png.length) fail('IEND structure');
+      end = true;
+    } else if (type[0] === type[0].toUpperCase()) fail(`unsupported critical chunk ${type}`);
+  }
+  if (!header || !end) fail('missing image header or end');
+  const channels = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 }[header.color];
+  const passes = (header.interlace
+    ? [[0, 0, 8, 8], [4, 0, 8, 8], [0, 4, 4, 8], [2, 0, 4, 4], [0, 2, 2, 4], [1, 0, 2, 2], [0, 1, 1, 2]]
+    : [[0, 0, 1, 1]]).map(([x, y, dx, dy]) => {
+    const width = Math.max(0, Math.ceil((header.width - x) / dx));
+    const height = Math.max(0, Math.ceil((header.height - y) / dy));
+    return { width, height, bytes: Math.ceil(width * channels * header.depth / 8) };
+  }).filter(pass => pass.width && pass.height);
+  const expectedSize = passes.reduce((sum, pass) => sum + (pass.bytes + 1) * pass.height, 0);
+  if (!Number.isSafeInteger(expectedSize) || expectedSize <= 0) fail('raster size');
+  if (expectedSize > MAX_PNG_RASTER_BYTES) fail('decompressed raster exceeds the 256 MiB PNG budget');
+  const compressed = Buffer.concat(imageData);
+  const { buffer: raster, engine } = inflateSync(compressed, { maxOutputLength: expectedSize, info: true });
+  if (raster.length !== expectedSize || engine.bytesWritten !== compressed.length) fail('compressed raster length');
+  let cursor = 0;
+  for (const pass of passes) {
+    for (let row = 0; row < pass.height; row++) {
+      if (raster[cursor] > 4) fail('row filter');
+      cursor += pass.bytes + 1;
+    }
+  }
+}
+
 function convertMermaidToPng(mmdContent, outputPath) {
-  const tmpFile = path.join(os.tmpdir(), `alex-mmd-${Date.now()}-${Math.random().toString(36).slice(2)}.mmd`);
+  const staging = fs.mkdtempSync(path.join(os.tmpdir(), 'alex-mmd-'));
+  const tmpFile = path.join(staging, 'source.mmd');
+  const freshPng = path.join(staging, 'diagram.png');
   try {
     fs.writeFileSync(tmpFile, mmdContent, 'utf8');
     // High-res render: 4x scale, 4800px viewport (was 8x/2400px).
     // Wider viewport prevents clipping on wide architecture diagrams;
     // 4 × 4800 = 19200px effective output — same fidelity, more horizontal room.
-    runTool('mmdc', ['-i', tmpFile, '-o', outputPath, '-b', 'white', '-s', '4', '-w', '4800', '-H', '2400'], {
+    runTool('mmdc', ['-i', tmpFile, '-o', freshPng, '-b', 'white', '-s', '4', '-w', '4800', '-H', '2400'], {
       stdio: ['pipe', 'pipe', 'pipe'],
       timeout: 120000
     });
+    const png = fs.readFileSync(freshPng);
+    validateRenderedPng(png);
+    fs.copyFileSync(freshPng, outputPath);
     return true;
   } catch (err) {
-    return false;
+    throw new Error(`Mermaid rendering failed; original source preserved: ${err.stderr?.toString() || err.message}`, { cause: err });
   } finally {
-    try { fs.unlinkSync(tmpFile); } catch { /* ignore */ }
+    fs.rmSync(staging, { recursive: true, force: true });
   }
 }
 
@@ -968,6 +1043,9 @@ async function build(args) {
   // Use os.tmpdir for temp files (proper cleanup)
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'md-to-word-'));
   process.on('exit', () => { try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch { /* ignore */ } });
+  const stagedImagesDir = path.join(tempDir, 'images');
+  const stagedDocx = path.join(tempDir, 'output.docx');
+  const publications = [];
 
   console.log(`\u{1f4c4} Converting ${sourcePath} \u2192 ${outputPath}`);
   if (args.toc) console.log('   \u{1f4d1} Table of Contents: enabled');
@@ -1038,7 +1116,7 @@ async function build(args) {
       return;
     }
 
-    if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
+    fs.mkdirSync(stagedImagesDir);
 
     // Phase 0.5: Generate cover page from H1 + metadata
     if (args.cover) {
@@ -1128,17 +1206,14 @@ async function build(args) {
     const replacements = [];
     for (const block of mermaidBlocks) {
       const pngName = `diagram-${block.index + 1}.png`;
-      const pngPath = path.join(imagesDir, pngName);
+      const pngPath = path.join(stagedImagesDir, pngName);
       process.stdout.write(`   Converting diagram ${block.index + 1}... `);
 
-      if (convertMermaidToPng(block.content, pngPath)) {
-        const size = calculateOptimalSize(pngPath, block.content);
-        replacements.push(`![Diagram ${block.index + 1}](${args.imagesDir}/${pngName})${size}`);
-        console.log(`\u2713 ${size}`);
-      } else {
-        console.log('\u2717 (failed)');
-        replacements.push(`![Diagram ${block.index + 1}](${args.imagesDir}/${pngName})`);
-      }
+      convertMermaidToPng(block.content, pngPath);
+      publications.push({ source: pngPath, destination: path.join(imagesDir, pngName) });
+      const size = calculateOptimalSize(pngPath, block.content);
+      replacements.push(`![Diagram ${block.index + 1}](<${pngPath.replace(/\\/g, '/')}>)${size}`);
+      console.log(`\u2713 ${size}`);
     }
 
     // Phase 2: Convert SVG references to PNG
@@ -1150,19 +1225,21 @@ async function build(args) {
 
       if (fs.existsSync(svgPath)) {
         const pngName = path.basename(svgPath, '.svg') + '.png';
-        const pngPath = path.join(imagesDir, pngName);
+        const destination = path.join(imagesDir, pngName);
+        const pngPath = fs.existsSync(destination) ? destination : path.join(stagedImagesDir, pngName);
 
         if (!fs.existsSync(pngPath)) {
           process.stdout.write(`\u{1f5bc}\ufe0f  Converting SVG: ${path.basename(svgPath)}... `);
           if (convertSvgToPng(svgPath, pngPath)) {
+            publications.push({ source: pngPath, destination });
             console.log('\u2713');
           } else {
-            console.log('\u2717');
+            throw new Error(`SVG rendering failed; prior outputs preserved: ${svgPath}`);
           }
         }
 
         const svgSize = fs.existsSync(pngPath) ? calculateOptimalSize(pngPath, '') : `{width=${MAX_IMAGE_WIDTH.toFixed(1)}in}`;
-        const newRef = `![${altText}](${args.imagesDir}/${pngName})${svgSize}`;
+        const newRef = `![${altText}](<${pngPath.replace(/\\/g, '/')}>)${svgSize}`;
         content = content.replace(fullMatch, newRef);
       }
     }
@@ -1176,14 +1253,16 @@ async function build(args) {
 
       if (fs.existsSync(svgPath)) {
         const pngName = path.basename(svgPath, '.svg') + '.png';
-        const pngPath = path.join(imagesDir, pngName);
+        const destination = path.join(imagesDir, pngName);
+        const pngPath = fs.existsSync(destination) ? destination : path.join(stagedImagesDir, pngName);
 
         if (!fs.existsSync(pngPath)) {
           process.stdout.write(`\u{1f5bc}\ufe0f  Converting SVG (HTML img): ${path.basename(svgPath)}... `);
           if (convertSvgToPng(svgPath, pngPath)) {
+            publications.push({ source: pngPath, destination });
             console.log('\u2713');
           } else {
-            console.log('\u2717');
+            throw new Error(`SVG rendering failed; prior outputs preserved: ${svgPath}`);
           }
         }
 
@@ -1191,7 +1270,7 @@ async function build(args) {
         const altMatch = fullTag.match(/alt=["']([^"']*)["']/i);
         const altText = altMatch ? altMatch[1] : path.basename(svgPath, '.svg');
         const imgSize = fs.existsSync(pngPath) ? calculateOptimalSize(pngPath, '') : `{width=${MAX_IMAGE_WIDTH.toFixed(1)}in}`;
-        const newRef = `![${altText}](${args.imagesDir}/${pngName})${imgSize}`;
+        const newRef = `![${altText}](<${pngPath.replace(/\\/g, '/')}>)${imgSize}`;
         content = content.replace(fullTag, newRef);
       }
     }
@@ -1205,8 +1284,14 @@ async function build(args) {
     // Save debug output (combined preprocessed markdown)
     if (args.debug) {
       const debugPath = path.join(sourceDir, '_debug_combined.md');
-      fs.writeFileSync(debugPath, content, 'utf8');
-      console.log(`\u{1f50d} Debug: saved preprocessed markdown to ${debugPath}`);
+      const stagedDebug = path.join(tempDir, '_debug_combined.md');
+      let debugContent = content;
+      for (const file of publications) {
+        debugContent = debugContent.replaceAll(file.source.replace(/\\/g, '/'),
+          `${args.imagesDir}/${path.basename(file.destination)}`.replace(/\\/g, '/'));
+      }
+      fs.writeFileSync(stagedDebug, debugContent, 'utf8');
+      publications.push({ source: stagedDebug, destination: debugPath });
     }
 
     // Write temporary markdown to temp dir
@@ -1220,7 +1305,7 @@ async function build(args) {
     // Build pandoc command with options
     const pandocArgs = [
       tempMd,
-      '-o', outputPath,
+      '-o', stagedDocx,
       '--from', 'markdown',
       '--to', 'docx',
       '--dpi=300',
@@ -1262,7 +1347,7 @@ async function build(args) {
 
     // Phase 5: Apply OOXML formatting
     console.log('\u{1f3a8} Applying formatting...');
-    await postProcessDocx(outputPath, {
+    await postProcessDocx(stagedDocx, {
       noFormatTables: args.noFormatTables,
       pageSize: args.pageSize,
       style: args.style,
@@ -1270,11 +1355,12 @@ async function build(args) {
     });
 
     // Phase 6: Output validation
-    const stats = fs.statSync(outputPath);
+    const stats = fs.statSync(stagedDocx);
     const sizeKB = stats.size / 1024;
     if (sizeKB < 5) {
       console.warn(`\u26a0\ufe0f  Output file is only ${sizeKB.toFixed(1)} KB -- may be corrupt or empty`);
     }
+    publishFiles([...publications, { source: stagedDocx, destination: outputPath }]);
     console.log(`\u2705 Done! Output: ${outputPath}`);
     console.log(`   Size: ${sizeKB.toFixed(1)} KB`);
     if (args.toc) console.log('   \u{1f4d1} Update TOC: Open in Word \u2192 right-click TOC \u2192 Update Field');

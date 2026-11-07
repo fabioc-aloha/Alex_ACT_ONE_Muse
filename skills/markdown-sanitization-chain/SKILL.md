@@ -1,7 +1,7 @@
 ---
 name: "markdown-sanitization-chain"
 description: "Render user-supplied markdown safely — marked.js → DOMPurify → Mermaid (order matters; skipping the sanitizer is XSS)"
-lastReviewed: 2026-05-26
+lastReviewed: 2026-11-07
 ---
 
 
@@ -87,7 +87,7 @@ of allowing user-supplied event attributes through DOMPurify.
 - [ ] Markdown parser runs first
 - [ ] DOMPurify runs before DOM insertion
 - [ ] Diagram renderer runs after sanitization
-- [ ] No raw `innerHTML` without sanitization anywhere in the surface: verify with `scripts/lint-innerhtml.mjs` over the surface's source files; it enumerates every `innerHTML` assignment and flags any whose value is not `DOMPurify.sanitize` output
+- [ ] Review DOM insertion paths for unsanitized input. `scripts/lint-innerhtml.cjs` (in this skill's `scripts/` directory) is a heuristic aid for direct dot-property `innerHTML`/`outerHTML` assignments. It recognizes whole sanitizer calls and static literals, and flags indirect or composed expressions for review. A clean scan does not establish safety: inspect data flow, dynamic/bracket-property sinks, parser limitations, and sanitizer configuration separately.
 - [ ] Tested with `<img src=x onerror=alert(1)>` payload
 
 ## Related

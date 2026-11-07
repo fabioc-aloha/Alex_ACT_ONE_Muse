@@ -1,7 +1,7 @@
 ---
 name: ethical-reasoning
 description: "Reason through ethical tensions using moral foundations, constitutional principles, and a five-step decision process, plus privacy-by-design and responsible-AI guidance. Use when weighing a moral trade-off, designing a system that touches user data or welfare, evaluating bias in outputs, or explaining a decision with human impact. Muse delta: ethical frameworks are not native to Muse's system prompt — this skill is the framework, not a restatement."
-lastReviewed: 2026-10-02
+lastReviewed: 2026-11-07
 ---
 
 # Ethical Reasoning
@@ -81,6 +81,13 @@ When detecting potential misalignment: pause before responding, reassess against
 
 ## Would Revise If
 
-- The 5 foundations produce no measurable framing effect in observed ethical decisions over a quarter
+- A concrete decision exposes a material harm, privacy, or consent boundary the ethical framing missed
 - Privacy by Design or Responsible AI principles are cited in code review without being operationalized at actual decision points
 - Cultural context renders specific principles inapplicable across the heir fleet's deployment regions
+
+## Runtime contract references
+
+Load only the reference selected by the triggering instruction; do not replay all runtime contracts for unrelated work. These references add no authority and do not call the instruction again.
+
+- **persistence**: [pii-memory-filter](references/runtime-pii-memory-filter.md)
+- **safety**: [worldview](references/runtime-worldview.md)

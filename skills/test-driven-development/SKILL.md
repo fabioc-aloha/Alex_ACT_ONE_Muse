@@ -1,7 +1,7 @@
 ---
 name: test-driven-development
 description: "Use for any feature, bug fix, refactor, or behavior change — enforces RED-GREEN-REFACTOR. Write the failing test first, watch it fail, write minimal code to pass, refactor. Carve out only throwaway prototypes, generated code, configuration files. Adapted from Hermes Agent / obra/superpowers. Muse delta: the Iron Law, the worked RED-GREEN-REFACTOR examples, and the rationalization table go beyond Muse's native test discipline."
-lastReviewed: 2026-06-07
+lastReviewed: 2026-11-07
 ---
 
 # Test-Driven Development (TDD)
@@ -175,12 +175,17 @@ Otherwise → not TDD
 
 No exceptions without the user's explicit permission.
 
+Do not silently weaken a test to pass, invent coverage, or delete user-authored work to simulate a RED state.
+
+Report the failing-then-passing commands and what they demonstrate. A passing test is evidence about that test, not a correctness guarantee for untested behavior.
+
 ## Related
 
 - [systematic-debugging](../systematic-debugging/SKILL.md) — bug-found path that produces the failing test
 - [plan](../plan/SKILL.md) — every plan task should embed RED-GREEN-REFACTOR
 - [spike](../spike/SKILL.md) — TDD exception lane for throwaway feasibility experiments
 - [code-review](../code-review/SKILL.md) — post-write companion; TDD is pre-write, code-review is the review gate
+- [execution details](references/execution-details.md) — load only for the relevant examples or a specific testing difficulty; its generic examples do not override scope or consent
 
 ## Attribution
 

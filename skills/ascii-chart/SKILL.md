@@ -1,7 +1,7 @@
 ---
 name: ascii-chart
 description: "Render charts and compact dashboards as pure ASCII in a monospace grid: bar, dot, sparkline, histogram, box plot, scatter, bubble, heatmap, funnel, waterfall, treemap, gauge, KPI card, and more. No rendering engine, no SVG, no browser, no MCP server. Use when the delivery target is a terminal, a log file, a pull request comment, a commit message, a README code block, or a context window where no renderer exists, or when the user asks for a text chart, an ASCII chart, or a plain-text dashboard. Muse delta: the 78-column grid constants, construction rules, and the mandatory measure-don't-eyeball QA loop — LLMs reliably miscount characters without it."
-lastReviewed: 2026-08-18
+lastReviewed: 2026-11-07
 ---
 
 # Delivery: ASCII Dashboard
@@ -17,6 +17,7 @@ Render dashboards as pure ASCII: no emojis, no Unicode box-drawing beyond the ba
 ## When to Use
 
 - Quick status snapshots in terminal output, log files, or commit messages
+- Chat-based reporting where the consumer is another LLM or a terminal user
 - Environments where SVG/HTML rendering is unavailable (CI logs, SSH sessions, plain-text email)
 - Token-constrained contexts where SVG coordinate math would waste budget
 - Rapid prototyping before committing to a richer delivery format
@@ -68,7 +69,7 @@ Horizontal `-`, vertical `|`, corners `+`, separator `=` or `-`, bar fill `#`, b
 +----------------+  +----------------+  +----------------+
 ```
 
-Width per card = `(78 - (N-1)*2) / N`, taken from this table (or `node scripts/ascii-gen.cjs layout --cols N`), never divided in your head. When the division is uneven, every card gets the floor and the remainder goes +1 per card from the left until it runs out:
+Width per card = `(78 - (N-1)*2) / N`, taken from this table (or `node scripts/ascii-chart.cjs cardwidth N`), never divided in your head. When the division is uneven, every card gets the floor and the remainder goes +1 per card from the left until it runs out:
 
 | Cards (N) | Widths | Cards + gaps |
 | --- | --- | --- |
@@ -92,7 +93,7 @@ Other          | ##                   |  5%
 
 Bar width = total width − label width − value width − borders. Labels left-aligned, values right-aligned.
 
-Fill counts are computed, never eyeballed: fill = round(value / max × bar width), via `node scripts/ascii-gen.cjs bars --values <csv> --width <bar width>`. After drafting the block, verify it with the same script's `check` mode against the source values (see Module 4); the Alignment QA Loop measures line lengths, but only `check` catches a bar whose fill is not proportional to its value.
+Fill counts are computed, never eyeballed: fill = round(value / max × bar area), so bar length stays proportional to the value. `node scripts/ascii-chart.cjs bars <data.json>` renders the block with that formula, and `node scripts/ascii-chart.cjs bars <data.json> --check <rendered.txt>` re-derives each fill from the data and diffs it against a rendered block. The Alignment QA Loop (Module 5) measures line lengths, but only this check catches a bar whose fill is not proportional to its value.
 
 ### Sparkline Row
 
@@ -100,7 +101,7 @@ Fill counts are computed, never eyeballed: fill = round(value / max × bar width
 Trend (12 months):  _/\__/\/\___/\  High: 4.2M  Low: 2.1M
 ```
 
-`/` up, `\` down, `_` flat, `^` peak. One char per data point, 20 chars max. Derive the characters from the numeric series with `node scripts/ascii-gen.cjs spark --values <csv>` (pairwise comparisons and peak detection are exactly what eyeballing gets wrong) and transcribe the script's string.
+`/` up, `\` down, `_` flat, `^` peak. One char per data point, 20 chars max. Derive the characters from the numeric series with `node scripts/ascii-chart.cjs sparkline <data.json>` (a strict local maximum becomes `^`; never read direction off the numbers by eye) and transcribe the script's string.
 
 ### Two-Column Dashboard
 
@@ -122,10 +123,10 @@ Each column = 38 chars (including borders); gap = 2 chars.
 
 ## Module 3: Construction Rules
 
-1. **Compute widths before drawing.** `card_width = (78 - (n_columns-1)*2) / n_columns`, taken from the Module 2 table or `scripts/ascii-gen.cjs layout` (uneven divisions: floor for every card, remainder +1 per card from the left); `bar_area = card_width - label_width - value_width - 4`. Never eyeball.
+1. **Compute widths before drawing.** `card_width = (78 - (n_columns-1)*2) / n_columns`, taken from the Module 2 table or `scripts/ascii-chart.cjs cardwidth` (uneven divisions: floor for every card, remainder +1 per card from the left); `bar_area = card_width - label_width - value_width - 4`. Never eyeball.
 2. **Right-align numbers, left-align labels.** Numbers scan faster with the ones digit in a fixed column.
 3. **Sort bars by value** (unless time-ordered). Largest on top; the eye scans top-down.
-4. **One header per card, centered.** Caps or title case for weight; no bold or underline (not portable).
+4. **One header per card, centered.** Caps or title case for weight; no bold or underline (not portable). Centering is measured, not eyeballed: pad both sides from the title's length (left pad = floor((inner width − title length) / 2), remainder on the right); `node scripts/ascii-chart.cjs center <width> "Title"` prints a centered line.
 5. **Footer row = call to action.** Last row spans full width with the one thing the reader should do next.
 6. **Validate with character count.** Every line in a card must have identical length. Counting is the advantage of ASCII.
 
@@ -133,7 +134,7 @@ Each column = 38 chars (including borders); gap = 2 chars.
 
 Input: a JSON or table structure (title, date, `kpis[]` with label/value/detail, `charts[]` with title/type/items, footer). Algorithm: compute the grid layout → render each component into a string array (one string per line) → zip line arrays side by side with gap spacing → pad every line to its card width → validate identical line lengths → join with newlines → run the Alignment QA Loop below.
 
-**Delegate the error-prone geometry to `scripts/ascii-gen.cjs`.** Bar fills (`bars`), sparkline direction characters (`spark`), card widths (`layout`), and centered titles (`center`) come from the script's output; the model transcribes, it does not compute. After rendering a bar block, run `node scripts/ascii-gen.cjs check --values <csv> --width <bar width> <draft-file>`: it re-derives every fill from the source values and diffs them against the rendered block. A mismatch is a rendering bug; fix it and re-check before the Alignment QA Loop.
+**Delegate the error-prone geometry to `scripts/ascii-chart.cjs`.** Bar fills (`bars`), sparkline direction characters (`sparkline`), card widths (`cardwidth`), and centered titles (`center`) come from the script's output; the model transcribes, it does not compute. After rendering a bar block, run `node scripts/ascii-chart.cjs bars <data.json> --check <rendered.txt>`: it re-derives every fill from the source values and diffs them against the rendered block. A mismatch is a rendering bug; fix it and re-check before the Alignment QA Loop.
 
 ## Module 5: Alignment QA Loop (mandatory)
 
@@ -159,7 +160,7 @@ Row(content):     "| " + content.padRight(74) + " |"
 Border(char):     "+" + (char * 76) + "+"
 DualRow(l, r):    "| " + l.padRight(34) + " |" + "  " + "| " + r.padRight(34) + " |"
 Center(text, w):  left = floor((w - len(text)) / 2); spaces(left) + text + spaces(w - len(text) - left)
-                  (titles are centered by construction, never by eye; `ascii-gen.cjs center` emits the padded string)
+                  (titles are centered by construction, never by eye; `ascii-chart.cjs center` emits the padded string)
 ```
 
 ### Width constants (do not deviate)
@@ -192,7 +193,7 @@ If any line fails: identify line number + measured width + content; trim trailin
 ## Cross-References
 
 - [`chart-big-idea`](../chart-big-idea/SKILL.md) — the Chart Brief decides whether ASCII is the right delivery target
-- [`chart-vocabulary`](../chart-vocabulary/SKILL.md) — pick the communication goal and chart type before rendering
-- [`references/ascii-gallery.md`](references/ascii-gallery.md) — 32 worked forms by seven communication goals
+- [`chart-vocabulary`](../chart-vocabulary/SKILL.md) — pick the communication goal and chart type before rendering. Module 3's 5-visual rule governs dashboard density here too.
+- [`references/ascii-gallery.md`](references/ascii-gallery.md) — 32 worked forms by seven communication goals, plus a Flint coverage matrix and the forms ASCII cannot carry
 - [`render-verify`](../render-verify/SKILL.md) — steps 4–5 still apply (checking a claim needs no renderer)
 - [`flint-chart`](../flint-chart/SKILL.md) — the upgrade path when ASCII is not enough

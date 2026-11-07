@@ -5,6 +5,103 @@ What changed between the Copilot edition
 Muse edition (`alex-act-one-Muse` v0.1.0). Target host: Muse, Meta's personal
 AI assistant.
 
+## Mirror to flagship 0.9.2 (this edition's v0.3.0, November 2026)
+
+The flagship shipped 0.7.0, 0.8.0, 0.9.0, 0.9.1, and 0.9.2 after this
+edition's v0.2.0. This release mirrors them. Method: the flagship delta
+(v0.6.0 → main at the 0.9.2 audit commit) was classified file by file
+against this edition — copied where this edition held the flagship text
+verbatim, merged where this edition carries Muse-delta rewrites, and
+skipped where the change is Copilot-host machinery. 114 files changed and
+61 added against this edition's previous main; nothing was deleted.
+
+Ported:
+
+- **Flint 1.0.1 (flagship 0.8.0).** Pins in the preserved provisioning
+  scripts are exact: `flint-chart@1.0.1` + `flint-chart-mcp@1.0.1`. The
+  launcher is now the flagship's thin shim over
+  `scripts/shared/runtime-status.cjs`, which derives every route's guard
+  from `dependencies.cjs` (one pin source; the drift the smoke suite was
+  written against cannot recur, and the suite now asserts that shape).
+  The flint skills teach `validate_chart` then `show`,
+  `list_interaction_presets`, `validate_board`, the 23 `interaction_spec`
+  presets (Vega-Lite only), the Ridgeline / Marginal / Table chart types,
+  and the 14 themes; ThemeSpec applies to Vega-Lite and Plotly.
+- **New skills (flagship 0.7.0 / 0.9.0):** `convert`, `render-chart`,
+  `project-status`, `flint-interactions` — registered in the manifest
+  (59 skills) and the README table, tier Keep.
+- **Deterministic helpers (flagship 0.7.0).** The helper scripts and the
+  flagship test files that cover them (`deterministic-helpers`,
+  `converter-safety`, `conversion-runtime`, `markdown-inline-code`,
+  `output-publication`) were ported; one flagship test path was adapted
+  (`instructions/` → `muse-opt-in/`). Where the two editions had written
+  the same helper twice (Nov 4 implementations), the flagship's later
+  version was adopted: `check-links` (superset: directory recursion,
+  fragment slugs), `validate-md`, `measure-reduction`, `check-print-floor`,
+  `diff-brain-qa`, `audit-tally`, and `contrast-check`. Two interface
+  notes: `audit-tally` now takes `console <rootDir>` / `ratio <w> <b>`
+  (the code-review skill text matches), and adopting the flagship
+  `contrast-check` fixed a real defect — this edition's skill text already
+  used the flagship pair syntax its own script did not accept.
+- **Converter safety (flagship 0.9.1).** The converter scripts and shared
+  libraries (`output-publication`, `html-screening`, `local-image-path`,
+  `process-command`) came across verbatim: source/output alias rejection,
+  Markdown input preservation, DOCX media isolation, literal-code
+  preservation, email header validation, staged publication with
+  rollback. Verified here against real Pandoc conversions (128 of 129
+  converter-cluster tests pass with Pandoc on PATH; the one skip needs
+  the Mermaid CLI).
+- **Canonical routing and content (flagship 0.7.0 / 0.9.0).** Adapted
+  SKILL.md merges across the pack, preserving Muse-delta framing:
+  critical-thinking mode routing with its methods in `references/`,
+  consolidated references and helper scripts for the existing skills
+  (63 new files), git-workflow and plan slimmed onto the flagship's
+  native-first routing, and the flagship hygiene rule applied — quota
+  phrasing and retired tracking obligations removed from Would Revise If
+  sections (enforced by the ported telemetry test).
+- **Opt-in modules.** All 15 modules and the 9 governance references the
+  flagship changed were refreshed verbatim (this edition held them
+  byte-identical to the flagship's 0.6.0 text, so the flagship's current
+  text is the mirror).
+
+Skipped, with reasons:
+
+- Flagship CI and installer machinery: `.github/workflows/verify.yml`,
+  `ci/runtime/`, `install-optional-dependencies.ps1`,
+  `reinstall-and-check.ps1`, `.vscode/`, `.gitattributes`, and the
+  flagship host files (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
+  `HANDOFF.md`, `CHANGELOG.md`). This edition has no CI and no installer;
+  its changes are recorded here instead of a changelog.
+- Flagship demo and verification artifacts: `docs/flint-showcase.html`,
+  `docs/flint-experimental.html`, `docs/testing.md`,
+  `docs/verification/`, `docs/getting-started.md`, `docs/install.md`,
+  `docs/plans/` — flagship build provenance and Copilot onboarding; this
+  edition's README and capability map carry its own.
+- Flagship tests for machinery this edition does not ship (activation
+  conflicts, bootstrap, PowerShell installer, CI gates, showcase
+  provenance, Flint provisioning): about 31 files. The tests that cover
+  ported code were ported (above).
+- Updates to the 8 archived host-specific skills (bootstrap, browser
+  tools, enterprise stack, Replicate, rich email, visual companions,
+  platform awareness): the archive is a preservation snapshot of the
+  original port; the flagship's evolution of those skills stays
+  flagship-only. The Replicate retirement proposed in the flagship's
+  roadmap is a flagship decision, not yet approved there.
+
+Known leftovers, deliberate:
+
+- `skills/figure-generator/scripts/invert-dataset.mjs` is superseded by
+  the ported `invert-svg.mjs` and no longer referenced; kept in place
+  pending a retirement call.
+- doc-hygiene's Would Revise If deadline stays at this edition's
+  2026-12-01 (the flagship's equivalent reads 2026-11-07); deadlines are
+  not moved silently.
+
+Verification: full suite 282 tests, 260 pass, 0 fail, 22 skipped (all
+skips are provisioned-runtime or real-tool checks; with Pandoc on PATH
+the converter cluster runs 128/129). Baseline before the mirror was 91
+tests, 86 pass, 0 fail, 5 skipped.
+
 ## Identity and metadata
 
 - `plugin.json`: `name` → `alex-act-one-Muse`, `version` → `0.1.0`, description

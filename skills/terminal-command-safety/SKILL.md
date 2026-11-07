@@ -1,7 +1,7 @@
 ---
 name: terminal-command-safety
 description: "Output-capture, hung-command, and host-behavior procedures for Muse's exec environment: redirect large output to a temp file before reading, background anything over 15 seconds, never run interactive commands, and never pass secrets through a command line. Muse delta: adapts the original PowerShell/VS Code patterns to muse.exec's Linux VM (bash equivalents, process.* lifecycle tools)."
-lastReviewed: 2026-08-18
+lastReviewed: 2026-11-07
 ---
 
 # Terminal Command Safety
@@ -11,6 +11,10 @@ lastReviewed: 2026-08-18
 - **Native to Muse:** commands run in its own Linux VM via `muse.exec`; output comes back in the tool result; a command still running past `yield_ms` backgrounds automatically and the terminal result is delivered back into context.
 - **What this skill uniquely adds:** the concrete failure procedures below — output capture via temp-file redirect when output may be truncated, the 15-second background rule with `process.*` lifecycle tools, and the anti-pattern table for diagnosing silent failures.
 - **Load when:** a command may lose output, hang, need interaction, or depend on host execution behavior.
+
+## Shell Quoting and Input
+
+Shell quoting is a separate correctness issue from output capture: backticks break in every shell (bash treats them as command substitution). Never put raw backticks into double-quoted terminal arguments. For multiline or mixed-quote text, prefer file-based input: pass literal text through the exec `stdin` field, or write it to a temp file outside the working tree (`/tmp/<slug>.txt`) and point the command at the file. A sandbox is not a quoting guarantee.
 
 ## Output Capture Failures
 
@@ -30,6 +34,14 @@ Terminal output can be silently lost or truncated. When you need the full, unfil
 4. Run one command at a time. Don't chain unrelated commands into one invocation.
 5. Stop a stuck command with `process.kill`; then read what it produced with `process.log` to diagnose.
 
+## Process Lifecycle
+
+- Keep environment setup and the commands that depend on it in the same exec call; each call starts a fresh shell, so setup from an earlier call does not carry over.
+- Retrieve existing background output (`process.log`) rather than rerunning the command.
+- Verify a server is responsive before reporting it up, and stop task-local helpers before finishing. Detach only services that must outlive the task, and only with approval.
+- Terminate only a specifically identified process or owned session (`process.kill` takes a session id), never a process name.
+- Report unsupported lifecycle controls explicitly instead of inventing a workaround.
+
 ## Boundaries
 
 - Never pass secrets through a terminal command or tool input; use the Secure Vault flow instead.
@@ -43,6 +55,10 @@ Terminal output can be silently lost or truncated. When you need the full, unfil
 | Starting a long-running command without backgrounding | Use `background: true`; the terminal result arrives automatically. |
 | Retrying an interactive command unchanged | Find and provide its noninteractive flags. |
 | Chaining five unrelated commands with `&&` | One command at a time; each gets its own verified result. |
+
+## References
+
+The bundled `references/` files carry the original PowerShell/VS Code procedures and the resident runtime contract. Treat their tool names as historical examples, not Muse APIs; the procedures above are the Muse adaptation. Load a reference only for a matching platform, output, or hang case.
 
 ## Would Revise If
 

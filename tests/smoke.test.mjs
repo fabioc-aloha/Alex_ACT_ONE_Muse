@@ -39,12 +39,21 @@ const { MCP_SERVERS } = require(join(ROOT, 'scripts', 'shared', 'dependencies.cj
 const LAUNCHER_REL = join('skills', 'setup-dependencies', 'scripts', 'runtime-launcher.mjs');
 const launcherSource = read(LAUNCHER_REL);
 
-/** Routes and their guarded versions, as the launcher itself declares them. */
+/**
+ * Routes and their guarded versions. Since the flagship's Flint 1.0.1
+ * upgrade the launcher is a thin shim: it delegates to
+ * scripts/shared/runtime-status.cjs, which derives every route's
+ * expectedVersion from MCP_SERVERS in dependencies.cjs. There is one
+ * source for the pins, so the drift this suite was written against (two
+ * files naming a version for the same package) cannot recur; the tests
+ * below assert that single-source shape instead of parsing a table out
+ * of the launcher.
+ */
 function launcherRoutes() {
-    const routes = {};
-    const block = /(\w+)\s*:\s*\{\s*expectedVersion:\s*'([^']+)'/g;
-    for (const [, name, version] of launcherSource.matchAll(block)) routes[name] = version;
-    return routes;
+    const { runtimeRoot, runtimeRoutes } = require(join(ROOT, 'scripts', 'shared', 'runtime-status.cjs'));
+    return Object.fromEntries(
+        Object.entries(runtimeRoutes(runtimeRoot())).map(([name, route]) => [name, route.expectedVersion]),
+    );
 }
 
 /** The launcher route a `plugin.json` server entry actually invokes. */
@@ -57,6 +66,19 @@ function routeOf(spec) {
 describe('MCP runtime pins', () => {
     // The original defect. Two files named a version for the same package and
     // nothing compared them, so they drifted and the server stopped starting.
+    // The 1.0.1 launcher design removes the second copy: the pins live only
+    // in dependencies.cjs and runtime-status.cjs derives the guards.
+    test('the launcher delegates to the shared runtime status check', () => {
+        assert.ok(
+            launcherSource.includes('runtime-status.cjs'),
+            'the launcher does not delegate to scripts/shared/runtime-status.cjs',
+        );
+        assert.ok(
+            !/\d+\.\d+\.\d+/.test(launcherSource),
+            'the launcher names a version itself; pins must live only in dependencies.cjs',
+        );
+    });
+
     test('every launcher route guards the reviewed pin', () => {
         const routes = launcherRoutes();
         assert.ok(Object.keys(routes).length > 0, 'parsed no routes from the launcher');

@@ -7,7 +7,9 @@ lastReviewed: 2026-05-26
 
 Apply the 7-discipline critical-thinking protocol to a specific decision, claim, or recommendation. The always-on [`critical-thinking.instructions.md`](../muse-opt-in/critical-thinking.instructions.md) keeps this discipline running in the background; this prompt forces a deliberate, visible pass for high-stakes work.
 
-Skill: [critical-thinking](../skills/critical-thinking/SKILL.md). Always-on rule: [critical-thinking.instructions.md](../muse-opt-in/critical-thinking.instructions.md).
+Skill: [critical-thinking](../skills/critical-thinking/SKILL.md), run in **act-pass** mode. Always-on rule: [critical-thinking.instructions.md](../muse-opt-in/critical-thinking.instructions.md). Pass the user's arguments, inputs, and explicit constraints unchanged; clarify only missing material inputs. The canonical skill owns the compatibility command constraints, execution, and validation.
+
+Return the owning skill's required result and verification limits. This entrypoint grants no additional authority: preserve the owner's approval, privacy, read-only, draft-only, and installation/publication boundaries as applicable. Resolve links from the canonical installed alex-act-one package, never an assumed adopter checkout; report a missing skill/reference and stop rather than silently skipping the workflow.
 
 If the generic skill tool is unavailable for the plugin-shipped skill, read the linked installed `critical-thinking/SKILL.md` directly and continue with the steps below. Do not report the skill as missing from tool inventory alone.
 
@@ -62,9 +64,9 @@ If the generic skill tool is unavailable for the plugin-shipped skill, read the 
 
 ## Would Revise If
 
-Revisit this prompt by **2026-08-26** (90 days) or sooner if any of the following fires:
+Revisit this prompt if any of the following fires:
 
-- ≥3 invocations on medium-stakes work in a quarter find the claim survives unmodified (the prompt is rubber-stamping; tighten the disconfirmer step)
-- The 7-discipline structure produces user confusion about prioritization ≥3 times in a quarter (overcomplex; collapse to fewer disciplines)
-- The falsifiability step consistently catches no real disconfirmers across 10+ invocations (materiality gate too tight, or skill body needs sharper falsifier examples)
-- The slash-command is invoked but the visible markers in the output are skipped ≥3 times (the prompt drifted to ritual, not discipline)
+- A medium-stakes pass finds the claim survives unmodified while the disconfirmer step produced nothing testable (the prompt is rubber-stamping; tighten the disconfirmer step)
+- The 7-discipline structure produces user confusion about prioritization (overcomplex; collapse to fewer disciplines)
+- The falsifiability step consistently catches no real disconfirmers (materiality gate too tight, or skill body needs sharper falsifier examples)
+- The prompt is invoked but the visible markers in the output are skipped (the prompt drifted to ritual, not discipline)

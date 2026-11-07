@@ -1,7 +1,7 @@
 ---
 name: spike
 description: "Use when the user wants to feel out an idea before committing to a real build — 'spike this out', 'try it', 'is this even possible?', 'compare A vs B'. Throwaway experiments that decompose into 2-5 feasibility questions, build minimal observable prototypes, and return VALIDATED / PARTIAL / INVALIDATED verdicts. Disposable by design. Adapted from Hermes Agent / GSD. Muse delta: Muse has no native disposable-prototyping discipline — this skill adds the decompose loop, Given/When/Then feasibility tables, the verdict format, and the head-to-head comparison."
-lastReviewed: 2026-10-02
+lastReviewed: 2026-11-07
 ---
 
 # Spike
@@ -11,6 +11,18 @@ lastReviewed: 2026-10-02
 - **What Muse already does natively**: research, build, and report on ideas — but nothing natively enforces the *disposable* discipline or the honest-verdict format that keeps a throwaway from becoming unplanned production.
 - **What this skill uniquely adds**: the decompose → research → build → verdict loop; breaking an idea into 2–5 independent feasibility questions with Given/When/Then framing and risk ordering; the spike numbering scheme (`001`, `002a`/`002b` for comparisons); the align-before-building step; the `VALIDATED | PARTIAL | INVALIDATED` verdict template; the head-to-head comparison for competing approaches; frontier mode for picking what to spike next.
 - **When to load it**: the user says "let me try this", "spike this out", "before I commit to Y", "quick prototype of Z", "is this even possible?", or "compare A vs B".
+
+## Contract
+
+Use a spike for a real feasibility uncertainty before a production commitment. Muse's planning, workspace, and task tools provide the mechanics; the contract is a bounded disposable experiment.
+
+State the hypothesis, observable success/failure conditions, smallest representative input, and what decision the result will change. With the required approval, build only the experiment needed to test it; do not silently graduate throwaway code into production.
+
+For performance, use a timed harness on the same input, repeat measurements, and report the median and run count from tool output. Separate measured timings from subjective quality judgments.
+
+Load the matching method/template in [execution details](references/execution-details.md). Preserve privacy and authority: do not install dependencies, provision services, spend credits, publish, or perform destructive cleanup without the applicable consent.
+
+Return VALIDATED, PARTIAL, or INVALIDATED against the stated conditions, with evidence, limitations, and the next decision. Keep source/worktree changes isolated and clean up only the resolved temporary resources this task owns.
 
 Spikes are disposable by design. Throw them away once they've paid their debt.
 

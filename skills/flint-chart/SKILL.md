@@ -1,14 +1,15 @@
 ---
 name: flint-chart
 description: "Use when the user wants to visualize data — from 'which chart should I use?' to 'render this'. Helps pick the right chart from the analytical question (comparison / trend / distribution / relationship / proportion / flow / KPI), then authors a ChartAssemblyInput and renders via the host's native chart capability (Vega-Lite / ECharts / Chart.js). Transform data before Flint; style tweaks after Flint."
-lastReviewed: 2026-08-21
+lastReviewed: 2026-11-07
 ---
 
 # flint-chart: pick, author, and render a chart
 
 ## Load the version-matched Flint language first
 
-Read `flint://agent-skill` or invoke `author_flint_chart` before authoring. That
+Read `flint://agent-skill` or call `get_flint_skill({ "skill": "chart" })`
+before authoring. That
 source-owned resource carries the exact semantic types, chart templates,
 properties, and backend boundaries for the installed MCP version. This skill
 adds Alex-owned framing, creative treatment selection, configured-runtime
@@ -17,9 +18,9 @@ setup, and `render-verify`; it does not replace Flint's language reference.
 For the conceptual grammar, compiler model, data-access boundary, backend
 contract, rendered-demo evidence, and tagged Microsoft links, read
 [`references/flint-language-reference.md`](references/flint-language-reference.md).
-It describes the published `0.5.1` contract that Illustrator pins. Use the MCP
-resource, `list_chart_types`, and `list_themes` as the final authority for the
-runtime actually installed in the host.
+It describes the published `1.0.1` contract that Illustrator pins. Use the MCP
+resource, `list_chart_types`, `list_interaction_presets`, and `list_themes` as
+the final authority for the runtime actually installed in the host.
 
 ## What you produce (and what you do NOT)
 
@@ -32,6 +33,10 @@ or `assembleChartjs` to get a backend spec.
 
 - **DO** emit `chart_spec` (chart type, channel→field mapping, properties)
   and `semantic_types` (field → semantic type).
+- **DO** add `interaction_spec` when the user asks for behaviour (highlight,
+  legend toggle, pan and zoom, brush), asks for an interactive chart, or the
+  session's goal is to explore the data. See "Interactions" below; load the
+  `flint-interactions` skill for preset choice and combinations.
 - **Carry the claim into a standalone chart.** Set `chart_spec.title` to the
   Chart Brief's Big Idea, tightened only for display, and use `subtitle` for
   what is measured, of whom, when, and in which units. A chart may travel
@@ -91,7 +96,7 @@ directly (not to render via MCP).
   the project's approved compatibility decision.
 
    ```bash
-  npm install --save-exact flint-chart@0.5.1
+  npm install --save-exact flint-chart@1.0.1
    ```
 
   Add renderer peer dependencies only through the same project dependency
@@ -121,13 +126,17 @@ First decide which workflow the user is asking for:
   `semantic_types` + `chart_spec` pieces. Do not install packages or write
   renderer code unless asked.
 - **MCP chart output:** if Flint MCP tools are available, **default to
-  `create_chart_view`** only for a Vega-Lite chart when the host supports MCP
-  App UIs — it opens an interactive, live-rendered SVG view with a
-  customization panel. For ECharts or Chart.js, use `render_chart` for a static
-  artifact or `compile_chart` for backend-native JSON. `render_chart` emits SVG
-  or PNG for Vega-Lite/ECharts and PNG only for Chart.js. Use `validate_chart`
-  to check a spec without rendering and `list_chart_types` when you need the
-  supported chart catalog.
+  `validate_chart` then `show`** for a Vega-Lite chart when the host supports
+  MCP App UIs: `show` (the 1.0 successor to `create_chart_view`) opens an
+  interactive, live-rendered view with a customization panel. In this Muse
+  edition's directly-driven stdio setup there is no App UI, so use
+  `render_chart` and verify the image visually. For ECharts or Chart.js, use
+  `render_chart` for a static artifact or `compile_chart` for backend-native
+  JSON. `render_chart` emits SVG or PNG for Vega-Lite/ECharts and PNG only for
+  Chart.js. Use `validate_chart` to check a spec without rendering,
+  `list_chart_types` for the supported chart catalog,
+  `list_interaction_presets` for the presets a chart type supports, and
+  `validate_board` before showing a multi-chart board.
 - **Project integration, only when the user asks for code:** add Flint to an
   app, notebook, script, or agentic product, install/import the library, and
   call an assembler in code. Keep the same `ChartAssemblyInput` contract, then
@@ -143,7 +152,7 @@ For JavaScript or TypeScript projects, use the approved project dependency
 workflow and preserve the lockfile:
 
 ```bash
-  npm install --save-exact flint-chart@0.5.1
+  npm install --save-exact flint-chart@1.0.1
 ```
 
 Do not add or upgrade renderer dependencies unless the user explicitly requests
@@ -199,14 +208,14 @@ text:
 - Omit both only when a surrounding caption already supplies the same reading,
   such as a sparkline in a table or a dashboard tile beneath a titled panel.
 
-Flint `0.5.1` realizes the title and subtitle in the Vega-Lite backend. When
+Flint `1.0.1` realizes the title and subtitle in the Vega-Lite backend. When
 ECharts or Chart.js is the delivery target, keep the authored text with the
 `ChartAssemblyInput` and make it visible in the surrounding artifact after
 inspecting the compiled result. Do not move the claim into `theme_spec`:
 themes govern presentation, while title and subtitle state what the reader is
 meant to understand.
 
-## Calendar Heatmap in Flint 0.5.1
+## Calendar Heatmap in Flint
 
 Use `"Calendar Heatmap"` when the question is about daily intensity, recurrence,
 or gaps over a long time span. Bind `x` to a date field and `color` to the daily
@@ -214,8 +223,8 @@ measure; Flint sums multiple rows from the same day into one GitHub-style
 week-by-week cell.
 
 Calendar Heatmap is available on the `vegalite` and `echarts` backends in the
-reviewed `0.5.1` runtime. For an interactive MCP App use Vega-Lite with
-`create_chart_view`; use `render_chart` or `compile_chart` for ECharts. It is
+reviewed `1.0.1` runtime. For an interactive MCP App use Vega-Lite with
+`show`; use `render_chart` or `compile_chart` for ECharts. It is
 not listed for Chart.js, so choose a standard `Heatmap` or another supported
 alternative there. Always call `list_chart_types` when the runtime version is
 unknown or has changed.
@@ -228,10 +237,44 @@ load `flint-theme` for a custom or inherited ThemeSpec. ThemeSpec controls
 presentation and compiler behavior; it does not choose fields, aggregation,
 filtering, sorting, titles, or values.
 
-Flint `0.5.1` themes apply to Vega-Lite. ECharts and Chart.js ignore ThemeSpec,
-so do not claim cross-backend parity. For a custom system, validate the bare
+Flint `1.0.1` ships 14 theme presets, adding `apple`, `bbc`, `material`, and
+`de-stijl` to the 0.5.x ten. ThemeSpec applies to Vega-Lite and Plotly in the
+library; in the three-backend MCP workflow it realizes on Vega-Lite. ECharts
+and Chart.js ignore ThemeSpec, so do not claim cross-backend parity. For a custom system, validate the bare
 ThemeSpec in Theme Lab and inspect a representative chart corpus before using it
 in a deliverable.
+
+## Interactions (`interaction_spec`)
+
+Add `interaction_spec` beside `chart_spec` when the user asks for behaviour,
+or when the goal of the session is to explore or analyse the data. A static
+image never needs it.
+
+```json
+{
+  "chart_spec": { "chartType": "Line Chart", "encodings": { "x": "date", "y": "value", "color": "series" } },
+  "interaction_spec": { "interactions": [ { "type": "brush-x" } ] }
+}
+```
+
+Flint 1.0.1 ships 23 interaction presets (`click-highlight`,
+`click-group-focus`, `hover-group-focus`, `axis-highlight`, `inspect`,
+`inspect-index`, `select`, `lasso-select`, `brush-x`, `brush-y`,
+`brush-angle`, `linked-brush`, `navigate`, `brush-zoom`, `legend-toggle`,
+`drag-reorder`, `filter-controls`, `click-annotate`, `double-activate`,
+`long-press`, `context-activate`, `context-menu`,
+`accessible-navigation`). Every entry is `{ "type": <preset>,
+"options": { ... } }`, one per behaviour. Take the presets and their options
+for the chart type from `list_interaction_presets` with `chartType`; never
+invent one. Interactions run on the Vega-Lite backend only: a static render
+and the other backends leave `interaction_spec` untouched and report it
+ignored. To change a chart already on screen, pass ChartUpdate layers as
+`updates` beside the input to `validate_chart` and `show`. For anything
+beyond a single named gesture (an exploratory intent, several presets
+together, linked charts or boards), load the
+[`flint-interactions`](../flint-interactions/SKILL.md) skill, which owns
+preset selection, conflicts, updates, and linking; use `validate_board`
+before showing a board.
 
 ## How data gets bound
 
@@ -489,13 +532,13 @@ Recommend the substitute, not the missing chart:
 | Chord Diagram (circular flows)                                          | `Sankey Diagram` (ECharts backend)                             | Linear flow is easier to read anyway                                                    |
 | Pareto Chart (bars + cumulative %)                                      | `Bar Chart` + `Line Chart` via multi-encoding                  | Sort bars descending, overlay cumulative-% line                                         |
 | Beeswarm Plot (every point)                                             | `Strip Plot` with `stepWidth`, `pointSize`, `opacity`          | Jittered points instead of packed; same "every dot is real" story                       |
-| Ridgeline Plot (many densities)                                         | `Violin Plot` with `row` facet                                 | Density curves stacked per group                                                        |
+| Ridgeline Plot (many densities)                                         | Native in 1.0.1: `Ridgeline Plot` (Vega-Lite)                  | One KDE ridge per group on its own baseline; `Violin Plot` with `row` facet is the fallback on older runtimes |
 | Small Multiples                                                         | any chart with `row` or `column` encoding                      | Native facet support                                                                    |
 | Word Cloud / Sentiment / NPS Gauge / Likert / Mind Map                  | Not in Flint's scope                                           | Export prepared data to Power BI / Tableau / dedicated tool                             |
 | Hierarchy visualization                                                  | `"Tree"` (ECharts only)                                       | Use `detail` for node labels, `color` for parent grouping, and `size` for values; validate the installed catalog before authoring |
 | Control Chart / Run Chart / Pareto / Process Capability (SPC)           | Not in Flint's scope                                           | Use a dedicated SPC / Six Sigma tool; Flint isn't built for statistical process control |
 | Decomposition Tree / Key Influencers / Smart Narrative (AI-Powered)     | Not in Flint's scope                                           | These are Power BI features; Flint is a chart compiler, not an analytics engine         |
-| Table / Matrix (precise value lookup)                                   | Use a data table (not Flint)                                   | Stephen Few's rule — tables for lookup, graphs for pattern                              |
+| Table / Matrix (precise value lookup)                                   | `Table` chart type (1.0.1) for a chart-shaped table            | Stephen Few's rule — tables for lookup, graphs for pattern; a plain data table still beats any chart for pure lookup |
 
 This table is a **catalog** boundary: Flint does not offer these chart types.
 [`ascii-chart`](../ascii-chart/SKILL.md) carries a separate **medium** boundary
@@ -534,9 +577,9 @@ Two runtime paths that need no fetch and always reflect the actual server the us
 
 Prefer these over external references when the question is "does the server I'm actually talking to render `<chartType>` on `<backend>`?" They cost nothing and cannot go stale.
 
-> **0.5.x note.** The underlying library's backend-neutral recommendations,
+> **1.0 note.** The underlying library's backend-neutral recommendations,
 > named views, and chart transformations surface through the interactive
-> Vega-Lite's `create_chart_view` MCP App rather than separate tools. Use it to
+> Vega-Lite `show` MCP App rather than separate tools. Use it to
 > explore compatible arrangements without changing the data or semantic truth
 > layer. ECharts and Chart.js workflows use static rendering or compilation;
 > headless workflows keep using §0.2 plus `list_chart_types`.
@@ -557,7 +600,7 @@ This is the authoritative reference for **what Flint actually does**; §0.2–0.
 Use the official [Flint documentation](https://microsoft.github.io/flint-chart/#/documentation/overview)
 for language design, semantics, layout, APIs, and backend architecture. Runtime
 resources remain authoritative for the installed server's exact vocabulary.
-The library documents Plotly and Excel, but the `0.5.1` MCP tool schema exposes
+The library documents Plotly and Excel, but the `1.0.1` MCP tool schema exposes
 only Vega-Lite, ECharts, and Chart.js; treat other backends as project-code
 integration, not MCP capability.
 
@@ -569,7 +612,7 @@ Short-form pointers to the underlying literature. Invoke these when justifying
 a choice; read the books themselves for depth.
 
 - **Trustworthy · Accessible · Elegant** (Kirk) — check the chart against all three before shipping
-- **Tables for lookup, graphs for pattern** (Few) — if the user wants exact values, a data table beats any chart; use `Bar Table` (Flint) only when you want compact bars with labels
+- **Tables for lookup, graphs for pattern** (Few) — if the user wants exact values, a data table beats any chart; use `Bar Table` (Flint) only when you want compact bars with labels, or the `Table` chart type when the table itself is the deliverable
 - **Explanatory vs exploratory** (Knaflic) — for stakeholder communication, show the pearl, not the oyster bed; strip clutter aggressively
 - **Bullet > Gauge Chart** (Few) — always prefer `Bullet Chart` for KPI-vs-target; reserve `Gauge Chart` for large single-KPI tiles
 - **Gestalt** (Knaflic Ch. 3) — group with proximity, distinguish with color/shape, connect with lines, enclose with backgrounds
@@ -586,7 +629,7 @@ properties"). Required channels are noted.
 
 | chartType                  | Channels                                              | Notes / required                                                                                                                                                              |
 | -------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `"Scatter Plot"`           | x, y, color, size, opacity, column, row               | x + y required                                                                                                                                                                |
+| `"Scatter Plot"`           | x, y, color, size, shape, opacity, column, row        | x + y required; `detail` carries a field on each point without a visual channel, for tooltips and linking                                                                 |
 | `"Regression"`             | x, y, size, color, column, row                        | scatter + fit line; props `regressionMethod`, `polyOrder`                                                                                                                     |
 | `"Connected Scatter Plot"` | x, y, order, color, detail, column, row               | x + y required; `order` = connection sequence (time/index), so the line traces a trajectory and may self-cross                                                                |
 | `"Ranged Dot Plot"`        | x, y, color                                           | dumbbell of two x per category                                                                                                                                                |
@@ -611,7 +654,9 @@ properties"). Required channels are noted.
 | `"Range Area Chart"`       | x, y, y2, color, column, row                          | x + y + y2 required; translucent band from `y` (low) to `y2` (high), value axis fits the band (not zero)                                                                      |
 | `"Violin Plot"`            | x, y, color, row                                      | x (category) + y (measure) required; mirrored KDE density per category, prop `bandwidth`; **Vega-Lite only**; a genuine `color` subgroup splits two groups or grids 3+ groups |
 | `"Streamgraph"`            | x, y, color, column, row                              | center-stacked areas                                                                                                                                                          |
-| `"Density Plot"`           | x, color, column, row                                 | prop `bandwidth`                                                                                                                                                              |
+| `"Density Plot"`           | x, color, column, row                                 | props `bandwidth`, `stackMode`, `opacity`                                                                                                                                     |
+| `"Ridgeline Plot"`         | x, y, color                                           | x = measure; `color` (or a discrete `y`) names the ridges, each the KDE of x on its own baseline; props `overlap`, `order`, `tailCut`, `colorBy`, `markAt`, `opacity`, `interpolate`, `bandwidth`; **Vega-Lite only** (added in 1.0) |
+| `"Marginal Plot"`          | x, y, color, size, shape, opacity                     | main plot follows the axis types (scatter / strip / count heatmap) with each axis's distribution along it; props `marginal`, `stackMode`, `bandwidth`, `binCount`, `whiskerMethod`, `showOutliers`; **Vega-Lite only** (added in 1.0) |
 | `"Pie Chart"`              | size, color, column, row                              | `size` = slice value (→ angle), `color` = category; props `innerRadius`, `sortSlices`                                                                                         |
 | `"Donut Chart"`            | size, color, column, row                              | same channels as Pie; **Vega-Lite only** (Chart.js spells it `"Doughnut Chart"`; ECharts has neither); `innerRadius` defaults to **0**, so set it or you get a pie                |
 | `"Rose Chart"`             | x, y, color, column, row                              | polar bars; props `alignment`, `padAngle`, `sortSlices`                                                                                                                       |
@@ -621,6 +666,7 @@ properties"). Required channels are noted.
 | `"KPI Card"`               | metric, value, goal                                   | big-number tile; prop `behindThreshold`                                                                                                                                       |
 | `"Map"`                    | longitude, latitude, color, size, opacity             | bubble map; props `region`, `projection`                                                                                                                                      |
 | `"Choropleth"`             | id, color, detail                                     | `id` = geographic key                                                                                                                                                         |
+| `"Table"`                  | none (`encodings: {}`)                                | the rows as given, one column per field in row order; shape `data.values` to the rows to list and name columns with `field_display_names` (added in 1.0)                     |
 
 **Donut chart — the type name differs per backend.** There is no single donut
 type that works everywhere; pick by backend:
@@ -1030,12 +1076,12 @@ Revise this skill if any of the following fires:
   runtime tool schema, or cannot be read on a supported host — restore only the
   minimum local reference needed while the upstream defect is active.
 - `flint-chart-mcp` ships a breaking change (chart-type rename, `ChartAssemblyInput` shape change, tool signature change) that this skill doesn't account for — sync §0.4 (Flint coverage) and the worked examples to the new version.
-- Any recommendation in §0.2 (question → family → chartType) is refuted by a source we trust (a case study, a Knaflic/Kirk/Few/Wexler update, or field feedback from ≥2 heir workspaces) — retire or rework that row.
+- Any recommendation in §0.2 (question → family → chartType) is refuted by a source we trust (a case study, a Knaflic/Kirk/Few/Wexler update, or field feedback from heir workspaces) — retire or rework that row.
 - The upstream fork base ([`microsoft/flint-chart/agent-skills/flint-chart-author/SKILL.md`](https://github.com/microsoft/flint-chart/blob/main/agent-skills/flint-chart-author/SKILL.md)) publishes a materially revised body — decide whether to rebase §1-N onto the new upstream or hold on the current fork point. **Do not rebase blindly.** As of 2026-08-05 upstream's skill is itself behind its own generated references: it still teaches "Donut chart: use `Pie Chart` with `innerRadius`" and never names the `Donut Chart` type that `reference-vegalite.md` documents. A straight rebase would regress the backend-specific donut guidance and the corrected `binCount` / `polyOrder` ranges in §Chart-level properties. Diff against the generated `reference-*.md` files, not against upstream's skill.
 - **Upstream absorbs chart selection itself.** Recommendations, named views,
-  and transformations are available through `create_chart_view`, but not as
-  headless tools. If they become tool-reachable and match or beat §0.2 on the
+  and transformations are available through `show` (called `create_chart_view`
+  before 1.0), but not as headless tools. If they become tool-reachable and match or beat §0.2 on the
   same question, call upstream and keep only Alex framing on top.
 - **The backend list changes.** §0.4 and the worked examples assume Vega-Lite /
-  ECharts / Chart.js because those are the `0.5.1` MCP enum values. If a future
+  ECharts / Chart.js because those are the `1.0.1` MCP enum values. If a future
   server accepts Plotly or Excel, rework coverage and ThemeSpec boundaries.

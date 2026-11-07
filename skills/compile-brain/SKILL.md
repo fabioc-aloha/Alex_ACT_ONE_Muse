@@ -2,6 +2,7 @@
 name: compile-brain
 description: "Create or improve a Markdown instruction, skill, prompt, or agent from an explicitly selected file or user-identified text. Use when a user asks to optimize an existing brain artifact or create one for consistent future execution."
 compatibility: "Muse skill format. Other-host adapters are a Copilot-edition concern."
+lastReviewed: 2026-11-07
 ---
 
 # Compile Brain
@@ -73,9 +74,13 @@ Before presenting a draft:
 1. Compare the draft against the behavior inventory item by item.
 2. Run at least two representative scenarios, including one failure, edge, or
    safety case, and confirm the draft produces the same required behavior.
-3. Verify that relative links resolve at the intended destination: run
-   `scripts/check-links.cjs` on the source and the draft and resolve every
-   miss it reports. Never substitute machine-specific absolute paths. Preserve required supporting
+3. Verify that relative links resolve at the intended destination. Run
+   `scripts/check-links.cjs` (in this skill's `scripts/` directory) on the
+   draft and resolve every reported miss; do not verify links by reading
+   alone. The checker accepts individual files or a directory (scanned
+   recursively for `*.md`) and checks link fragments against the target
+   file's heading slugs. Never
+   substitute machine-specific absolute paths. Preserve required supporting
    resources beside an in-place replacement, or explicitly include them in a
    standalone output.
 4. Produce a preservation receipt naming retained invariants, deliberately
@@ -83,9 +88,10 @@ Before presenting a draft:
 
 ### High-reduction review
 
-Measure source and draft length with `scripts/measure-reduction.cjs`: it
-prints both character counts and the percent reduction, and uses a tokenizer
-CLI when one is supplied via `--tokenizer`. Read every gate below off its
+Measure source and draft length with `scripts/measure-reduction.cjs` (in
+this skill's `scripts/` directory; `--source <file> --draft <file>` or two
+positional paths): it prints both character counts and the percent reduction,
+and uses a tokenizer CLI when one is supplied via `--tokenizer`. Read every gate below off its
 output; never estimate the reduction in prose, and never use characters
 divided by four as the measurement. A
 **conservative first pass** removes no more than 20% of measured tokens or
@@ -227,9 +233,9 @@ new vocabulary.
    | Agent | `.github/agents/<name>.agent.md` |
    | Brain contract | `BRAIN.md` |
 
-10. Run the semantic comparison, scenario review, and intended-destination link
-    check (`scripts/check-links.cjs` on the draft). Resolve blocking losses
-    before presenting the draft.
+10. Run the semantic comparison, scenario review, and the intended-destination
+    link check (`scripts/check-links.cjs` on the draft). Resolve blocking
+    losses before presenting the draft.
 11. Present the artifact type, destination, complete draft, behavior
     preservation receipt, and measured reduction. State material behavioral
     changes, if any. When the human-facing gate fired, state the audience and

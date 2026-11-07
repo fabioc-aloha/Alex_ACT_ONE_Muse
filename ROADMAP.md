@@ -1,12 +1,12 @@
 # Roadmap
 
 What is working now, what is being built, and what is deliberately out of scope.
-Applies to the Muse edition (`alex-act-one-Muse` 0.2.0), ported from the Copilot
-edition (Alex ACT ONE v0.3.6).
+Applies to the Muse edition (`alex-act-one-Muse` 0.3.0), ported from the Copilot
+edition (Alex ACT ONE v0.3.6) and mirrored to its 0.9.2 in November 2026.
 
 ## Working Today
 
-- The package declares 55 skills, 15 chat-ready prompts, and 15 opt-in modules.
+- The package declares 59 skills, 15 chat-ready prompts, and 15 opt-in modules.
   There are no MCP servers to register — the Copilot edition's three servers map
   to native Muse capabilities (see `docs/muse-capability-map.md`)
 - Skills are used straight from the `skills/` directory the assistant reads;

@@ -1,7 +1,7 @@
 ---
 name: "md-to-txt"
 description: "Strip Markdown formatting and produce clean plain text via pandoc. Use when the user asks to convert to plain text or export markdown as a .txt file. Muse delta: the md-to-txt.cjs option flags and the format-aware defaults (em-dash → comma ON, decorative HRs preserved) — beyond Muse's native ability to strip markdown by hand."
-lastReviewed: 2026-05-26
+lastReviewed: 2026-11-07
 ---
 
 # Md To Txt
@@ -50,5 +50,9 @@ Override via flags above.
 
 ## Related
 
-- Pre-flight the source with the project's linter or the `lint-clean-markdown` skill
+- Markdown linting — pre-flight the source with the project's linter or the `lint-clean-markdown` skill
 - [md-to-word](../md-to-word/SKILL.md) — for formatted output
+
+## Would Revise If
+
+Revisit this skill if any of the following fires: pandoc upstream changes plain-text output in a way that breaks the documented "stripped" list; the heuristic for indentation preservation produces wrong output on a real source the user converts; or a heir needs a stripped-but-not-plain output (e.g., RTF, SRT) that this skill doesn't cover: split into a sibling skill instead.

@@ -1,7 +1,7 @@
 ---
 name: "markdown-mermaid"
 description: "Author Mermaid diagrams that render correctly in GitHub, VS Code, and Mermaid 10+ consumers. Applies a config-driven init directive + linkStyle + semantic classDef vocabulary from `.github/config/brand-palette.json` (default: 6-role semantic palette + typography). Covers renderer pitfalls, mode fragility, and diagram-tool selection. Use when embedding Mermaid in markdown, debugging silent render failures, or choosing between Mermaid / Excalidraw / D2 / PlantUML. Muse delta: the init directive, the 6-role classDef vocabulary, and the mode-fragility table — the pitfalls native Mermaid generation reliably trips on."
-lastReviewed: 2026-08-01
+lastReviewed: 2026-11-07
 ---
 
 # Markdown & Mermaid
@@ -16,7 +16,7 @@ Unified 2026-07-30: palette values moved from the retired `mermaid-init.json` in
 
 ## Init directive (always required)
 
-Every diagram starts with an init directive derived from `.github/config/brand-palette.json`: `themeVariables` from `brand` (edgeLabelBackground = white constant), `classDef`s from `semantic`, `linkStyle` from `typography.linkStroke` / `linkStrokeWidth`. Default (Alex ACT 6-role semantic palette):
+Every diagram starts with an init directive derived from `.github/config/brand-palette.json`. Values come from the `semantic` section (classDef fills/strokes/text), the `brand.muted` value (edge / link color), and the `typography.linkStroke` / `linkStrokeWidth` values. Default (Alex ACT 6-role semantic palette):
 
 ````markdown
 ```mermaid
@@ -35,11 +35,17 @@ flowchart LR
 ```
 ````
 
-To override the palette for a project, edit `.github/config/brand-palette.json` (rebrands mermaid + the illustrator plugin's svg-banner + illustrator + flint at once). For one diagram only, override the init directive inline (rare).
+**Three components, one source**:
+
+- `%%{init: ...}%%` themeVariables derived from `brand-palette.json` (edgeLabelBackground = white constant; other theme colors track the palette)
+- `classDef <name> fill:... color:... stroke:...` for each entry in `semantic` (blue / green / purple / gold / red / neutral)
+- `linkStyle default <spec>` from `typography.linkStroke` + `linkStrokeWidth`
+
+To override the palette for a project, edit `.github/config/brand-palette.json` (rebrands mermaid + the illustrator plugin's svg-banner + illustrator + flint at once). To use a different palette for one diagram, override the init directive inline (rare; usually you want fleet-wide consistency).
 
 ## Semantic classDef vocabulary
 
-Apply `:::<class>` to every node:
+Apply a semantic class to every node, using `:::<class>` or a `class A,B <class>` statement. `node scripts/check-mermaid-classes.mjs <file.md>` checks conventional flowchart node definitions and edge endpoints; it is a source heuristic, not a Mermaid parser. Review skipped diagram types and unfamiliar syntax separately, and render the result. Semantic roles ship with the default config:
 
 | Class        | Role                              | Example                 |
 | ------------ | --------------------------------- | ----------------------- |
@@ -50,11 +56,11 @@ Apply `:::<class>` to every node:
 | `:::red`     | Error, warning, failure           | `E[Retry]:::red`        |
 | `:::neutral` | Context, optional, out-of-scope   | `F[Cache]:::neutral`    |
 
-Verify coverage mechanically: `node scripts/lint-mermaid-classes.mjs <file.md>` extracts every Mermaid block, lints the flowchart and graph blocks for nodes with no `:::class` (a node assigned through a `class` statement counts as covered), reports other diagram types as skipped, and exits non-zero when any node is uncovered.
-
-Consistency across the fleet matters more than per-diagram creativity.
+Consistency across the fleet matters more than clever per-diagram creativity — a reader who has seen one Alex-brand diagram should recognize the second immediately.
 
 ## Mode fragility (renderer footguns)
+
+Several Mermaid modes fail silently on colons and special characters. Default to `flowchart` for arbitrary text.
 
 | Mode              | Status  | Constraint                               |
 | ----------------- | ------- | ---------------------------------------- |
@@ -68,13 +74,41 @@ Consistency across the fleet matters more than per-diagram creativity.
 | `gitGraph`        | Fragile | Long chains with quoted colon-tags break |
 | `gantt`           | Fragile | `dateFormat HH:mm` mis-parses task lines |
 
-**Rule:** if labels contain colons, times (`HH:MM`), or complex text — use `flowchart` with subgraphs. **Debug silent failure:** check console, simplify content, test incrementally, try `flowchart`.
+**Rule**: If your labels contain colons, times (`HH:MM`), or complex text — use `flowchart` with subgraphs.
 
-Full pitfall catalog (P1–P9, unicode/emoji failures, layout patterns, reserved words, cross-diagram compatibility) in [`references/pitfalls.md`](references/pitfalls.md).
+**Debug silent failure**: check browser console; simplify content; test incrementally; try `flowchart` — if it works there, the mode was the problem.
+
+Full pitfall catalog (P1–P9, unicode/emoji failures, layout patterns, classDiagram + architecture-beta gotchas, reserved-word handling, cross-diagram compatibility matrix) in [`references/pitfalls.md`](references/pitfalls.md) — 844 lines of renderer-specific gotchas that LLM native generation reliably trips on.
 
 ## Multi-line labels
 
-Use `<br/>`, **NOT** `\n`. `\n` renders as literal text — the single most common defect in LLM-generated Mermaid.
+Use `<br/>` for line breaks, **NOT** `\n`. `\n` renders as literal text. This is the single most common defect in LLM-generated Mermaid.
+
+```mermaid
+%% Correct
+A[Line one<br/>Line two]:::blue
+
+%% Wrong — renders "Line one\nLine two" as one string
+A[Line one\nLine two]:::blue
+```
+
+## Size the graph and its frame together
+
+Author the source so the diagram has a readable natural shape before relying on a renderer:
+
+- Prefer `TD` for sequential flows with several steps or multi-line labels.
+- Split diagrams whose rendered aspect ratio exceeds 4:1 unless horizontal comparison is the point. Measure the ratio from the rendered SVG's `viewBox` (width ÷ height, after the docs-shell crop below), never by eye: `node scripts/check-mermaid-classes.mjs --svg <rendered.svg>` prints the ratio and fails above 4:1.
+- Keep labels short enough that a node communicates one idea.
+- Do not combine `width: 100%` with a fixed or capped SVG height. That creates a page-wide viewport with a small graph centered inside it.
+
+The Alex docs-shell applies one deterministic fit after Mermaid renders:
+
+1. Crop once to the root graph bounds plus 16–32px of padding.
+2. Derive the ideal SVG width from the cropped viewBox and source font size, targeting 16px labels.
+3. Shrink-wrap compact diagrams instead of stretching every SVG to page width.
+4. Use contained horizontal scrolling only when the graph cannot preserve a 13px desktop or 11px mobile label floor inside the available width.
+
+Runtime fitting removes wasted viewport space; it does not repair an over-dense source diagram. Refactor the Mermaid source first when the graph still needs scrolling or extreme height after fitting.
 
 ## Diagram-tool selection
 
@@ -101,4 +135,12 @@ For Mermaid alternatives (D2, PlantUML, Graphviz, WaveDrom) with syntax examples
 
 ## Related
 
-- [`lint-clean-markdown`](../lint-clean-markdown/SKILL.md) — when the concern is lint compliance rather than diagram rendering
+- [`lint-clean-markdown`](../lint-clean-markdown/SKILL.md) — writing markdown that passes `markdownlint` on the first attempt. Reach for it when the concern is lint compliance rather than diagram rendering.
+
+## Falsifiability
+
+Revise if any of the following fires:
+
+- The mode-fragility warnings stop applying because Mermaid.js fixed the underlying parser bugs (check mermaid.js changelog)
+- The default palette + built-in fallback (if we add one to a future renderer helper) drift out of sync
+- The trim itself was wrong: diagrams start rendering without the palette because the skill body was doing more work than it looked (the always-loaded palette section carried the discipline; the config-pointer doesn't)

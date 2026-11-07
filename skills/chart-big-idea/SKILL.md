@@ -1,7 +1,7 @@
 ---
 name: chart-big-idea
 description: "Distill the one-sentence Big Idea, story arc, audience, and style stance for a chart BEFORE picking a chart type. Starts by questioning intent — whether the artifact should exist at all, and whether the stated purpose is the real one. Reads the surrounding docs / prose / ticket for an existing Big Idea first, then helps the user articulate one via a 3-question elicitation ladder if none is found. Asks whether the user wants a TRADITIONAL (safe) or INNOVATIVE (higher-impact, higher-risk) treatment. Use before invoking the flint-chart skill or the /render-chart prompt whenever the user's ask is 'chart this', 'visualize', 'make a chart', 'show the data', or when framing is unclear."
-lastReviewed: 2026-08-15
+lastReviewed: 2026-11-07
 ---
 
 # Chart Big Idea
@@ -90,33 +90,7 @@ Classify the intent before choosing a treatment:
 | **Exploratory** | Help the reader inspect patterns without pretending the conclusion is settled. |
 | **Persuasive** | Support a decision or position honestly, including material counter-evidence. |
 
-Adapted from Cole Nussbaumer Knaflic's _Storytelling with Data_ framing. Write ONE sentence that:
-
-1. **States a unique point of view** — not a topic. "Adoption is up" beats "Q3 adoption metrics".
-2. **Conveys what's at stake** — why the reader should care. "…so we need to reallocate the training budget" beats "…which is notable".
-3. **Is a complete sentence** — subject + verb + object. If it reads like a chart title, tighten it into a claim.
-
-**Template**: _"[Subject] [did/is/shows] [specific finding], [therefore/so-what implication]."_
-
-**Examples:**
-
-| Weak (topic)               | Strong (Big Idea)                                                                                                                                        |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| "Sales by region"          | "The West region grew 3× faster than the rest of the company last quarter, so the FY26 hiring plan should shift 15 headcount west."                      |
-| "AI readiness scores"      | "One-third of respondents are Skeptics with BI below the Likert midpoint — training programs that treat them the same as Enthusiasts will underperform." |
-| "Portfolio risk over time" | "Portfolio VaR crossed the policy ceiling in three of the last five quarters — the risk-appetite statement needs a formal review."                       |
-
-### If the Big Idea is still not clear after Step 0 — help the user find it
-
-Run this 3-question elicitation ladder. Ask **one question at a time**; stop as soon as a Big Idea sentence writes itself. Do not batch the questions — batching is an interrogation, not a conversation.
-
-1. **"What surprised you in this data?"** — the surprise is almost always the Big Idea. If nothing surprised, the chart may not have a claim to make (in which case, ask whether it's decorative / reference-only).
-2. **"What decision should change if this chart lands?"** — gets the "so-what" clause. If no decision changes, the chart is informational; that's fine, but the Big Idea shape shifts from persuasive to descriptive.
-3. **"If a colleague read only the chart title and moved on, what one sentence do you want stuck in their head?"** — the Big Idea reframed as a headline the user can imagine writing. This one usually unlocks users who couldn't answer #1 or #2 abstractly.
-
-**If all three come back vague** ("just show the data", "I don't know, you pick"): propose a Big Idea _yourself_ from Step 0 context + what the data actually shows, mark it clearly as `**Proposal**:`, and let the user confirm or edit. Do not stall waiting for a perfect answer. A specific proposal the user can react to is faster than an open-ended prompt.
-
-**Anti-pattern**: running the whole ladder in one message ("What surprised you? What decision changes? What headline?"). One question, wait, listen, next.
+Load and follow [big-idea](../big-idea/SKILL.md) for shared claim distillation, audience, and narrative stance. This chart workflow owns the analytical intent, population, denominator, units, treatment choice, and Chart Brief. For a vague dataset request, use the chart-specific [elicitation examples](references/claim-elicitation.md); do not duplicate the general distillation procedure or redirect back to this skill before completing the shared method.
 
 ## Step 1.5: Claim computability
 
@@ -138,6 +112,12 @@ Four rules decide the Status column:
 If a claim is not computable, replace it with an evidence boundary that names
 the missing input. Do not estimate silently, and do not let the chart imply a
 number the data never contained.
+
+Computable is not computed. Establish material shares/ratios with an executed
+script, query, or formula and retain its output as evidence. If execution is
+denied or unavailable, use another permitted deterministic tool or label the
+derived claim unverified; do not silently replace the failed check with prose
+arithmetic.
 
 Adapted from the Claim Computability Gate in an earlier visual-storytelling
 curriculum, absorbed into this plugin.
@@ -193,19 +173,21 @@ Both are valid design choices. The tradeoff:
 | **Deviation example**         | Bar with target line                                        | Bullet chart or dumbbell                                        |
 | **Ranking + context example** | Ranked bar                                                  | Dot plot with reference band, or lollipop on distribution       |
 
-**Style-stance × Story-arc → concrete chartType hints for flint-chart §0.2**:
+**Style-stance × Story-arc → exact chartType candidates**. Confirm the selected
+backend's live `list_chart_types` catalog before handing a type to Flint; these
+names are not snake_case aliases, and a composite treatment is not one chartType.
 
 | Story arc            | Traditional pick                    | Innovative pick                                                                                  |
 | -------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Comparison           | `bar_chart` (grouped or single)     | `lollipop_chart`                                                                                 |
-| Change over time     | `line_chart`                        | `slope_chart` or annotated `line_chart` with markers                                             |
-| Composition          | `stacked_bar_chart`                 | `treemap` or faceted `bar_chart` (small multiples)                                               |
-| Distribution         | `histogram` or `bar_chart` of bins  | `strip_plot` + jitter, `boxplot`, or `violin` where Flint supports it                            |
-| Relationship         | `scatter_plot`                      | `scatter_plot` with color/size encoding + trendline layer                                        |
-| Deviation            | `bar_chart` with reference `rule`   | `bullet_chart` or dumbbell (two-point layered)                                                   |
-| Flow                 | `bar_chart` of source→target counts | `sankey` (if backend supports it — see `flint-chart` §0.4)                                       |
-| Anomaly              | `line_chart` with annotated point   | `line_chart` with shaded band + annotation callout                                               |
-| Ranking-with-context | Ranked `bar_chart`                  | Layered `lollipop_chart` overlaid on `strip_plot` (see AIRS fig07 ultimate for a worked example) |
+| Comparison           | `Bar Chart` or `Grouped Bar Chart` | `Lollipop Chart` |
+| Change over time     | `Line Chart` | `Slope Chart` or annotated `Line Chart` |
+| Composition          | `Stacked Bar Chart` | `Treemap` or faceted `Bar Chart` where supported |
+| Distribution         | `Histogram` or `Bar Chart` of prepared bins | `Strip Plot`, `Boxplot`, or `Violin Plot` where supported |
+| Relationship         | `Scatter Plot` | `Scatter Plot` with color/size, or `Regression` |
+| Deviation            | `Bar Chart` with a supported reference treatment | `Bullet Chart` or `Ranged Dot Plot` |
+| Flow                 | `Bar Chart` of prepared source/target counts | `Sankey Diagram` where supported |
+| Anomaly              | `Line Chart` with a supported annotation | `Line Chart` with a separately verified reference treatment |
+| Ranking-with-context | Ranked `Bar Chart` | `Lollipop Chart` and `Strip Plot` as separate/composed treatments, verified after rendering |
 
 **Rule of thumb**: default to TRADITIONAL when the audience is glance-time or general-fluency. Default to INNOVATIVE when the audience is domain-fluent AND has 30+ seconds of study time AND the extra dimensions materially strengthen the Big Idea. When in doubt, ask.
 
@@ -283,7 +265,7 @@ when the chart travels without the surrounding prose.
 - **Story arc**: Ranking-with-context (comparison + distribution)
 - **Audience**: Study (2min+) / Domain-fluent / Decision-critical
 - **Style stance**: INNOVATIVE — the Big Idea has two arcs, so a traditional single-arc chart (bar of means) loses half the argument. Study-time + domain-fluent audience can afford the extra read cost.
-- **Suggested chartType**: layered `lollipop_chart` (centroid + stem) overlaid on `strip_plot` (respondent-level jitter)
+- **Suggested chartType**: `Lollipop Chart` (centroid + stem) and `Strip Plot` (respondent-level jitter), as a separately verified composite rather than one registered chartType
 - **Alternates considered**: (a) traditional bar with error bars — chosen against because it hides the floor/ceiling clamping that makes the Skeptics story vivid; (b) boxplot + strip — chosen against because box quartile lines are redundant with the strip density and add visual noise.
 - **Anti-patterns to avoid**: over-layering (kept to strip + lollipop + centroid, no boxplot); starting y at 0 on a Likert scale (started at 1); putting metadata inside the plot area (n= labels moved to the axis).
 

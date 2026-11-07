@@ -1,76 +1,32 @@
 ---
 name: proactive-awareness
-description: "Applies cross-session context recovery, uncommitted-work detection, and focus routing once proactive behavior has been judged appropriate. Use when continuity, worktree state, or active goals may change the response. Muse delta: the whether-to-surface judgment is not native to Muse — that stays with the resident reliance-nudges inhibition rules; this skill is the what-to-check procedure (HANDOFF.md, TODO.md, git status, goals.json) applied once that gate clears."
-lastReviewed: 2026-10-02
+description: "Applies cross-session context recovery, uncommitted-work detection, and focus routing once proactive behavior has been judged appropriate. Use when continuity, worktree state, or active goals may change the response. Muse delta: the whether-to-surface judgment is not native to Muse — that stays with the resident reliance-nudges inhibition rules; this skill is the read-only what-to-check contract (HANDOFF.md, authoritative task list, TODO.md fallback, git counts, goals) applied once that gate clears, with the detailed procedures consolidated in its references."
+lastReviewed: 2026-11-07
 ---
 
-# Proactive Awareness
+# Read-only Project Recovery
 
 ## Muse delta
 
-- **What Muse already does natively**: Muse carries user context across turns, but it has no defined rule set for *whether* a proactive nudge is appropriate. That judgment lives in the resident `reliance-nudges` instruction (the silence and frustration floors), not in the system prompt.
-- **What this skill uniquely adds**: the once-appropriate procedures — PA1 cross-session context recovery (`HANDOFF.md` → authoritative task list → `TODO.md` → session memory → dream reports), PA2 uncommitted-work detection (>24h threshold, count-only privacy), and PA4 focus routing from `.github/config/goals.json`.
+- **What Muse already does natively**: Muse carries user context across turns, and its native session history, resume, and memory interfaces are available as secondary evidence. They are not the authoritative task backlog, and Muse has no defined native rule set for *whether* a proactive nudge is appropriate — that judgment lives in the resident `reliance-nudges` instruction (the silence and frustration floors), not in the system prompt.
+- **What this skill uniquely adds**: the read-only recovery contract — recovery never authorizes writes or meditation; a policy-denied source stays denied; unobserved worktree state stays unknown; nudges disclose counts, not filenames — plus routing to the consolidated procedures in [project recovery](references/project-recovery.md) (PA1 cross-session recovery, PA2 uncommitted-work detection, PA4 focus routing).
 - **When to load it**: once the inhibition rules have judged a proactive behavior appropriate; when continuity, worktree state, or active goals may change the response.
 
-Whether to surface what you notice is decided by the Inhibition Rules in the `reliance-nudges` instruction, which holds the silence and frustration floors. Use this skill once that decision is made, to apply PA1, PA2, or PA4.
+Use relevant native session history, resume, and memory interfaces as secondary evidence, not as the authoritative task backlog. Read current repository guidance, HANDOFF current state/next action/blockers/verification, and the authoritative task list; use TODO.md only as a fallback. Follow existing project conventions and do not invent absent records.
 
-## Cross-Session Context Recovery (PA1)
+This skill is read-only. Do not create or rewrite project records, instructions, memory, or installed configuration. A request to recover context does not authorize meditation writes. New topics and irrelevant/stale history must not be forced onto the user's current task.
 
-At the start of every relevant conversation:
+A policy-denied source remains unavailable: do not ask the user to paste, supply, or reupload its contents, or recover them through another channel. Ask only for an independently authorized task goal or next action without restricted content. Modified does not establish staged or unstaged status; keep unobserved worktree details unknown.
 
-1. **Check repo-root `HANDOFF.md`** — the canonical project handoff. If present, read current state, blockers, next action, and verification; tolerate older section names without assuming they contain the full backlog.
-2. **Check the authoritative task list** linked from handoff or `AGENTS.md`. Otherwise read root `TODO.md` if present. Use relevant pending work to inform recovery, not to force old tasks onto a new request. If handoff is missing, tasks can still establish unfinished work; note the missing restart context.
-3. **Check session memory** — read `/memories/session/` as a secondary signal. Session memory is by-design ephemeral and clears at conversation end; any handoff content here is a lower-tier signal than `HANDOFF.md`. Scan titles and status fields if present.
-4. **Check dream reports (if available)** — if `.github/quality/dream-report.json` exists, note the last dream date and any issues. Skip silently if absent — not every project ships a dream pipeline.
-5. **Summarize briefly** — if relevant prior context exists in handoff, the task list, or session memory, offer a one-line recovery summary subject to the inhibition rules. These checks are read-only; do not rewrite continuity records or create episodic/native memory as part of recovery.
+Load and follow the [project recovery procedure](references/project-recovery.md) for the selected recovery, worktree-state, or focus case. Count changes with git; privacy-sensitive nudges disclose counts, not filenames. Silence wins during frustration or flow, and unsolicited reminders must be relevant and nonintrusive.
 
-| Signal | Action |
-| --- | --- |
-| `HANDOFF.md` present with recent content | Mention proactively |
-| Authoritative task list has work relevant to this request | Use it to inform recovery; do not repeat the whole backlog |
-| Session memory file with `Status: Active` | Mention proactively (secondary signal) |
-| Session memory file with `Status: Concluded`, or memory stale (>7 days) | Skip |
-| User's first message is clearly a new topic, or starts with "new topic" | Don't force old context; start fresh |
-| No handoff, authoritative task list, or session memory | Start fresh, no mention |
-| Dream report shows issues (if dream pipeline present) | Mention if relevant to current request |
+For session/context mechanics use native controls and the [session boundary](references/runtime-session-health-monitoring.md); do not collect cross-session behavioral scores. Missing history/handoff is a named limitation, not evidence that no work exists. Return material state, blockers, next action, and evidence without claiming fresh verification from stale notes.
 
-## Uncommitted Work Detection (PA2)
+## Runtime contract references
 
-When starting a session or after completing a task that touched files:
+Load only the reference selected by the triggering instruction; do not replay all runtime contracts for unrelated work. These references add no authority and do not call the instruction again.
 
-1. **Get the counts from commands, never by scanning a status listing.** Staged count: `git diff --cached --name-only | wc -l`. Unstaged count: `git diff --name-only | wc -l`. PowerShell equivalents: `(git diff --cached --name-only | Measure-Object -Line).Lines` and `(git diff --name-only | Measure-Object -Line).Lines`.
-2. **Get the oldest change's age from file times.** Bash: `git diff --cached --name-only | xargs -d '\n' stat -c %Y | sort -n | head -1` prints the oldest staged file's modification time as epoch seconds; run the same pipeline over `git diff --name-only` for unstaged changes. Age is now minus that value. PowerShell: `(git diff --cached --name-only | Get-Item | Sort-Object LastWriteTime | Select-Object -First 1).LastWriteTime`.
-3. **Privacy**: surface file *count* only, not file names or paths, in nudges. The commands above use names internally to compute the count and the age; the nudge itself reports count and timeframe only.
-4. **Threshold**: only alert if uncommitted changes are >24 hours old (based on the file modification time from step 2).
-5. **Nudge format**: *"You have N uncommitted changes from [timeframe]. Want to review and commit?"* Quote N and the timeframe from the command output in steps 1 and 2; never estimate either by eye.
-
-| Condition | Priority | Message |
-| --- | --- | --- |
-| Staged changes >4 days | High | "N files staged but uncommitted for N days" |
-| Staged changes >24h | Medium | "N uncommitted staged changes" |
-| Modified tracked files >24h (not staged) | Low | Mention only if user asks about project status |
-
-## Focus Routing (PA4)
-
-Read `.github/config/goals.json` for the user's active focus (heir-authored; absent on fresh installs by design):
-
-1. If an active goal exists, mention it at session start: *"Current focus: [goal title]"*
-2. When the user's request is ambiguous, route toward the active goal.
-3. Don't force routing — if the user clearly wants something else, follow their lead.
-
-## Boundaries
-
-- Do not override the resident silence or frustration inhibition floors.
-- Do not expose worktree filenames or paths in an uncommitted-work nudge.
-- Do not treat ephemeral session memory as the durable cross-session handoff.
-
-## Anti-Patterns
-
-| Anti-pattern | Correction |
-| --- | --- |
-| Surfacing stale continuity during a new topic | Let the resident gate suppress it. |
-| Naming changed files in a nudge | Report only a count and timeframe. |
-| Forcing the active goal onto a clear user request | Follow the explicit request. |
+- **recovery**: [session-health-monitoring](references/runtime-session-health-monitoring.md)
 
 ## Would Revise If
 

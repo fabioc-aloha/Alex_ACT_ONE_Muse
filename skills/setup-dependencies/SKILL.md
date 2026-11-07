@@ -1,7 +1,7 @@
 ---
 name: setup-dependencies
 description: "Check which optional dependencies this plugin can use, report what each missing one costs, and install them with consent. Covers Pandoc, Mermaid CLI, svgexport, jszip, and the pinned MCP servers for charts, image generation, and browser verification. Use after installing the plugin, when a skill reports a missing tool, or when checking for MCP updates."
-lastReviewed: 2026-09-07
+lastReviewed: 2026-11-07
 ---
 
 # Setup Dependencies
@@ -27,6 +27,14 @@ The report covers three things: external tools, the MCP servers, and the
 optional plugins that extend this package. It writes nothing.
 
 Add `--json` for a machine-readable version.
+
+For MCP packages, the report distinguishes directory presence (`installed`),
+exact metadata and library checks (`versionMatched`), and a bounded successful
+`--version` launch probe (`launchable`). Empty package directories are not ready.
+`present`/`allPresent` require the version and launch checks, not just a folder.
+Host connectivity is separate: `hostConnected` is `null` and
+`connectionStatus` is `not-observed` until the host is checked independently.
+These probes do not demonstrate API authentication or actual renderer output.
 
 ## What Is Optional
 
@@ -94,12 +102,14 @@ or npx.
 
 | Pinned package | Tier | Role |
 | --- | --- | --- |
-| `flint-chart-mcp@0.5.1` | Required | Chart rendering, ThemeSpec discovery, version-matched authoring resources. No fallback |
+| `flint-chart-mcp@1.0.1` with `flint-chart@1.0.1` | Required | Chart rendering, validated interactive show, and version-matched chart/theme/interaction/board resources. No fallback |
 | `@playwright/mcp@0.0.80` | Recommended | Browser verification. `render-verify` also works with the host's own browser tools |
 | `replicate-mcp@0.9.0` | Add-on | AI image generation. Also needs `REPLICATE_API_TOKEN` and a paid account |
 
-Provisioning installs all three; there is no per-server flag. That is fine for
-disk, and the launcher only starts a server when a skill actually calls it.
+Provisioning selects all MCP servers by default. Use `--server flint` to select
+only Flint and its independently exact-pinned library. The launcher checks both
+metadata versions before invoking Flint; other server pins remain unchanged.
+The launcher only starts a server when a skill actually calls it.
 
 Procedure:
 
@@ -108,8 +118,22 @@ Procedure:
    the mutation boundary. It changes nothing.
 2. Show that preview and ask whether to apply it. Installing the plugin is not
    consent for a separate package-network operation.
-3. On approval, rerun with `--apply`.
-4. Reload the host so its MCP processes restart through the direct launcher.
+3. On approval, rerun with `--apply`. Success requires exact installed metadata,
+   the server-resolved Flint library where applicable, and a bounded launch probe
+   for each selected server. npm exit zero alone is not readiness.
+4. Reload the host so its MCP processes restart through the direct launcher,
+   then verify the expected MCP tools/connectivity there. No host connection is
+   claimed by the package installation or standalone version probe.
+
+Metadata, plugin-inventory, and installation subprocesses have finite waits;
+timeout/startup failures remain explicit. A failed install or verification can
+leave partial package state and must not be reported as provisioned successfully.
+
+If registry metadata advertises backend tarballs that npm policy cannot fetch
+directly, do not enable remote fetching or change the registry. With explicit
+approval and npm 12+, `--registry-tarball-prefix <HTTPS-prefix/>` routes matching
+tarball URLs through the configured registry for that command only. Preview the
+exact prefix first; the installer does not invent it or persist npm settings.
 
 The provisioner installs nothing globally and never passes `--registry` or edits
 `.npmrc`. Whatever registry the user has configured is the one it uses.

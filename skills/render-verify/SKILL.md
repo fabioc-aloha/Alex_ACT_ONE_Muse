@@ -1,7 +1,7 @@
 ---
 name: render-verify
-description: "Verify a rendered visual artifact actually says what it was supposed to say — open it, read its console errors, walk a failure catalog, and check it against the claim it was meant to carry. Works on charts, generated HTML reports, SVG, dashboards, diagrams, and any other output meant to be looked at. Use after render_chart, after a Vega-Lite create_chart_view, after editing a post-Flint Vega-Lite spec, and before committing any generated HTML/SVG/PNG. Satisfied by the host's native browser tools. (The Copilot edition also allowed the optional alex-playwright MCP server; there is no MCP consumer in the Muse edition — see `docs/muse-capability-map.md`.)"
-lastReviewed: 2026-08-14
+description: "Verify a rendered visual artifact actually says what it was supposed to say — open it, read its console errors, walk a failure catalog, and check it against the claim it was meant to carry. Works on charts, generated HTML reports, SVG, dashboards, diagrams, and any other output meant to be looked at. Use after render_chart, after a Flint `show` (the Vega-Lite interactive view; called create_chart_view before Flint 1.0), after editing a post-Flint Vega-Lite spec, and before committing any generated HTML/SVG/PNG. Satisfied by the host's native browser tools. (The Copilot edition also allowed the optional alex-playwright MCP server; there is no MCP consumer in the Muse edition — see `docs/muse-capability-map.md`.)"
+lastReviewed: 2026-11-07
 ---
 
 # render-verify: look at what you rendered
@@ -49,6 +49,13 @@ longest; a shorter general catalog follows it.
 - Single-layer chart, small embedded data, spec unchanged since a render you
   already looked at.
 - The user is iterating rapidly on color or title only.
+
+- When requested interaction behavior or state changes: if gesture and reset
+  acceptance is not already defined, load and follow
+  [flint-interactions](../flint-interactions/SKILL.md). Otherwise apply the
+  existing acceptance; do not reload that owner. This skill owns visual/data
+  checks, not a second interaction procedure; a valid spec, screenshot, or
+  accepted display call does not prove behavior.
 
 ## The failure catalog — charts
 
@@ -98,7 +105,7 @@ Before declaring a figure done in a document / chapter / report / worked solutio
 | **Big Idea sentence**                       | The chapter or section's one-line takeaway still holds against the data, and it matches the figure's own subtitle       |
 | **Caption / alt text**                      | Describes what the figure now shows. Alt text IS the caption in most publication workflows                              |
 | **Anchoring paragraph**                     | Introduces the figure with the correct panels in the correct order (BEFORE-left, AFTER-right for paired panels)         |
-| **Numeric claims**                          | Run the scan-mode diff: `node scripts/check-numeric-claims.mjs --prose <doc> --dataset <data.json>` extracts every numeric token the prose cites (`$4.2M`, `2.18×`, `78%`) and diffs it against the dataset values. Every unmatched token is a triage candidate: fix the prose, or name the non-data lever it comes from. Include category names and sort order, not just values |
+| **Numeric claims**                          | Run `scripts/check-claims.mjs --prose <doc> --data <dataset.json>` as a numeric-membership scan, then verify entity, period, units, category names, and sort order semantically. A value occurring somewhere in the dataset does not establish that the prose claim is true |
 | **Figure text that belongs in the chapter** | Sentence-length exposition inside the SVG is a smell — propose relocation to the chapter body                             |
 
 ### Look for the non-data lever first
@@ -174,7 +181,7 @@ chart described as verified is worse than an unverified chart.
 
 ### Which capabilities you actually need
 
-"Can open HTML" is not one capability — it is five, and hosts differ in which
+"Can open HTML" is not one capability, and hosts differ in which
 they provide. Establish what you have _before_ interpreting what you see.
 
 | #   | Capability                                                                         | Needed for                                | If missing                                                               |
@@ -184,6 +191,7 @@ they provide. Establish what you have _before_ interpreting what you see.
 | 3   | **Console-error access**                                                           | Step 2 — finding the _cause_              | You can still see symptoms; say that causes were not checked             |
 | 4   | **Element-scoped or scrolled capture**                                             | Multi-figure artifacts                    | Verify one figure per page-load, or accept reduced confidence and say so |
 | 5   | **Wait-for / re-capture after render**                                             | Anything JS-rendered (Vega-Lite, ECharts) | **See the false-positive warning below**                                 |
+| 6   | **Input reaches the intended frame and focus target**                              | Interactive acceptance, keyboard paths, and reset | Label DOM-only or unsupported checks explicitly                     |
 
 > [!WARNING]
 > **Capability 5 can manufacture a defect that isn't there.** Vega-Lite and
@@ -230,9 +238,8 @@ and observe the result. Tool names vary between hosts; outcomes do not.
    `error`.
 3. **Then screenshot it.**
 
-Zero console errors plus a wrong-looking artifact means a spec, data, or layout
-problem. Console errors plus a right-looking artifact means you are probably
-looking at a stale render.
+Console output alone does not establish a stale render or a spec defect. Check
+the actual artifact, readiness, frame target, and state before choosing a cause.
 
 ## Step 3 — check the picture against the catalogs
 
@@ -243,13 +250,27 @@ is rendered as a page. Then, for multi-figure artifacts:
   screenshot visually hides defects in unfocused figures.
 - **Check the axes have real domains** — not `[0, 0]`, not a collapsed range,
   no `undefined` ticks.
-- **Count the marks, and report both numbers.** Derive the expected count
-  from the dataset or spec first (the rows, series, or categories the data
-  implies), then count the rendered marks in the DOM or the accessibility
-  tree. Report expected and actual side by side; a mismatch is a defect
-  even when the picture looks right.
+- **Count the marks against what the data should produce, by count, not by eye.**
+  (1) Derive the expected count from the source: rows per series in the dataset
+  or the spec's data, counted with a script or `jq`, with any dedup or
+  aggregation the spec applies already accounted for. (2) Count the rendered
+  marks in the browser snapshot: the mark group's DOM elements, or the mark
+  entries in the accessibility tree. (3) Compare the two numbers. A mismatch is
+  a data or spec problem (dedup, aggregation, empty binding) until proven
+  otherwise; do not resolve it by looking harder at the picture.
 - **Search the rendered text for placeholders** — `TODO`, `undefined`, `NaN`,
   `{{`, `Lorem`. Search what rendered, not the source that produced it.
+- **Decode embedded images.** Require `decode()` success or `naturalWidth > 0`,
+  including data-URI SVG. An image can be complete and still fail XML decoding;
+  report/footer text outside its SVG root is not valid image content.
+- **Measure clipping after resize.** Wait for the child frame and layout to
+  settle; compare each plot's `getBoundingClientRect()` with its nearest
+  clipping container at desktop and narrow widths. A page with no horizontal
+  overflow can still hide part of a fixed-height board chart.
+- **Exercise requested behavior.** Use the existing flint-interactions
+  acceptance contract for themed controls, semantic identities, linked overlays,
+  preserved populations, and neutral-state reset. A static preview or changed
+  opacity alone does not prove that the correct recipient records responded.
 
 ## Step 4 — check the claim, not just the render
 
@@ -258,17 +279,17 @@ Big Idea from the `chart-big-idea` skill; for a report or diagram it is whatever
 the surrounding prose asserts. **A correct render of a wrong claim is still a
 defect.**
 
-- **Verify prose claims arithmetically against the plotted or tabulated values.**
-  If the caption says "less than a fifth of the noise", compute it.
-  Ratios are computed with a script, never in your head: run
-  `node scripts/check-numeric-claims.mjs --dataset <data.json> --numerator <key> --denominator <key>`
-  (ratio mode; dotted key paths, numeric arrays are summed) and quote the
-  printed ratio.
+- **Verify prose claims arithmetically against the plotted or tabulated values, with a script.**
+  If the caption says "less than a fifth of the noise", do not do the division
+  in your head: run this skill's bundled `scripts/check-claims.mjs --data
+  <dataset.json> --part <value or field path> --whole <value or field path>
+  --claim 1/5 --relation lt` and quote its output. The model writes the check
+  and interprets the result; it never does the arithmetic in prose.
   Order-of-magnitude overstatements in captions survive every automated check
   there is.
 - **Re-read the claim and ask whether the picture shows it.** If the claim is
   about a gap and the eye goes to a trend, the chart type is wrong — go back to
-  `flint-chart` §0.2, do not patch the styling.
+  the owning `flint-chart` selection reference, do not patch the styling.
 
 ### Storytelling read-back
 
@@ -401,3 +422,6 @@ Revise this skill if:
   row about installed-Chrome-by-channel would then be wrong.
 - **A failure mode recurs that is not in either catalog above.** The tables are
   the load-bearing content; extend them rather than adding tooling.
+- **Verification is consistently skipped by users**, indicating the step is too
+  heavy and should collapse into the `flint-chart` render step instead of
+  standing as its own skill.

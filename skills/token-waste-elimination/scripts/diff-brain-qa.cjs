@@ -4,150 +4,199 @@
  * @lifecycle stable
  * @muscle diff-brain-qa
  * @inheritance inheritable
- * @description Compute before/after deltas from two brain-qa --json snapshots
+ * @description Compute artifact-count and line-count deltas between two brain-qa --json snapshots
  * @version 1.0.0
  * @skill token-waste-elimination
  * @platform windows,macos,linux
  * @requires node
  *
- * Workflow step 6 asks for artifact-count and high-frequency-line deltas
- * between the baseline brain-QA snapshot and the post-change snapshot.
- * Subtracting snapshot numbers in prose is exactly the kind of arithmetic
- * that drifts. This script reads both `brain-qa --json` outputs and prints
- * the deltas itself.
+ * Deterministic delta reporting for the token-waste-elimination workflow:
+ * given the brain-qa --json snapshots captured before and after a trimming
+ * pass, compute the deltas instead of subtracting the two reports by hand.
  *
- * Snapshot shapes vary by project, so the script is shape-tolerant:
- *   - Artifact count: the length of the first array found under any of
- *     artifacts / files / items / results, or a numeric count/total field.
- *   - High-frequency lines: when artifact entries carry per-file line
- *     counts (lines / lineCount) and an applyTo scope, lines for scopes
- *     "**" plus the slash-star variant are summed. Otherwise all line
- *     counts is reported as total lines.
- *   - Every numeric scalar field present at the same path in both
- *     snapshots is also diffed, so project-specific counters still show.
+ * Reported:
+ *   - Artifact count delta, when a count can be located in both snapshots
+ *     (artifactCount / counts.artifacts / summary.artifactCount, or the
+ *     length of an artifacts|files array).
+ *   - Per-file line deltas, when both snapshots carry a files|artifacts
+ *     array whose entries have a path and a numeric lines|lineCount field.
+ *     Added and removed files are listed as well.
+ *   - Every other numeric metric present under the same dotted path in
+ *     both snapshots, with its delta.
  *
  * Usage:
- *   node diff-brain-qa.cjs BEFORE.json AFTER.json
+ *   node diff-brain-qa.cjs BEFORE.json AFTER.json [--json]
  *
- * Exit codes: 0 = diffed, 2 = usage, file, or JSON error.
+ * Requirements:
+ *   - Node.js 24+
  */
 
 "use strict";
 
+process.on("uncaughtException", (err) => {
+  console.error(`\x1b[31m[FATAL] ${err.message}\x1b[0m`);
+  process.exit(1);
+});
+
 const fs = require("fs");
+const path = require("path");
 
-function fail(msg) {
-  console.error(`[ERROR] ${msg}`);
-  process.exit(2);
-}
-
-function readJson(p) {
+function loadSnapshot(file) {
+  if (!fs.existsSync(file)) {
+    console.error(`ERROR: File not found: ${file}`);
+    process.exit(1);
+  }
   try {
-    return JSON.parse(fs.readFileSync(p, "utf8"));
-  } catch (e) {
-    fail(`cannot parse ${p} as JSON: ${e.message}`);
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch (err) {
+    console.error(`ERROR: ${file} is not valid JSON: ${err.message}`);
+    process.exit(1);
   }
 }
 
-const LIST_KEYS = ["artifacts", "files", "items", "results"];
-
-function artifactList(snap) {
-  if (Array.isArray(snap)) return snap;
-  if (snap && typeof snap === "object") {
-    for (const k of LIST_KEYS) {
-      if (Array.isArray(snap[k])) return snap[k];
-    }
+function flattenNumbers(obj, prefix = "", out = new Map()) {
+  if (obj === null || typeof obj !== "object") return out;
+  if (Array.isArray(obj)) return out; // arrays handled by dedicated extractors
+  for (const [key, value] of Object.entries(obj)) {
+    const p = prefix ? `${prefix}.${key}` : key;
+    if (typeof value === "number" && Number.isFinite(value)) out.set(p, value);
+    else if (value && typeof value === "object" && !Array.isArray(value)) flattenNumbers(value, p, out);
   }
+  return out;
+}
+
+function fileEntries(snapshot) {
+  const arr = snapshot.artifacts || snapshot.files || null;
+  if (!Array.isArray(arr)) return null;
+  const map = new Map();
+  for (const entry of arr) {
+    if (!entry || typeof entry !== "object") continue;
+    const p = entry.path || entry.file || entry.name;
+    const lines = entry.lines !== undefined ? entry.lines : entry.lineCount;
+    if (typeof p === "string" && typeof lines === "number") map.set(p, lines);
+  }
+  return map.size > 0 ? map : null;
+}
+
+function artifactCount(snapshot, entries) {
+  const candidates = [
+    snapshot.artifactCount,
+    snapshot.counts && snapshot.counts.artifacts,
+    snapshot.summary && snapshot.summary.artifactCount,
+    snapshot.totals && snapshot.totals.artifacts,
+  ];
+  for (const c of candidates) if (typeof c === "number") return c;
+  const arr = snapshot.artifacts || snapshot.files;
+  if (Array.isArray(arr)) return arr.length;
+  if (entries) return entries.size;
   return null;
 }
 
-function artifactCount(snap) {
-  const list = artifactList(snap);
-  if (list) return list.length;
-  if (snap && typeof snap === "object") {
-    for (const k of ["count", "total", "artifactCount", "totalArtifacts"]) {
-      if (typeof snap[k] === "number") return snap[k];
+function diffSnapshots(before, after) {
+  const beforeFiles = fileEntries(before);
+  const afterFiles = fileEntries(after);
+
+  const result = {
+    artifactCount: null,
+    fileDeltas: [],
+    addedFiles: [],
+    removedFiles: [],
+    totalLineDelta: null,
+    metricDeltas: [],
+  };
+
+  const bc = artifactCount(before, beforeFiles);
+  const ac = artifactCount(after, afterFiles);
+  if (bc !== null && ac !== null) {
+    result.artifactCount = { before: bc, after: ac, delta: ac - bc };
+  }
+
+  if (beforeFiles && afterFiles) {
+    let totalBefore = 0;
+    let totalAfter = 0;
+    for (const [p, lines] of beforeFiles) {
+      totalBefore += lines;
+      if (afterFiles.has(p)) {
+        totalAfter += afterFiles.get(p);
+        const d = afterFiles.get(p) - lines;
+        if (d !== 0) result.fileDeltas.push({ path: p, before: lines, after: afterFiles.get(p), delta: d });
+      } else {
+        result.removedFiles.push({ path: p, lines });
+      }
+    }
+    for (const [p, lines] of afterFiles) {
+      if (!beforeFiles.has(p)) {
+        totalAfter += lines;
+        result.addedFiles.push({ path: p, lines });
+      }
+    }
+    result.fileDeltas.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+    result.totalLineDelta = { before: totalBefore, after: totalAfter, delta: totalAfter - totalBefore };
+  }
+
+  const beforeNums = flattenNumbers(before);
+  const afterNums = flattenNumbers(after);
+  for (const [p, bv] of beforeNums) {
+    if (afterNums.has(p) && afterNums.get(p) !== bv) {
+      result.metricDeltas.push({ metric: p, before: bv, after: afterNums.get(p), delta: afterNums.get(p) - bv });
     }
   }
-  return null;
+  result.metricDeltas.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+
+  return result;
 }
 
-function entryLines(e) {
-  if (!e || typeof e !== "object") return null;
-  for (const k of ["lines", "lineCount", "line_count"]) {
-    if (typeof e[k] === "number") return e[k];
-  }
-  return null;
-}
-
-function lineSums(snap) {
-  const list = artifactList(snap);
-  if (!list) return null;
-  let total = 0;
-  let high = 0;
-  let any = false;
-  let anyScoped = false;
-  for (const e of list) {
-    const n = entryLines(e);
-    if (n === null) continue;
-    any = true;
-    total += n;
-    const scope = e && typeof e === "object" ? e.applyTo || e.scope || e.glob : null;
-    if (scope === "**" || scope === "**/*") {
-      high += n;
-      anyScoped = true;
-    }
-  }
-  if (!any) return null;
-  return { total, highFreq: anyScoped ? high : null };
-}
-
-function collectScalars(obj, prefix, out) {
-  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return;
-  for (const [k, v] of Object.entries(obj)) {
-    const p = prefix ? `${prefix}.${k}` : k;
-    if (typeof v === "number") out.set(p, v);
-    else if (v && typeof v === "object" && !Array.isArray(v)) collectScalars(v, p, out);
-  }
-}
-
-function fmtDelta(before, after) {
-  if (before === null || after === null) return "n/a (missing in one snapshot)";
-  const d = after - before;
-  const sign = d > 0 ? "+" : "";
-  return `${before} -> ${after} (delta ${sign}${d})`;
+function signed(n) {
+  return n > 0 ? `+${n}` : `${n}`;
 }
 
 function main() {
-  const args = process.argv.slice(2);
-  if (args.length !== 2) fail("usage: node diff-brain-qa.cjs BEFORE.json AFTER.json");
-  const before = readJson(args[0]);
-  const after = readJson(args[1]);
+  const args = process.argv.slice(2).filter((a) => a !== "--json");
+  const asJson = process.argv.includes("--json");
+  if (args.length !== 2) {
+    console.log("Usage: node diff-brain-qa.cjs BEFORE.json AFTER.json [--json]");
+    process.exit(1);
+  }
+  const before = loadSnapshot(path.resolve(args[0]));
+  const after = loadSnapshot(path.resolve(args[1]));
+  const result = diffSnapshots(before, after);
 
-  console.log(`artifacts: ${fmtDelta(artifactCount(before), artifactCount(after))}`);
-
-  const lb = lineSums(before);
-  const la = lineSums(after);
-  if (lb && la) {
-    console.log(`total lines: ${fmtDelta(lb.total, la.total)}`);
-    if (lb.highFreq !== null && la.highFreq !== null) {
-      console.log(`high-frequency lines ("**" + "**/*"): ${fmtDelta(lb.highFreq, la.highFreq)}`);
-    } else {
-      console.log('high-frequency lines: n/a (artifact entries lack applyTo scopes in one snapshot)');
-    }
-  } else {
-    console.log("lines: n/a (no per-artifact line counts in one snapshot)");
+  if (asJson) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
   }
 
-  const sb = new Map();
-  const sa = new Map();
-  collectScalars(before, "", sb);
-  collectScalars(after, "", sa);
-  const shared = [...sb.keys()].filter((k) => sa.has(k)).sort();
-  if (shared.length > 0) {
-    console.log("numeric fields present in both snapshots:");
-    for (const k of shared) console.log(`  ${k}: ${fmtDelta(sb.get(k), sa.get(k))}`);
+  if (result.artifactCount) {
+    const { before: b, after: a, delta } = result.artifactCount;
+    console.log(`Artifact count: ${b} -> ${a} (${signed(delta)})`);
+  } else {
+    console.log("Artifact count: not present in both snapshots");
+  }
+
+  if (result.totalLineDelta) {
+    const { before: b, after: a, delta } = result.totalLineDelta;
+    console.log(`Total lines across listed files: ${b} -> ${a} (${signed(delta)})`);
+    for (const f of result.fileDeltas) {
+      console.log(`  ${signed(f.delta).padStart(7)}  ${f.before} -> ${f.after}  ${f.path}`);
+    }
+    for (const f of result.addedFiles) console.log(`  ADDED    ${f.lines} lines  ${f.path}`);
+    for (const f of result.removedFiles) console.log(`  REMOVED  ${f.lines} lines  ${f.path}`);
+  }
+
+  if (result.metricDeltas.length > 0) {
+    console.log("\nOther numeric metric deltas:");
+    for (const m of result.metricDeltas) {
+      console.log(`  ${m.metric}: ${m.before} -> ${m.after} (${signed(m.delta)})`);
+    }
+  }
+
+  if (!result.artifactCount && !result.totalLineDelta && result.metricDeltas.length === 0) {
+    console.log("No comparable numeric metrics found in both snapshots.");
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = { diffSnapshots };

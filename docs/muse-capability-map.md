@@ -20,6 +20,9 @@ server now point here instead.
 - `setup-dependencies` in the Copilot edition provisions these servers. In this
   edition there is nothing to provision — the capabilities are native to the
   host. The skill is preserved for reference.
-- Version pins from the Copilot edition (`flint-chart-mcp@0.5.1`,
-  `@playwright/mcp@0.0.80`, `replicate-mcp@0.9.0`) are recorded here for
-  lineage; they have no operational meaning in the Muse edition.
+- Version pins from the Copilot edition at its 0.9.2 (`flint-chart@1.0.1`
+  and `flint-chart-mcp@1.0.1` exact-pinned, `@playwright/mcp@0.0.80`,
+  `replicate-mcp@0.9.0`) are recorded here for lineage; they have no
+  operational meaning in the Muse edition. The preserved provisioning
+  scripts under `skills/setup-dependencies/` carry the same 1.0.1 pin so the
+  editions stay in step.

@@ -1,7 +1,7 @@
 ---
 name: "code-review"
 description: "Systematic code review for correctness, security, and growth — not just style enforcement"
-lastReviewed: 2026-05-05
+lastReviewed: 2026-11-07
 ---
 
 # Code Review Skill
@@ -164,8 +164,8 @@ For safety-critical projects, apply NASA/JPL Power of 10 rules during review:
 
 The report's numbers come from `scripts/audit-tally.cjs`, never from counting grep output by hand:
 
-1. **Console statements:** `grep -rn "console\." src/ > console-audit.txt`. During the categorization pass, append `[legitimate]` or `[removable]` to each line (the keep/drop call stays human judgment). Run `node scripts/audit-tally.cjs console-audit.txt` and quote its output for X (remaining), Y (legitimate), Z (removable).
-2. **Menu validation:** record one line per command tested in `menu-audit.txt`, tagged `[working]` or `[broken]`. Run the same script and quote its working/broken ratio.
+1. **Console statements:** run `node scripts/audit-tally.cjs console <rootDir>` — the script scans the tree itself; do not grep output into a list file for it to read. After you categorize each hit (the keep/drop call stays human judgment), write a categories file with one `path:line:legitimate` or `path:line:removable` entry per hit and rerun with `--categories <file>`; quote its output for X (remaining), Y (legitimate), Z (removable).
+2. **Menu validation:** count the commands you tested as working and as broken, then run `node scripts/audit-tally.cjs ratio <working> <broken>` and quote its ratio. Never divide in prose.
 
 ### Audit Report Template
 

@@ -1,7 +1,7 @@
 ---
 name: "ai-tell-audit"
 description: "Read-only audit for AI-tell prose: scan text against the humanizer's pattern catalog plus the project's house AI-tell list, and return a density verdict with a Major/Minor findings table and minimal recasts. Never rewrites. Use for pre-publish checks when the author wants to judge the flags themselves."
-lastReviewed: 2026-10-16
+lastReviewed: 2026-11-07
 ---
 
 # AI-Tell Audit
@@ -91,5 +91,5 @@ End with the pattern families checked and found clean, in one line, so a clean a
 
 ## Would Revise If
 
-- **Event-based:** if repeated audits flag legitimate stylistic choices as tells (e.g., intentional rule-of-three for humor) 3+ times in a quarter, the catalog's false-positive carve-outs need strengthening — add explicit exemptions rather than softening the patterns.
+- **Event-based:** if repeated audits keep flagging legitimate stylistic choices as tells (e.g., intentional rule-of-three for humor), the catalog's false-positive carve-outs need strengthening — add explicit exemptions rather than softening the patterns.
 - **Counter-evidence:** if density verdicts stop discriminating (everything reads "light"), the severity thresholds are too coarse — split Major into blocking vs non-blocking.

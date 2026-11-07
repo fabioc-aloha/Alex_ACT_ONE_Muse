@@ -275,7 +275,10 @@ checker bundled with the sibling compile-brain skill
 (`../compile-brain/scripts/check-links.cjs`) over `HANDOFF.md`, `TODO.md`,
 `CHANGELOG.md`, and `AGENTS.md`, and resolve every miss it reports. That
 script is the single implementation of this check; do not re-implement it
-here and do not eyeball link targets instead.
+here and do not eyeball link targets instead. The checker also accepts a
+directory argument (scanned recursively for `*.md` files) and validates
+`#fragment` targets on local Markdown links against the destination file's
+heading slugs.
 
 Reconcile task accounting by count, not by reading. Before cleanup, take
 the open-item count from the authoritative task list (for a checkbox list,

@@ -1,7 +1,7 @@
 ---
 name: docs-shell
 description: "The single-page HTML shell (index.html + manifest.json at a repository root or stable subfolder) that renders concatenated markdown as browsable, GitHub-styled documentation with a two-line topnav, per-doc emoji icons, sticky page header, and sidebar TOC. Use when the user says 'shell', 'add a doc', 'add a chapter', 'landing page', 'sidebar', 'manifest', 'hero', 'nav-strip', 'shell theme', 'color scheme', 'polish the pages', 'render preview', 'add an area', or when authoring/editing content that appears in the root manifest. Also invoke when the shell misrenders (raw frontmatter visible, links broken across folders, missing hero, doc button not switching content, sticky header overlap). Muse delta: the manifest-driven 90% mental model, the schema essentials, and the common-task procedures — beyond Muse's native ability to write static HTML docs."
-lastReviewed: 2026-08-07
+lastReviewed: 2026-11-07
 ---
 
 # docs-shell skill
@@ -39,6 +39,8 @@ Do NOT fire when: the user is editing content of an existing doc and the change 
 **Two-line topnav.** Line 1 = brand slot + area buttons. Line 2 = documents of the active area. URL scheme `?area=<id>&doc=<slug>` with cascading fallbacks.
 
 **Rendered reading surface.** The shell doesn't expose raw Markdown controls. Relative links to sources already registered in the manifest route to their rendered shell pages. Parsed Markdown passes through DOMPurify; Mermaid runs afterward in strict mode; CDN assets are exact-version, SHA-384 pinned. On narrow screens both nav rows scroll horizontally; the TOC becomes static and caps expanded height at 360px. Keyboard: skip link, heading permalinks, focus states, `aria-current`. Reduced-motion preferences disable animation and smooth scrolling.
+
+**Shell-resident pages and browser storage.** A page is shell-resident when a state's `render()` returns DOM the shell injects into the shared `#content` region and the surface delegates its document identity (`title`, the hero, the TOC, the page size, and the hash) to the ambient chrome rather than owning it. Pages fork between a **shell-owned** family (document pages plus shells built to reuse this engine, e.g. a course player) and a **data-backed** family that ships its own engine yet, for consistency with the document shell, delegates chrome and read-aloud (e.g. an assessment or a package workbench). For the data-backed family, rendered content stays sourced to **memory then localStorage** only; other plausible carriers (an anchor URL parameter, an identity hint in page chrome, an initial prompt, a search field) are rejected, because each one smuggles state through a channel the data contract does not own.
 
 ## Manifest schema, essential fields
 
@@ -102,7 +104,26 @@ The shell reads the rendered page via the browser's built-in Web Speech API — 
 - **Click to seek.** Clicking a block during a live session jumps playback there; inert until started; ignores clicks on links/controls/selections.
 - **Two buttons, not three.** Play/pause carries the whole interaction (no stop button; `Escape`, page finish, doc switch, unload cover exit). `stopAll()` still exists and runs on page finish, doc switch, and unload.
 - **The reader's choice persists** (`localStorage` under `alexact.readaloud`); voice ranking prefers neural/host-natural voices.
+- **Paragraph strategies.** The shell offers three paragraph-level strategies: *pause* (insert the correct synthesis gap between paragraphs), *prose* (join paragraphs without an artificial pause), and *smart* (default; when the next paragraph is a structural continuation under the same heading, join the two, otherwise pause). If a joined paragraph reads the last sentence end-marker twice, add a text-level rule rather than a new paragraph strategy.
 - **`[hidden]` needs restating.** Author `display` rules outrank the UA `[hidden]` rule — keep the explicit `.listen-panel[hidden] { display: none; }` rule if you restyle.
+
+### Settings popover dismissal
+
+The read-aloud settings popover is a sibling of `#content`, not a child. Dismissal contract:
+
+| Event | Behavior |
+| --- | --- |
+| Focus leaves the settings region | Close (only if not already closed). |
+| Click inside the read-aloud dock but outside the settings region | Close. |
+| Click anywhere else, including on `#content` | Close. |
+| Press `Esc` | Close. |
+| Open the quick-jump panel | Close the popover (the quick-jump panel is a separate menu that supersedes the settings popover). |
+
+Keyboard shortcuts: `Ctrl`+`Shift`+`L` toggles read-aloud; in the settings popover, `Home` and `End` jump the rate slider to its bounds.
+
+### Reading position and the § anchor
+
+Read-aloud progress is mirrored to the URL hash as a `§<N>` fragment (e.g. `?doc=foo#§42`), which makes a listening position shareable. On load, the shell seeks to the block whose `data-listen-index` matches the `§N` value, if one is present. To detect whether a saved position is stale (content has shifted under it), the shell also stores the heading text of the block at that index; a mismatch clears the saved position rather than seeking to a wrong block.
 
 ## Common tasks
 
@@ -177,6 +198,10 @@ For a doc whose `sources[]` are ALL `.html` files, the shell links the topnav bu
 | Verifying a show/hide change by asserting `element.hidden` | Assert `getComputedStyle(el).display` or the bounding box on a freshly loaded page. |
 | Reading a table aloud cell by cell | Skip and announce; a row read cell by cell is noise. |
 | Capping utterances at a fixed character count | Express the cap as a duration, not a character count. |
+| Overriding or removing the `popstate` listener | Every link is a problem — the URL is not navigation state. Hash changes drive navigation. |
+| Leaving search marks in the content when clearing a search | Clear `<mark class="search-mark">` nodes, not just `START` markers. |
+| Decorative emoji gate that hides a broken icon choice | Emoji icon renders when it is meaningful, not when the page is "nice enough." |
+| Shipping "popcorn" / "confetti" micro-interactions | A documentation shell is not a product landing page. No celebratory motion. |
 
 ## Optional features (CSS ready, opt-in)
 
@@ -214,3 +239,14 @@ To adopt: start with [`starter/ADOPTION.md`](starter/ADOPTION.md), choose one st
   - [big-idea](../big-idea/SKILL.md) — how to author `hero.subtitle` copy
   - [markdown-mermaid](../markdown-mermaid/SKILL.md) — Mermaid authoring rules when a doc contains a `mermaid` block
   - [svg-banner](../svg-banner/SKILL.md) — branded SVG banner authoring
+
+## Falsifiability
+
+This skill stops earning its keep if any of these fire:
+
+- Adopters keep building standalone HTML instead of declaring docs in the manifest — the manifest-first rule is not landing, and the skill is documenting a shell nobody uses as designed.
+- The manifest schema drifts from what the shell actually reads — the skill becomes a fictional spec, worse than no spec at all.
+
+## Origin
+
+The docs-shell pattern originated in the Alex ACT ONE plugin as the rendering surface for plugin documentation. Adopted across multiple Alex ACT projects (skill catalogs, books, research reports). Shipped as the shell for the Alex_Skill_Mall catalog + AlexBooks.

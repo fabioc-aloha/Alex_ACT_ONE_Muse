@@ -1,76 +1,117 @@
 #!/usr/bin/env node
 /**
- * @muscle code-review
- * @lifecycle stable
- * @inheritance inheritable
- * @description Tally categorized audit lines and compute derived counts/ratios
+ * @description Deterministic tallies for the Extension Audit report template:
+ *   console-statement counts (total, legitimate, removable) and the
+ *   menu-validation working/broken ratio. The reviewer categorizes; this
+ *   script counts and divides. Never tally grep output or do the division
+ *   in prose.
  * @version 1.0.0
- * @platform windows,macos,linux
- * @requires node
- *
- * Extension audits categorize items by appending a tag to each line of a
- * list file, e.g. `[legitimate]` / `[removable]` for console statements or
- * `[working]` / `[broken]` for menu validation. This script does the
- * counting and the ratio math so the numbers in the audit report come from
- * a deterministic tally, never from counting list items by eye.
  *
  * Usage:
- *   node audit-tally.cjs <list-file> [more-list-files...]
+ *   node audit-tally.cjs console <rootDir>
+ *   node audit-tally.cjs console <rootDir> --categories <file>
+ *   node audit-tally.cjs ratio <working> <broken>
  *
- * Input: one item per line; the category is the trailing [tag] on the line.
- * Blank lines and lines starting with # are ignored. Untagged lines are
- * reported separately so a missed categorization cannot hide in a total.
+ * The categories file has one entry per console hit:
+ *   path/to/file.ts:123:legitimate
+ *   path/to/file.ts:87:removable
+ * With --categories, the script cross-checks legitimate + removable against
+ * the scanned total and warns when they disagree.
  *
- * Output: total items, count per category, and derived lines when the
- * console ([legitimate]/[removable]) or menu ([working]/[broken])
- * categories are present.
+ * Exit codes: 0 = tallies printed, 2 = usage error.
  */
+'use strict';
 
-const fs = require('fs');
+const { existsSync, readdirSync, readFileSync, statSync } = require('node:fs');
+const { extname, join, relative } = require('node:path');
 
-const files = process.argv.slice(2);
-if (files.length === 0) {
-  console.error('Usage: node audit-tally.cjs <list-file> [more-list-files...]');
-  process.exit(2);
-}
+const EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs']);
+const CONSOLE_RE = /\bconsole\.(log|debug|info|warn|error)\s*\(/g;
 
-const counts = new Map();
-let total = 0;
-let untagged = 0;
-
-for (const file of files) {
-  const lines = fs.readFileSync(file, 'utf8').split(/\r?\n/);
-  for (const raw of lines) {
-    const line = raw.trim();
-    if (!line || line.startsWith('#')) continue;
-    total += 1;
-    const m = line.match(/\[([^\]]+)\]\s*$/);
-    if (!m) {
-      untagged += 1;
-      continue;
-    }
-    const cat = m[1].trim().toLowerCase();
-    counts.set(cat, (counts.get(cat) || 0) + 1);
+function collectFiles(target, out) {
+  const stat = statSync(target);
+  if (stat.isFile()) {
+    if (EXTENSIONS.has(extname(target))) out.push(target);
+    return;
+  }
+  for (const entry of readdirSync(target, { withFileTypes: true })) {
+    if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
+    const full = join(target, entry.name);
+    if (entry.isDirectory()) collectFiles(full, out);
+    else if (EXTENSIONS.has(extname(entry.name))) out.push(full);
   }
 }
 
-console.log(`Total items: ${total}`);
-for (const [cat, n] of [...counts.entries()].sort()) {
-  console.log(`  ${cat}: ${n}`);
+function scanConsole(root) {
+  const files = [];
+  collectFiles(root, files);
+  let total = 0;
+  const perFile = [];
+  for (const file of files.sort()) {
+    const lines = readFileSync(file, 'utf8').split(/\r?\n/);
+    let count = 0;
+    lines.forEach((line) => {
+      const matches = line.match(CONSOLE_RE);
+      if (matches) count += matches.length;
+    });
+    if (count > 0) perFile.push({ file: relative(process.cwd(), file), count });
+    total += count;
+  }
+  return { total, perFile };
 }
-if (untagged > 0) console.log(`  (untagged: ${untagged})`);
 
-const get = (c) => counts.get(c) || 0;
-
-if (counts.has('legitimate') || counts.has('removable')) {
-  const l = get('legitimate');
-  const r = get('removable');
-  console.log(`Console statements: ${l + r} remaining (${l} legitimate, ${r} removable)`);
+function consoleMode(args) {
+  const root = args[0];
+  if (!root || !existsSync(root)) {
+    console.error('Usage: node audit-tally.cjs console <rootDir> [--categories <file>]');
+    process.exit(2);
+  }
+  const { total, perFile } = scanConsole(root);
+  for (const { file, count } of perFile) console.log(`${file}: ${count}`);
+  const catIndex = args.indexOf('--categories');
+  if (catIndex === -1) {
+    console.log(`Console statements: ${total} remaining (run with --categories <file> for the legitimate/removable split)`);
+    return;
+  }
+  const catFile = args[catIndex + 1];
+  if (!catFile || !existsSync(catFile)) {
+    console.error(`Categories file not found: ${catFile ?? '(missing)'}`);
+    process.exit(2);
+  }
+  let legitimate = 0;
+  let removable = 0;
+  for (const raw of readFileSync(catFile, 'utf8').split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (line.endsWith(':legitimate')) legitimate++;
+    else if (line.endsWith(':removable')) removable++;
+    else console.error(`Warning: unrecognized category line ignored: ${line}`);
+  }
+  console.log(`Console statements: ${total} remaining (${legitimate} legitimate, ${removable} removable)`);
+  if (legitimate + removable !== total) {
+    console.error(`Warning: categorized ${legitimate + removable} of ${total} scanned hits; the split does not cover every statement.`);
+  }
 }
 
-if (counts.has('working') || counts.has('broken')) {
-  const w = get('working');
-  const b = get('broken');
-  const pct = w + b === 0 ? 0 : (w / (w + b)) * 100;
-  console.log(`Menu validation: ${w} working / ${b} broken = ${pct.toFixed(1)}% working`);
+function ratioMode(args) {
+  const working = Number(args[0]);
+  const broken = Number(args[1]);
+  if (!Number.isInteger(working) || !Number.isInteger(broken) || working < 0 || broken < 0 || working + broken === 0) {
+    console.error('Usage: node audit-tally.cjs ratio <working> <broken>  (non-negative integers, not both zero)');
+    process.exit(2);
+  }
+  const pct = ((working / (working + broken)) * 100).toFixed(1);
+  console.log(`Menu validation: ${working}/${working + broken} working (${working}:${broken}, ${pct}% working)`);
 }
+
+function main() {
+  const [mode, ...rest] = process.argv.slice(2);
+  if (mode === 'console') consoleMode(rest);
+  else if (mode === 'ratio') ratioMode(rest);
+  else {
+    console.error('Usage: node audit-tally.cjs console <rootDir> [--categories <file>] | ratio <working> <broken>');
+    process.exit(2);
+  }
+}
+
+main();

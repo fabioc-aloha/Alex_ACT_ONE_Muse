@@ -5,7 +5,7 @@ lastReviewed: 2026-08-11
 
 # /rich-email
 
-Use the `rich-email` skill to create and validate a draft-only HTML email from Markdown, then open it in New Outlook when the supported Windows launcher is available.
+Load and follow the `rich-email` skill in **draft only** mode to create and validate a draft-only HTML email from Markdown, then open it in New Outlook when the supported Windows launcher is available. Pass the user's arguments, inputs, and explicit constraints unchanged; clarify only missing material inputs. The canonical skill owns the compatibility command constraints, execution, and validation.
 
 ## Steps
 
@@ -18,6 +18,12 @@ Use the `rich-email` skill to create and validate a draft-only HTML email from M
 7. Open the unsent New Outlook draft only after the user confirms the draft boundary.
 8. Ask the user to review the compose window; do not send or claim delivery.
 9. Remove temporary artifacts after the draft is saved or discarded.
+
+## Would Revise If
+
+Return the owning skill's required result and verification limits. This entrypoint grants no additional authority: preserve the owner's approval, privacy, read-only, draft-only, and installation/publication boundaries as applicable.
+
+Resolve links from the canonical installed alex-act-one package, never an assumed adopter checkout. Report a missing skill/reference and stop rather than silently skipping the workflow.
 
 ## Would Revise If
 

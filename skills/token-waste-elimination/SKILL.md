@@ -1,7 +1,7 @@
 ---
 name: token-waste-elimination
 description: "Audit active brain artifacts for context cost, duplicated guidance, oversized routing files, and stale metadata. Use during brain audits, quarterly review, or when instructions feel heavy."
-lastReviewed: 2026-07-28
+lastReviewed: 2026-11-07
 ---
 
 # Token Waste Elimination
@@ -19,13 +19,16 @@ node scripts/brain-qa.cjs --json
 node scripts/brain-semantic-qa.cjs --json
 ```
 
-If your project doesn't ship equivalents, use the fallback counter bundled with this skill instead of measuring by hand:
+If your project doesn't ship equivalents, run this skill's bundled fallback
+counter instead of measuring by hand. It lists active instruction files
+grouped by `applyTo` scope with their line counts, totals the always-on
+group (`"**"` and `"**/*"`), and reports skill files over 500 lines:
 
 ```pwsh
-node scripts/count-instructions.cjs <project-root>
+node scripts/measure-instructions.cjs <project-root>
 ```
 
-It lists the active `applyTo: "**"` and `applyTo: "**/*"` instruction files with their line counts grouped by scope, and flags any skill file that exceeds 500 lines.
+Resolve `scripts/` against this skill's directory when invoking it.
 
 Then measure active instructions by scope and line count. Treat `applyTo: "**"`
 and `applyTo: "**/*"` as the highest-frequency group. Skill and prompt bodies
@@ -70,16 +73,11 @@ strong removal candidate.
    node scripts/brain-semantic-qa.cjs
    ```
 
-6. Report artifact-count and high-frequency-line deltas, computed from the
-   baseline and post-change snapshots by the differ bundled with this skill
-   rather than subtracted in prose:
-
-   ```pwsh
-   node scripts/diff-brain-qa.cjs baseline.json after.json
-   ```
-
-   Do not claim token savings unless measured by the actual loader or a
-   documented approximation.
+6. Report artifact-count and high-frequency-line deltas. Compute them from
+   the before/after `--json` snapshots with this skill's
+   `scripts/diff-brain-qa.cjs` rather than subtracting the two reports by
+   hand. Do not claim token
+   savings unless measured by the actual loader or a documented approximation.
 
 ## Anti-Patterns
 

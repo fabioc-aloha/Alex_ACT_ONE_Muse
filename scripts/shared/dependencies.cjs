@@ -83,7 +83,9 @@ const MCP_SERVERS = {
     flint: {
         label: 'Flint (charts)',
         package: 'flint-chart-mcp',
-        version: '0.5.1',
+        version: '1.0.1',
+        entrypoint: 'dist/cli.js',
+        library: { package: 'flint-chart', version: '1.0.1' },
         tier: 'required',
         unlocks: 'flint-chart and flint-theme. Without it they cannot render anything, and there is no fallback',
     },
@@ -91,6 +93,7 @@ const MCP_SERVERS = {
         label: 'Playwright (browser)',
         package: '@playwright/mcp',
         version: '0.0.80',
+        entrypoint: 'cli.js',
         tier: 'enhances',
         unlocks: 'browser verification for render-verify, which also works with the host\'s own browser tools',
     },
@@ -98,10 +101,17 @@ const MCP_SERVERS = {
         label: 'Replicate (images)',
         package: 'replicate-mcp',
         version: '0.9.0',
+        entrypoint: 'index.js',
         tier: 'addon',
         unlocks: 'AI image generation. Also needs a REPLICATE_API_TOKEN and a paid account',
     },
 };
+
+const SHOWCASE_PACKAGES = Object.freeze([
+    { package: '@napi-rs/canvas', version: '1.0.10' },
+    { package: 'chart.js', version: '4.5.1' },
+    { package: '@modelcontextprotocol/sdk', version: '1.32.1' },
+]);
 
 function platformKey() {
     if (process.platform === 'win32') return 'win32';
@@ -207,4 +217,16 @@ function remedyFor(toolName) {
     ].join('\n');
 }
 
-module.exports = { TOOLS, MCP_SERVERS, PLUGINS, platformKey, remedyFor, specOf, installMap };
+function mcpPackages(routes = Object.keys(MCP_SERVERS)) {
+    return routes.flatMap((route) => {
+        const server = MCP_SERVERS[route];
+        if (!server) throw new Error(`Unknown MCP server: ${route}`);
+        const packages = [{ name: server.package, version: server.version, route }];
+        if (server.library) packages.push({
+            name: server.library.package, version: server.library.version, route: null,
+        });
+        return packages;
+    });
+}
+
+module.exports = { TOOLS, MCP_SERVERS, SHOWCASE_PACKAGES, PLUGINS, mcpPackages, platformKey, remedyFor, specOf, installMap };

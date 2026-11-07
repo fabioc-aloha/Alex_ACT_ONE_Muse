@@ -1,7 +1,7 @@
 ---
 name: chart-vocabulary
 description: "Catalog of chart types organized by seven communication goals (comparison, change over time, proportion, distribution, relationship, flow, deviation), with a selection algorithm, an evaluation loop for AI-suggested charts, and density limits for dashboards. Use when picking a chart type, sanity-checking a suggested one, or reviewing whether a chart matches its story intent."
-lastReviewed: 2026-08-14
+lastReviewed: 2026-11-07
 ---
 
 # chart-vocabulary
@@ -170,6 +170,8 @@ Executive dashboards that work follow this constraint:
 
 > **No more than 5 visuals per page.** Each visual answers a different question. If you need more, you need a second page, not a denser layout.
 
+**Count the visuals, do not eyeball them, when the page is machine-readable.** For an HTML or docs-shell dashboard, count chart containers per page from the DOM or the page manifest and assert the count is ≤5. In the browser console: `document.querySelectorAll('canvas, svg, .chart, .chart-container, [data-chart]').length` (narrow the selector to the page's chart-container convention so decorative SVGs do not inflate the count). A screenshot scanned by eye is not a count.
+
 | Slot | Role | Typical chart |
 | --- | --- | --- |
 | 1-3 | **KPI cards** | Card, gauge, or sparkline |
@@ -249,7 +251,7 @@ FT Visual Vocabulary, Data-to-Viz, Data Viz Catalog, Vega-Lite examples, and Sto
 
 ## Would Revise If
 
-Revise if:
+Revisit if:
 
 - The 5-visual rule is contradicted by a working dashboard that ships more visuals without density complaints (rule too strict)
 - One of the five galleries in Module 4 retires or moves; the URL check fails

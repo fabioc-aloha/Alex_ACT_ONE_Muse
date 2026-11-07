@@ -4,105 +4,132 @@
  * @lifecycle stable
  * @muscle measure-reduction
  * @inheritance inheritable
- * @description Measure source vs draft length and percent reduction for compile-brain gates
+ * @description Measure source vs draft length and report the reduction percentage for compile-brain's gates
  * @version 1.0.0
  * @skill compile-brain
  * @platform windows,macos,linux
  * @requires node
  *
- * The compile-brain high-reduction gates (20% / 35% / 50%) must be read off a
- * measurement, never estimated in prose (no "characters divided by four").
- * This script counts characters in the source and the draft and prints the
- * percent reduction plus the gate band it falls in. When a tokenizer CLI is
- * on PATH (override with --tokenizer <cmd>), token counts are printed too;
- * the character measurement is always the fallback and always printed.
+ * Deterministic length measurement for the compile-brain high-reduction
+ * review. Prints character counts for source and draft (and token counts
+ * when a tokenizer command is supplied), then reads the reduction gates
+ * off the computed percentage instead of an in-prose estimate:
+ *
+ *   - Up to 20% reduction: within the conservative first-pass ceiling
+ *   - Over 35%: high-reduction, needs explicit rationale and a
+ *     fresh-context semantic review
+ *   - Over 50%: the review must challenge whether compressed tables,
+ *     examples, citations, or links carried operational meaning
  *
  * Usage:
- *   node measure-reduction.cjs SOURCE.md DRAFT.md [--tokenizer <cmd>]
+ *   node measure-reduction.cjs --source SOURCE.md --draft DRAFT.md
+ *   node measure-reduction.cjs SOURCE.md DRAFT.md
+ *   node measure-reduction.cjs SOURCE.md DRAFT.md --tokenizer "tokcount"
  *
- * The tokenizer command, when used, must accept text on stdin and print a
- * single integer token count on stdout.
+ * Options:
+ *   --tokenizer CMD   External tokenizer command; the file path is appended
+ *                     and the first integer in its stdout is the token count.
  *
- * Exit codes: 0 = measured, 2 = usage or file error.
+ * Requirements:
+ *   - Node.js 24+
  */
 
 "use strict";
 
+process.on("uncaughtException", (err) => {
+  console.error(`\x1b[31m[FATAL] ${err.message}\x1b[0m`);
+  process.exit(1);
+});
+
 const fs = require("fs");
-const { spawnSync } = require("child_process");
+const path = require("path");
+const { execFileSync } = require("child_process");
 
-function fail(msg) {
-  console.error(`[ERROR] ${msg}`);
-  process.exit(2);
+function countWithTokenizer(cmd, file) {
+  const parts = cmd.split(/\s+/).filter(Boolean);
+  const out = execFileSync(parts[0], [...parts.slice(1), file], {
+    encoding: "utf8",
+    timeout: 30000,
+  });
+  const match = out.match(/\d+/);
+  if (!match) throw new Error(`Tokenizer produced no count for ${file}: ${out.trim()}`);
+  return parseInt(match[0], 10);
 }
 
-function parseArgs(argv) {
-  const files = [];
-  let tokenizer = null;
-  for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === "--tokenizer") {
-      tokenizer = argv[++i];
-      if (!tokenizer) fail("--tokenizer needs a command");
-    } else if (argv[i].startsWith("--")) {
-      fail(`unknown option: ${argv[i]}`);
-    } else {
-      files.push(argv[i]);
-    }
+function measure(file, tokenizerCmd) {
+  if (!fs.existsSync(file)) {
+    console.error(`ERROR: File not found: ${file}`);
+    process.exit(1);
   }
-  if (files.length !== 2) {
-    fail("usage: node measure-reduction.cjs SOURCE.md DRAFT.md [--tokenizer <cmd>]");
+  const chars = fs.readFileSync(file, "utf8").length;
+  const result = { file, chars, tokens: null };
+  if (tokenizerCmd) result.tokens = countWithTokenizer(tokenizerCmd, file);
+  return result;
+}
+
+function reductionPct(before, after) {
+  if (before === 0) return 0;
+  return ((before - after) / before) * 100;
+}
+
+function gateVerdict(pct) {
+  if (pct > 50) {
+    return "OVER 50%: blocking review must challenge whether compressed tables, examples, citations, or resource links carried operational meaning";
   }
-  return { source: files[0], draft: files[1], tokenizer };
-}
-
-function readFile(p) {
-  try {
-    return fs.readFileSync(p, "utf8");
-  } catch (e) {
-    fail(`cannot read ${p}: ${e.message}`);
+  if (pct > 35) {
+    return "HIGH-REDUCTION (over 35%): requires an explicit rationale and a fresh-context semantic review before the draft is execution-ready";
   }
+  if (pct > 20) {
+    return "Over the 20% conservative first-pass ceiling: confirm the user requested a second pass or a deeper cut";
+  }
+  return "Within the 20% conservative first-pass ceiling";
 }
 
-function countTokens(cmd, text) {
-  const res = spawnSync(cmd, [], { input: text, encoding: "utf8", shell: true });
-  if (res.error || res.status !== 0) return null;
-  const n = parseInt(String(res.stdout).trim(), 10);
-  return Number.isFinite(n) ? n : null;
-}
-
-function band(pct) {
-  if (pct <= 20) return "within the conservative first-pass ceiling (<= 20%)";
-  if (pct <= 35) return "above the first-pass ceiling (> 20%): present the first-pass receipt and get an explicit second-pass request";
-  if (pct <= 50) return "high-reduction (> 35%): explicit rationale and fresh-context semantic review required before presenting as execution-ready";
-  return "above 50%: the review must specifically challenge whether compressed tables, examples, citations, or resource links carried operational meaning";
+function parseCliArgs() {
+  const args = process.argv.slice(2);
+  const opts = { positional: [], tokenizer: null };
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--source") opts.source = args[++i];
+    else if (args[i] === "--draft") opts.draft = args[++i];
+    else if (args[i] === "--tokenizer") opts.tokenizer = args[++i];
+    else if (!args[i].startsWith("--")) opts.positional.push(args[i]);
+  }
+  if (!opts.source && opts.positional[0]) opts.source = opts.positional[0];
+  if (!opts.draft && opts.positional[1]) opts.draft = opts.positional[1];
+  return opts;
 }
 
 function main() {
-  const { source, draft, tokenizer } = parseArgs(process.argv.slice(2));
-  const srcText = readFile(source);
-  const draftText = readFile(draft);
+  const opts = parseCliArgs();
+  if (!opts.source || !opts.draft) {
+    console.log("Usage: node measure-reduction.cjs --source SOURCE.md --draft DRAFT.md [--tokenizer CMD]");
+    process.exit(1);
+  }
 
-  const srcChars = [...srcText].length;
-  const draftChars = [...draftText].length;
-  if (srcChars === 0) fail(`source ${source} is empty; reduction is undefined`);
+  const source = measure(path.resolve(opts.source), opts.tokenizer);
+  const draft = measure(path.resolve(opts.draft), opts.tokenizer);
 
-  const pct = (1 - draftChars / srcChars) * 100;
+  const charPct = reductionPct(source.chars, draft.chars);
+  console.log(`Source: ${path.basename(source.file)}  ${source.chars} characters`);
+  console.log(`Draft:  ${path.basename(draft.file)}  ${draft.chars} characters`);
+  console.log(`Character reduction: ${charPct.toFixed(1)}%`);
 
-  console.log(`source: ${source} = ${srcChars} characters`);
-  console.log(`draft:  ${draft} = ${draftChars} characters`);
-  console.log(`reduction (characters): ${pct.toFixed(1)}%`);
-  console.log(`gate: ${band(pct)}`);
-
-  if (tokenizer) {
-    const srcTok = countTokens(tokenizer, srcText);
-    const draftTok = countTokens(tokenizer, draftText);
-    if (srcTok !== null && draftTok !== null && srcTok > 0) {
-      const tokPct = (1 - draftTok / srcTok) * 100;
-      console.log(`tokens (via ${tokenizer}): source ${srcTok}, draft ${draftTok}, reduction ${tokPct.toFixed(1)}%`);
-    } else {
-      console.log(`tokens: tokenizer command "${tokenizer}" did not return counts; character measurement stands`);
-    }
+  if (source.tokens !== null && draft.tokens !== null) {
+    const tokenPct = reductionPct(source.tokens, draft.tokens);
+    console.log(`Source tokens: ${source.tokens}  Draft tokens: ${draft.tokens}`);
+    console.log(`Token reduction: ${tokenPct.toFixed(1)}%`);
+    console.log(`Gate basis (tokens): ${tokenPct.toFixed(1)}%`);
+    console.log(gateVerdict(tokenPct));
+  } else {
+    console.log("Estimated tokens (characters / 4): " +
+      `${Math.round(source.chars / 4)} -> ${Math.round(draft.chars / 4)} (no tokenizer supplied)`);
+    console.log(`Gate basis (characters): ${charPct.toFixed(1)}%`);
+    console.log(gateVerdict(charPct));
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = { reductionPct, gateVerdict };

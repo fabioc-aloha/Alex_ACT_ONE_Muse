@@ -5,7 +5,7 @@ lastReviewed: 2026-08-15
 
 # /setup-enterprise
 
-Load the `setup-enterprise-stack` skill and run its three-mode flow (emit / consent-install / audit) against the user's Copilot CLI configuration.
+Load and follow the `setup-enterprise-stack` skill in **emit/install/audit** mode and run its three-mode flow (emit / consent-install / audit) against the user's Copilot CLI configuration. Pass the user's arguments, inputs, and explicit constraints unchanged; clarify only missing material inputs. The canonical skill owns the compatibility command constraints, execution, and validation.
 
 Steps:
 
@@ -20,3 +20,7 @@ Steps:
 7. Report what changed (or, in emit mode, what the user must paste).
 
 Fires only when the user explicitly asks — `/setup-enterprise` is not auto-invoked. The skill body carries the JSON block, the prerequisite table, and the consent-gate rules.
+
+Return the owning skill's required result and verification limits. This entrypoint grants no additional authority: preserve the owner's approval, privacy, read-only, draft-only, and installation/publication boundaries as applicable.
+
+Resolve links from the canonical installed alex-act-one package, never an assumed adopter checkout. Report a missing skill/reference and stop rather than silently skipping the workflow.

@@ -48,6 +48,8 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { runTool } = require(path.join(__dirname, '..', '..', '..', 'scripts', 'shared', 'tool-runner.cjs'));
+const { resolveLocalImagePath } = require(path.join(__dirname, '..', '..', '..', 'scripts', 'shared', 'local-image-path.cjs'));
+const { screenExecutableHtml } = require(path.join(__dirname, '..', '..', '..', 'scripts', 'shared', 'html-screening.cjs'));
 
 // ---------------------------------------------------------------------------
 // Shared module imports
@@ -273,14 +275,13 @@ function processMermaidBlocks(markdown, sourceDir, usePng) {
 // ---------------------------------------------------------------------------
 function embedLocalImages(html, sourceDir) {
   return html.replace(/<img\s+([^>]*?)src=["']([^"']+)["']([^>]*)>/g, (match, pre, src, post) => {
-    if (src.startsWith('http') || src.startsWith('data:')) return match;
-    const imagePath = path.resolve(sourceDir, src);
-    if (!fs.existsSync(imagePath)) return match;
+    const imagePath = resolveLocalImagePath(src, sourceDir);
+    if (imagePath === null) return match;
 
     const ext = path.extname(imagePath).toLowerCase();
     const mimeMap = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
     const mime = mimeMap[ext];
-    if (!mime) return match;
+    if (!mime) throw new Error(`Unsupported local image format: ${src}`);
 
     const base64 = fs.readFileSync(imagePath).toString('base64');
     return `<img ${pre}src="data:${mime};base64,${base64}"${post}>`;
@@ -290,7 +291,21 @@ function embedLocalImages(html, sourceDir) {
 // ---------------------------------------------------------------------------
 // Main conversion
 // ---------------------------------------------------------------------------
+function markdownOutputPath(sourcePath, suffix) {
+  return sourcePath.replace(/\.md$/i, '') + suffix;
+}
+
 function convertMarkdownToHtml(sourcePath, outputPath, options = {}) {
+  const debugPath = options.debug ? markdownOutputPath(sourcePath, '_debug_combined.md') : null;
+  const source = fs.statSync(sourcePath, { bigint: true });
+  for (const destination of [outputPath, debugPath].filter(Boolean)) {
+    if (fs.existsSync(destination)) {
+      const target = fs.statSync(destination, { bigint: true });
+      if (source.dev === target.dev && source.ino === target.ino) {
+        throw new Error(`Output aliases the Markdown source; choose a different destination: ${destination}`);
+      }
+    }
+  }
   const styleName = options.style || 'professional';
   const style = STYLE_PRESETS[styleName] || STYLE_PRESETS.professional;
   const embedImages = options.embedImages !== false;
@@ -299,21 +314,7 @@ function convertMarkdownToHtml(sourcePath, outputPath, options = {}) {
   let generateToc = !!options.toc;
 
   let markdown = fs.readFileSync(sourcePath, 'utf8');
-  const unsafeTagOrHandler = /<(?:script|iframe|object|embed|svg|math|meta|base|link)\b|\bon[a-z]+\s*=|\bsrcdoc\s*=/i;
-  const htmlAttributes = markdown.matchAll(/\b(?:href|src|action|formaction|xlink:href|poster|background|data)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi);
-  const unsafeUrl = [...htmlAttributes].some((match) => {
-    const value = match[1] ?? match[2] ?? match[3] ?? '';
-    const decoded = value
-      .replace(/&#x([0-9a-f]+);?/gi, (_, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
-      .replace(/&#([0-9]+);?/g, (_, decimal) => String.fromCodePoint(Number.parseInt(decimal, 10)))
-      .replace(/&(colon|tab|newline);/gi, (_, name) => ({ colon: ':', tab: '\t', newline: '\n' })[name.toLowerCase()])
-      .replace(/[\u0000-\u0020\u007f-\u009f]/g, '')
-      .toLowerCase();
-    return /^(?:javascript:|vbscript:|data:text\/html)/.test(decoded);
-  });
-  if (unsafeTagOrHandler.test(markdown) || unsafeUrl) {
-    throw new Error('Unsafe executable HTML found in Markdown; sanitize external content before conversion');
-  }
+  screenExecutableHtml(markdown);
   const sourceDir = path.dirname(path.resolve(sourcePath));
 
   // Extract title from frontmatter or first H1
@@ -350,7 +351,6 @@ function convertMarkdownToHtml(sourcePath, outputPath, options = {}) {
   markdown = processMermaidBlocks(markdown, sourceDir, usePngMermaid);
 
   if (options.debug) {
-    const debugPath = sourcePath.replace(/\.md$/, '_debug_combined.md');
     fs.writeFileSync(debugPath, markdown, 'utf8');
     console.log(`  \u{1F50D} Debug: saved preprocessed markdown to ${debugPath}`);
   }
@@ -365,15 +365,18 @@ function convertMarkdownToHtml(sourcePath, outputPath, options = {}) {
   process.on('exit', () => { try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch { /* ignore */ } });
   const tempMd = path.join(tempDir, 'source.md');
   const tempHtml = path.join(tempDir, 'output.html');
+  const template = path.join(tempDir, 'fragment.html');
 
   try {
     fs.writeFileSync(tempMd, markdown, 'utf8');
+    fs.writeFileSync(template, '$if(toc)$<nav id="TOC" class="toc" role="doc-toc">\n$table-of-contents$\n</nav>\n$endif$\n$body$\n', 'utf8');
 
-    const pandocArgs = [tempMd, '-o', tempHtml, '--from', 'markdown', '--to', 'html5', '--standalone=false'];
+    const pandocArgs = [tempMd, '-o', tempHtml, '--from', 'markdown', '--to', 'html5', '--standalone', '--template', template];
     if (generateToc) pandocArgs.push('--toc', '--toc-depth=3');
     runTool('pandoc', pandocArgs, { stdio: ['pipe', 'pipe', 'pipe'], timeout: 30000 });
 
     let htmlBody = fs.readFileSync(tempHtml, 'utf8');
+    screenExecutableHtml(htmlBody, false);
 
     // Embed local images as base64
     if (embedImages) {
@@ -465,7 +468,7 @@ function main() {
 
   const outputPath = positional[1]
     ? path.resolve(positional[1])
-    : sourcePath.replace(/\.md$/, '.html');
+    : markdownOutputPath(sourcePath, '.html');
 
   convertMarkdownToHtml(sourcePath, outputPath, options);
 }

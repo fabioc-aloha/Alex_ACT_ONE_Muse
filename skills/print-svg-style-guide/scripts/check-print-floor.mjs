@@ -1,146 +1,179 @@
 #!/usr/bin/env node
 /**
- * check-print-floor.mjs: the shipped gate for the print-legibility floor.
+ * check-print-floor.mjs - print-svg-style-guide gate: print-legibility floor.
  *
- * Why: the style guide states a floor (5.8pt instructional, 2.9pt for
- * note/micro roles) and calls it gate-enforced, but a floor that lives only
- * in prose is enforced by whoever remembers it. This script computes the
- * print size of every <text> element from the guide's own formula and fails
- * on the violations the guide names. The model reads the verdict; it does
- * not do the px-to-points arithmetic itself.
+ * The floor is gate-enforced by this script, not by a visual pass. For every
+ * <text> element in an SVG it computes print points from the guide's formula
  *
- * Formula (from SKILL.md): printPoints = fontSizePx x printWidthIn x 72 /
- * viewBoxWidth. Print width defaults to 4.39in (7x10in trim, standard
- * figure); override with --print-width-in.
+ *   printPoints = fontSizePx * printWidthIn * 72 / viewBoxWidth
  *
- * Failures (exit 1 when any occur):
- *   - text below the 5.8pt instructional floor with no data-print-role
- *     marker (unmarked below-floor text)
- *   - note or micro role text below the 2.9pt floor
- *   - a <text> element with no font-size (attribute or style)
- *   - an unknown data-print-role value (only "note" and "micro" exist)
- *   - micro-role text of 40 or more characters: at 40 chars the guide
- *     auto-promotes micro to note, so a long micro is a misclassified note
+ * (printWidthIn defaults to 4.39, the book figure width) and asserts:
  *
- * Usage:
- *   node scripts/check-print-floor.mjs <figure.svg> [--print-width-in 4.39]
+ *   - instructional text (no marker) is at or above 5.8pt
+ *   - text below 5.8pt carries a data-print-role marker ("micro" or "note")
+ *   - marked text is at or above the 2.9pt small-text floor
+ *   - a "micro" element whose text is 40+ characters is promoted to "note"
+ *     (the auto-promotion rule, asserted here rather than counted by eye)
  *
- * Exit 0 when every text element passes, 2 on usage or file errors.
+ *   node check-print-floor.mjs <figure.svg> [--print-width-in 4.39]
+ *
+ * Supports explicit unitless/px font sizes on text, g, and svg elements.
+ * Stylesheets, transforms, and independently styled tspans require a rendered
+ * check and are reported as unsupported, not passed.
+ * Exit codes: 0 = gate passes, 1 = a violation, 2 = error/unsupported input.
+ * Node built-ins only.
  */
 
-import fs from 'node:fs';
+import { readFileSync } from "node:fs";
 
-const INSTRUCTIONAL_FLOOR = 5.8;
-const ROLE_FLOOR = 2.9;
-const MICRO_PROMOTE_CHARS = 40;
-const KNOWN_ROLES = new Set(['note', 'micro']);
+const INSTRUCTIONAL_FLOOR_PT = 5.8;
+const SMALL_FLOOR_PT = 2.9;
+const PROMOTE_MIN_CHARS = 40;
+const DEFAULT_PRINT_WIDTH_IN = 4.39;
 
-function fail(msg) {
-  console.error(`[ERROR] ${msg}`);
+function usageError(message) {
+  console.error(`error: ${message}`);
+  console.error("usage: node check-print-floor.mjs <figure.svg> [--print-width-in <inches>]");
   process.exit(2);
 }
 
 function parseArgs(argv) {
-  const opts = { file: null, printWidthIn: 4.39 };
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (a === '--print-width-in') {
-      opts.printWidthIn = parseFloat(argv[++i]);
-      if (!Number.isFinite(opts.printWidthIn) || opts.printWidthIn <= 0) {
-        fail('--print-width-in needs a positive number');
-      }
-    } else if (a.startsWith('--')) fail(`unknown option: ${a}`);
-    else if (!opts.file) opts.file = a;
-    else fail('exactly one FILE argument');
+  const args = {};
+  const positional = [];
+  for (let i = 0; i < argv.length; i += 1) {
+    const item = argv[i];
+    if (item.startsWith("--")) {
+      const value = argv[i + 1];
+      if (value === undefined || value.startsWith("--")) usageError(`missing value for ${item}`);
+      args[item.slice(2)] = value;
+      i += 1;
+    } else {
+      positional.push(item);
+    }
   }
-  if (!opts.file) fail('usage: node scripts/check-print-floor.mjs <figure.svg> [--print-width-in N]');
-  return opts;
+  if (positional.length !== 1) usageError("expected exactly one SVG path");
+  args.file = positional[0];
+  return args;
 }
 
-function fontSizeOf(attrs) {
-  const direct = attrs.match(/\bfont-size="([\d.]+)(?:px)?"/);
-  if (direct) return parseFloat(direct[1]);
-  const styled = attrs.match(/font-size:\s*([\d.]+)(?:px)?/);
-  if (styled) return parseFloat(styled[1]);
-  return null;
+function parseAttrs(tagText) {
+  const attrs = {};
+  const pattern = /([\w-]+)\s*=\s*(["'])(.*?)\2/g;
+  let match;
+  while ((match = pattern.exec(tagText)) !== null) attrs[match[1]] = match[3];
+  return attrs;
 }
 
-function textContent(inner) {
-  return inner
-    .replace(/<[^>]*>/g, '')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/\s+/g, ' ')
+function fontSizeFrom(attrs) {
+  let value = attrs["font-size"];
+  if (attrs.style) {
+    if (/(?:^|;)\s*font\s*:/i.test(attrs.style)) usageError("unsupported font shorthand; use an explicit px font-size");
+    const styleMatch = attrs.style.match(/(?:^|;)\s*font-size\s*:\s*([^;]+)/i);
+    if (styleMatch) value = styleMatch[1].replace(/\s*!important\s*$/i, "").trim();
+  }
+  if (value === undefined) return null;
+  const size = String(value).trim().match(/^(\d+(?:\.\d+)?|\.\d+)(?:px)?$/);
+  if (!size || !Number.isFinite(Number(size[1]))) usageError(`unsupported font-size "${value}"; use unitless or px sizes`);
+  return Number(size[1]);
+}
+
+function decodeText(raw) {
+  return raw
+    .replace(/<[^>]*>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, " ")
     .trim();
 }
 
 function main() {
-  const opts = parseArgs(process.argv.slice(2));
+  const args = parseArgs(process.argv.slice(2));
+  const printWidthIn = args["print-width-in"] !== undefined ? Number(args["print-width-in"]) : DEFAULT_PRINT_WIDTH_IN;
+  if (!Number.isFinite(printWidthIn) || printWidthIn <= 0) usageError("--print-width-in must be a positive number");
+
   let svg;
   try {
-    svg = fs.readFileSync(opts.file, 'utf8');
-  } catch (e) {
-    fail(`cannot read ${opts.file}: ${e.message}`);
+    svg = readFileSync(args.file, "utf8");
+  } catch (error) {
+    usageError(`cannot read ${args.file}: ${error.message}`);
+  }
+  if (/<style\b|\btransform\s*[=:]|<tspan\b[^>]*(?:font-size|style\s*=)/i.test(svg)) {
+    usageError("unsupported stylesheet, transform, or styled tspan; measure the rendered text instead");
   }
 
-  const vb = svg.match(/<svg\b[^>]*viewBox="([\d.\s-]+)"/);
-  if (!vb) fail('no viewBox on the root <svg> element: print size cannot be computed');
-  const viewBoxWidth = parseFloat(vb[1].trim().split(/\s+/)[2]);
-  if (!Number.isFinite(viewBoxWidth) || viewBoxWidth <= 0) fail('viewBox width is not a positive number');
+  const svgTag = svg.match(/<svg\b([^>]*)>/);
+  if (!svgTag) usageError(`${args.file}: no <svg> element found`);
+  const svgAttrs = parseAttrs(svgTag[1]);
+  let viewBoxWidth = null;
+  if (svgAttrs.viewBox) {
+    const parts = svgAttrs.viewBox.trim().split(/[\s,]+/).map(Number);
+    if (parts.length === 4 && Number.isFinite(parts[2])) viewBoxWidth = parts[2];
+  }
+  if (viewBoxWidth === null && svgAttrs.width) viewBoxWidth = Number(svgAttrs.width);
+  if (!Number.isFinite(viewBoxWidth) || viewBoxWidth <= 0) usageError(`${args.file}: cannot determine a positive viewBox width`);
 
-  const re = /<text\b([^>]*)>([\s\S]*?)<\/text>/g;
-  let m;
-  let checked = 0;
-  const failures = [];
-  while ((m = re.exec(svg)) !== null) {
-    checked++;
-    const attrs = m[1];
-    const content = textContent(m[2]);
-    const preview = content.slice(0, 50);
-    const roleMatch = attrs.match(/data-print-role="([^"]*)"/);
-    const role = roleMatch ? roleMatch[1] : null;
-    const size = fontSizeOf(attrs);
-
-    if (role !== null && !KNOWN_ROLES.has(role)) {
-      failures.push(`text ${checked} (${JSON.stringify(preview)}): unknown data-print-role "${role}"`);
+  const tokenPattern = /<text\b([^>]*)>([\s\S]*?)<\/text>|<g\b([^>]*?)>|<\/g\s*>/g;
+  const groupStack = [{ fontSize: fontSizeFrom(svgAttrs), role: svgAttrs["data-print-role"] ?? null }];
+  const elements = [];
+  let match;
+  while ((match = tokenPattern.exec(svg)) !== null) {
+    if (match[0].startsWith("</")) {
+      groupStack.pop();
       continue;
     }
-    if (size === null) {
-      failures.push(`text ${checked} (${JSON.stringify(preview)}): missing font-size`);
+    if (match[3] !== undefined) {
+      if (match[0].endsWith("/>")) continue;
+      const attrs = parseAttrs(match[3]);
+      groupStack.push({ fontSize: fontSizeFrom(attrs), role: attrs["data-print-role"] ?? null });
       continue;
     }
-    const pt = (size * opts.printWidthIn * 72) / viewBoxWidth;
-    const ptStr = pt.toFixed(2);
-    if (role === null) {
-      if (pt < INSTRUCTIONAL_FLOOR - 1e-9) {
-        failures.push(
-          `text ${checked} (${JSON.stringify(preview)}): ${size}px = ${ptStr}pt, below the ` +
-            `${INSTRUCTIONAL_FLOOR}pt instructional floor, with no data-print-role marker`
+    const attrs = parseAttrs(match[1]);
+    let fontSize = fontSizeFrom(attrs);
+    let role = attrs["data-print-role"] ?? null;
+    for (let i = groupStack.length - 1; i >= 0 && (fontSize === null || role === null); i -= 1) {
+      if (fontSize === null) fontSize = groupStack[i].fontSize;
+      if (role === null) role = groupStack[i].role;
+    }
+    elements.push({ fontSize, role, text: decodeText(match[2]) });
+  }
+
+  let violations = 0;
+  for (const element of elements) {
+    const snippet = element.text.length > 30 ? `${element.text.slice(0, 30)}...` : element.text;
+    const chars = element.text.length;
+    if (element.fontSize === null) {
+      usageError(`cannot resolve font-size for "${snippet}"; specify a unitless or px size on text or its ancestors`);
+    }
+    const pt = (element.fontSize * printWidthIn * 72) / viewBoxWidth;
+    const problems = [];
+    if (pt < SMALL_FLOOR_PT - 1e-9) {
+      problems.push(`below the ${SMALL_FLOOR_PT}pt small-text floor`);
+    } else if (pt < INSTRUCTIONAL_FLOOR_PT - 1e-9 && element.role !== "micro" && element.role !== "note") {
+      problems.push(`below the ${INSTRUCTIONAL_FLOOR_PT}pt instructional floor without a data-print-role marker`);
+    }
+    if (element.role === "micro" && chars >= PROMOTE_MIN_CHARS) {
+      problems.push(`micro text is ${chars} chars (>= ${PROMOTE_MIN_CHARS}); must be promoted to "note"`);
+    }
+    if (problems.length > 0) {
+      violations += problems.length;
+      for (const problem of problems) {
+        console.log(
+          `VIOLATION "${snippet}" : ${element.fontSize}px = ${pt.toFixed(2)}pt, role ${element.role ?? "none"}, ${chars} chars - ${problem}`,
         );
       }
     } else {
-      if (pt < ROLE_FLOOR - 1e-9) {
-        failures.push(
-          `text ${checked} (${JSON.stringify(preview)}): role "${role}" at ${size}px = ${ptStr}pt, ` +
-            `below the ${ROLE_FLOOR}pt floor for marked text`
-        );
-      }
-      if (role === 'micro' && content.length >= MICRO_PROMOTE_CHARS) {
-        failures.push(
-          `text ${checked} (${JSON.stringify(preview)}): micro-role text of ${content.length} characters ` +
-            `(${MICRO_PROMOTE_CHARS}+ auto-promotes to note)`
-        );
-      }
+      console.log(
+        `ok "${snippet}" : ${element.fontSize}px = ${pt.toFixed(2)}pt, role ${element.role ?? "none"}, ${chars} chars`,
+      );
     }
   }
 
   console.log(
-    `checked ${checked} text elements (viewBox width ${viewBoxWidth}, print width ${opts.printWidthIn}in)`
+    `print-floor gate: ${elements.length} text elements, viewBox width ${viewBoxWidth}, ${violations} violation(s)`,
   );
-  for (const f of failures) console.log(`FAIL: ${f}`);
-  console.log(failures.length === 0 ? 'verdict: PASS' : `verdict: FAIL (${failures.length} violation(s))`);
-  process.exit(failures.length > 0 ? 1 : 0);
+  process.exit(violations > 0 ? 1 : 0);
 }
 
 main();

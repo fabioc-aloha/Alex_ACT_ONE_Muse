@@ -1,7 +1,7 @@
 ---
 name: systematic-debugging
 description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes. Four-phase root-cause-first method (investigate → pattern-analyze → hypothesize → implement) that beats guess-and-check thrashing.
-lastReviewed: 2026-05-26
+lastReviewed: 2026-11-07
 ---
 
 # Systematic Debugging
@@ -123,6 +123,7 @@ You MUST complete each phase before proceeding to the next.
    - Where does bad value originate?
    - What called this with bad value?
    - Keep tracing up until you find the source
+   - Trace one continuous cause rather than splitting a small trace into agents
    - Fix at source, not at symptom
 
 ### Phase 2: Pattern Analysis
@@ -194,17 +195,11 @@ You MUST complete each phase before proceeding to the next.
    - No other tests broken?
    - Issue actually resolved?
 
-**Attempt log:** keep a file named `debug-attempts.log` in the project root. Append one line per fix attempt, once its outcome is known:
-
-```text
-<ISO timestamp> | hypothesis: <what you believed> | change: <what you changed> | result: worked | failed | inconclusive
-```
-
-The log is the attempt count. Never reconstruct the count from memory; step 4 reads it from the file.
+**Retry evidence:** After a failed fix, note the hypothesis, change, and result in the current task or session record. Reuse existing state; do not require a new project-root log or retain a cross-session counter. When evaluating the retry threshold, count failed attempts for this unresolved bug with a command or query over that record. Successful fixes and attempts on other bugs do not belong in that count.
 
 4. **If Fix Doesn't Work**
    - STOP
-   - Count attempts from the log, not from memory: `wc -l debug-attempts.log` (PowerShell: `(Get-Content debug-attempts.log | Measure-Object -Line).Lines`)
+   - Read the failed-attempt count for this unresolved bug from the task or session record
    - If < 3: Return to Phase 1, re-analyze with new information
    - **If ≥ 3: STOP and question the architecture (step 5 below)**
    - DON'T attempt Fix #4 without architectural discussion
@@ -307,6 +302,6 @@ Bundled in this skill's `references/` directory:
 
 Revise if any of the following fires:
 
-- Heirs report the structured method produces no observed change in debugging outcomes over 90 days (skill is decorative)
+- A concrete debugging case exposes a root cause the prescribed investigation should have caught
 - The "3+ fixes failed → question architecture" rule produces premature architectural rewrites where simple Phase 1 re-analysis would have sufficed
 - Adjacent skills (`critical-thinking`, `problem-framing-audit`) cover Phase 1 + 3 sufficiently that this skill is redundant

@@ -4,7 +4,7 @@
 
 **Your assistant is fast, confident, and too often wrong. Give it a discipline.**
 
-Alex ACT ONE is a pack of 55 skills for Muse, Meta's personal AI assistant, ported from the [Copilot edition](https://github.com/fabioc-aloha/Alex_ACT_ONE). It changes how the assistant works: frame the problem before solving it, look for evidence against its first answer, and check what it produced before calling it done. There is no plugin loader and nothing to register: copy the skill folders in and they are live.
+Alex ACT ONE is a pack of 59 skills for Muse, Meta's personal AI assistant, ported from the [Copilot edition](https://github.com/fabioc-aloha/Alex_ACT_ONE). It changes how the assistant works: frame the problem before solving it, look for evidence against its first answer, and check what it produced before calling it done. There is no plugin loader and nothing to register: copy the skill folders in and they are live.
 
 **See the difference:** the same loaded prompt, "Our dashboard takes 8 seconds to load. Rust rewrite, or Redis caching?", handled two ways. Try it yourself with [the evaluation guide](docs/launch/evaluation-guide.md).
 
@@ -79,7 +79,7 @@ banners, then check that what rendered says what you meant.
 write project-specific skills from work you keep repeating, and consolidate what
 a session learned into something reusable.
 
-55 skills, 15 opt-in modules, and 15 chat-ready prompts. There is no MCP server
+59 skills, 15 opt-in modules, and 15 chat-ready prompts. There is no MCP server
 to install, register, or provision — the capabilities the Copilot edition's
 servers provided are native to Muse (see below).
 
@@ -180,6 +180,8 @@ Deciding what to draw, drawing it, and checking it says what you meant.
 | `chart-interpretation` | Read a chart someone else made — image, screenshot, HTML, or dashboard — and extract insights, patte… | — | Keep |
 | `flint-chart` | Use when the user wants to visualize data — from 'which chart should I use?' to 'render this'. Helps… | Native chart capability | Keep |
 | `flint-theme` | Creates and refines reusable Flint ThemeSpec visual systems from brand guidance, websites, decks, de… | Native chart capability | Keep |
+| `flint-interactions` | Choose and verify interactive Flint chart behavior: highlight, brush, zoom, legend toggles, filt… | Native chart capability | Keep |
+| `render-chart` | Orchestrates expert visual storytelling over Flint: frame the claim, inspect data, explore famil… | Native chart capability | Keep |
 | `ascii-chart` | Render charts and compact dashboards as pure ASCII in a monospace grid: bar, dot, sparkline, histogr… | — | Delta |
 | `print-svg-style-guide` | Author print-quality SVG figures for books, reports, and exec-facing documents: canvas and typograph… | — | Delta |
 | `figure-generator` | Ship deterministic hand-authored SVG generators for print-quality figures backed by real published d… | — | Delta |
@@ -195,6 +197,7 @@ Moving a document between formats without losing its structure.
 
 | Skill | What it does | Needs | Tier |
 | --- | --- | --- | --- |
+| `convert` | Convert a document between Markdown, HTML, Word, email, and plain text using the matching bundle… | Pandoc | Keep |
 | `docx-to-md` | Convert Word documents (.docx) to clean Markdown with image extraction and pandoc cleanup. Use when… | Pandoc | Keep |
 | `html-to-md` | Convert HTML documents to clean Markdown via pandoc. Use when the user asks to convert HTML to markd… | Pandoc | Keep |
 | `md-to-html` | Convert Markdown to standalone HTML pages with embedded CSS, images, and Mermaid diagrams. Use when… | Pandoc | Keep |
@@ -211,6 +214,7 @@ Auditing, extending, and consolidating the agent.
 | `meditation` | Review session outcomes, recommend reusable skills or automation, and reconcile project guidance, ha… | — | Keep |
 | `compile-brain` | Create or improve a Markdown instruction, skill, prompt, or agent from an explicitly selected file o… | — | Keep |
 | `assess-brain` | Assess active Markdown brain files in a local AI agent project or plugin source without changing it.… | — | Keep |
+| `project-status` | Report the current project's repository state, recent work, brain QA health (if applicable), and… | — | Keep |
 | `project-capability-authoring` | Create tested project-local skills and scripts from demonstrated repeated work. Use after meditation… | — | Keep |
 | `token-waste-elimination` | Audit active brain artifacts for context cost, duplicated guidance, oversized routing files, and sta… | — | Keep |
 | `proactive-awareness` | Applies cross-session context recovery, uncommitted-work detection, and focus routing once proactive… | — | Delta |
@@ -269,7 +273,17 @@ lives in [PORT-NOTES.md](PORT-NOTES.md#v020-curation).
 **Added after v0.2.0** (October 2026): `github-data-api-push` (restored to the
 manifest — the skill shipped in the port but was omitted from the manifest),
 `scoped-delegation`, and `ai-tell-audit` (with its `vary-construct.mjs`
-recast-variation script). The manifest now declares 55 skills.
+recast-variation script).
+
+**Mirrored to the flagship's 0.9.2** (November 2026, this edition's 0.3.0):
+the flagship releases 0.7.0 through 0.9.2 were ported across — canonical-skill
+routing and the deterministic helper scripts, the Flint 1.0.1 upgrade with the
+new `flint-interactions` skill, the `convert`, `render-chart`, and
+`project-status` skills (new in the flagship since the original port), the
+0.9.1 converter-safety fixes, and the refreshed opt-in modules. Copilot-host
+machinery (the plugin installer, CI, Mall delivery) stays flagship-only; the
+per-item record is in [PORT-NOTES.md](PORT-NOTES.md). The manifest now
+declares 59 skills.
 
 ## Native capabilities instead of MCP servers
 

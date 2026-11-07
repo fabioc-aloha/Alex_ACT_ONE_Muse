@@ -1,7 +1,7 @@
 ---
 name: print-svg-style-guide
 description: "Author print-quality SVG figures for books, reports, and exec-facing documents: canvas and typography grammar with a legibility floor, a semantic color palette where color carries meaning, and four composition idioms. Use when authoring or reviewing a figure destined for paper or PDF, or when picking colors that must read consistently across a document. Muse delta: the print-legibility floor math, the data-print-role taxonomy, and the four composition idioms — beyond Muse's native graphic instincts."
-lastReviewed: 2026-07-29
+lastReviewed: 2026-11-07
 ---
 
 # Print-quality SVG style guide
@@ -46,7 +46,7 @@ At 7×10in with figure width 4.39in: `printPoints = fontSizePx × 4.39 × 72 ÷ 
 
 **Rule:** minimum instructional px = `viewBoxWidth ÷ 54.5`. At 640 → 11.74px, so 12px is the floor. A wider viewBox raises the floor — recompute, don't assume 12px.
 
-**The gate ships as a script:** `node scripts/check-print-floor.mjs <figure.svg>` (in this skill's `scripts/` folder) computes print points for every `<text>` element from the formula above and fails on: below-floor text with no `data-print-role` marker, note/micro text below 2.9pt, a missing font-size, an unknown `data-print-role` value, and micro-role text of 40 or more characters. Run it on every shipped figure; a floor that lives only in prose is not a gate.
+**Run the gate; do not eyeball it.** The gate ships as a script: `node scripts/check-print-floor.mjs <figure.svg> [--print-width-in <inches>]` (in this skill's `scripts/` folder) computes print points for every `<text>` element from the formula above. For supported SVGs it exits with code 1 on below-floor text (below the 2.9pt small-text floor, or below the 5.8pt instructional floor without a `micro`/`note` role marker), missing role markers, or `micro` text at or over 40 characters that should be promoted to `note`. It supports explicit unitless/px font sizes on text, groups, and the root SVG. Stylesheets, transforms, styled tspans, and unresolved sizes exit with code 2: measure the rendered text instead. Unsupported is not a pass. A supported figure must pass the checker; the meaning of its role markers still requires review. Run it on every shipped figure; a floor that lives only in prose is not a gate.
 
 **The micro marker is not an escape hatch.** It exists for text the reader never needs to read at size. Marking instructional content `micro` to clear the gate is gaming it. The `note` role's auto-promote (≥40 chars) catches the class where this happens by accident.
 
@@ -168,3 +168,12 @@ Red-700 circle r=10 at the top-right of the region being called out; white bold 
 - [`render-verify`](../render-verify/SKILL.md) § Prose-coupling check — verifies surrounding prose after the figure ships
 - [`figure-generator`](../figure-generator/SKILL.md) — the engineering discipline that emits conforming SVGs
 - `markdown-mermaid` (Alex ACT Core) — sibling for Mermaid diagrams (different rendering model, shared palette discipline)
+
+## Would revise if
+
+Revise the floor formula, palette, or composition idioms if:
+
+- A figure shipped through this skill's discipline fails a print-legibility audit that this skill was supposed to prevent
+- The `data-print-role="note"` auto-promote rule (≥40 chars) misses a class of content it should catch
+
+The floor math, palette semantics, and composition idioms are book-tested across 53 shipped figures and 368 pages.

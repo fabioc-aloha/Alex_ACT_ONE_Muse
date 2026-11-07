@@ -1,7 +1,7 @@
 ---
 name: "mutation-testing"
 description: "Meta-test your test harness — apply small intentional defects to production code, expect the suite to catch each one. Surfaces silent coverage gaps that 100% line coverage hides."
-lastReviewed: 2026-05-31
+lastReviewed: 2026-11-07
 ---
 
 # Mutation Testing
@@ -44,10 +44,10 @@ or another tool reading the file can leave a real defect behind.
 
 Count the run log mechanically; never tally from memory:
 
-- Bash: `grep -c "CAUGHT" <run-log>`, `grep -c "SURVIVED" <run-log>`, `grep -c "PRECONDITION-NOT-FOUND" <run-log>`
-- PowerShell: `(Select-String -Path <run-log> -Pattern "CAUGHT").Count`, with the same shape for the other two patterns
+- Bash: `grep -c '\] CAUGHT$' <run-log>`, `grep -c 'SURVIVED' <run-log>`, `grep -c 'PRECONDITION-NOT-FOUND' <run-log>`
+- PowerShell: `(Select-String -Path <run-log> -Pattern '\] CAUGHT$').Count`, with the same shape for the other two patterns
 
-Report the caught ratio as caught / (caught + survived). PRECONDITION-NOT-FOUND lines stay out of the ratio: the mutation never applied, so fix the find string and re-run that mutation before counting it as tested.
+Report the caught ratio as caught / (caught + survived), with survived and precondition-not-found listed separately. PRECONDITION-NOT-FOUND lines stay out of the ratio: the mutation never applied, so fix the find string and re-run that mutation before counting it as tested.
 
 ## Isolated Mutation Harness
 

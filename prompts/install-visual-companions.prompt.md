@@ -5,7 +5,7 @@ lastReviewed: 2026-08-18
 
 # /alex-act-one install-visual-companions
 
-Invokes the [install-visual-companions](../archive/host-specific/install-visual-companions/SKILL.md) skill to offer the 8 visual-workflow companion plugins for consent-gated per-plugin install.
+Load and follow the [install-visual-companions](../archive/host-specific/install-visual-companions/SKILL.md) skill in **consent-gated setup** mode to offer the 8 visual-workflow companion plugins for consent-gated per-plugin install. Pass the user's arguments, inputs, and explicit constraints unchanged; clarify only missing material inputs. The canonical skill owns the compatibility command constraints, execution, and validation.
 
 Steps:
 
@@ -16,5 +16,9 @@ Steps:
 5. Run `copilot plugin install <name>@<marketplace>` for each verified plugin.
 6. Print install-time caveats for the plugins that need manual post-install steps (`chromium-control-canvas`, `eyeball`, `napkin`, `visual-pr` — Playwright-based, ~100 MiB Chromium download each).
 7. Report installed, skipped, and caveats outstanding.
+
+Return the owning skill's required result and verification limits. This entrypoint grants no additional authority: preserve the owner's approval, privacy, read-only, draft-only, and installation/publication boundaries as applicable.
+
+Resolve links from the canonical installed alex-act-one package, never an assumed adopter checkout. Report a missing skill/reference and stop rather than silently skipping the workflow.
 
 **Would revise if**: the `install-visual-companions` skill is retired, or the companion catalog changes.

@@ -1,7 +1,7 @@
 ---
 name: "md-to-eml"
 description: "Convert Markdown to RFC 5322 email (.eml) with inline CSS and CID images. Use when the user asks to convert to email, make an eml, or export markdown as an .eml file. Muse delta: the md-to-eml.cjs procedure — frontmatter→RFC 5322 header mapping, email-safe HTML, CID images, mermaid table fallback, test-mode workflow, and the conversion acceptance table — beyond Muse's native ability to hand-write HTML."
-lastReviewed: 2026-07-28
+lastReviewed: 2026-11-07
 ---
 
 # Md To Eml
@@ -38,11 +38,27 @@ Convert Markdown documents with YAML frontmatter into RFC 5322-compliant `.eml` 
 | **Tables** | ✅ | HTML tables with borders |
 | **Blockquotes** | ✅ | Indented with border |
 | **Lists** | ✅ | Ordered and unordered |
-| **Mermaid diagrams** | ⚠️ | Table fallback (no JS in email) — pre-render to PNG for high fidelity |
+| **Mermaid diagrams** | ⚠️ | Simple flowchart tables; unsupported source retained |
 | **Emoji** | ✅ | Unicode preserved |
 | **Horizontal rules** | ✅ | Styled dividers |
 
-**Key features:** YAML frontmatter maps to RFC 5322 headers; email-safe HTML with inline CSS and table-based layout (no `<style>` blocks); local images embedded as base64 multipart MIME CID attachments; `--test` flag overrides recipients for safe preview.
+## Key Features
+
+| Feature | Details |
+|---------|---------|
+| YAML frontmatter | Maps to RFC 5322 headers (To, From, Subject, CC, Reply-To) |
+| Email-safe HTML | Inline CSS with table-based layout (no `<style>` blocks) |
+| Mermaid fallback | Simple flowchart tables; unsupported diagrams keep labeled source |
+| CID images | Local images embedded as base64 multipart MIME attachments |
+| Emoji preservation | Subject and body emoji render correctly across clients |
+| Test mode | `--test` flag overrides recipients for safe preview |
+
+Header values and `--test-to` reject control characters before conversion or
+test-recipient overrides. Source and rendered HTML use the same executable-HTML
+screening as the HTML converter; scripts, event handlers, and executable URLs
+stop conversion without replacing an existing email. Literal HTML inside code
+remains escaped. This screening is not a substitute for sanitizing untrusted
+input, and conversion does not send email or prove mail-client behavior.
 
 ## Usage
 
@@ -113,7 +129,12 @@ reply-to: noreply@example.com
 
 ## Mermaid Diagrams in Email
 
-Email clients can't execute JavaScript, so Mermaid diagrams convert to text-based table representations. For high-fidelity diagrams, pre-render to PNG and include as images.
+Email clients cannot execute JavaScript. The supported simple `graph`/`flowchart`
+subset becomes node and relationship tables. Unsupported diagram types or syntax
+retain their complete original source in a labeled code block, not a rendered
+diagram. Pre-render to PNG when a visual diagram is required.
+
+For high-fidelity diagrams, pre-render to PNG and include as images.
 
 ## Troubleshooting
 
@@ -128,7 +149,7 @@ Email clients can't execute JavaScript, so Mermaid diagrams convert to text-base
 
 ## Limitations
 
-- Email clients cannot execute JavaScript — Mermaid diagrams use table fallback
+- Email clients cannot execute JavaScript — simple flowcharts use tables; unsupported diagrams retain labeled source
 - Complex CSS layouts may render differently across clients (Outlook vs Gmail vs Apple Mail)
 - Inline images add to email size — consider linking for large image sets
 - Some clients strip CSS — design for graceful degradation
@@ -137,7 +158,7 @@ Email clients can't execute JavaScript, so Mermaid diagrams convert to text-base
 
 - Node.js 24+
 - pandoc (for Markdown to HTML conversion)
-- Shared runtime: `scripts/shared/tool-runner.cjs`, `dependencies.cjs`, `markdown-preprocessor.cjs`, and `mermaid-pipeline.cjs`
+- Shared runtime: keep the complete `scripts/shared/` directory at the same relative location, including the image-path and HTML-screening helpers and their transitive imports.
 
 ## Muscle Script
 
@@ -155,7 +176,7 @@ Email clients can't execute JavaScript, so Mermaid diagrams convert to text-base
 | Images missing or show broken icons | Reject | Embed as base64 or CID attachment |
 | Links are clickable and point to correct URLs | Accept | Spot-check 2-3 links |
 | Mermaid diagrams pre-rendered as inline images | Accept | Raw mermaid syntax is not email-safe |
-| Mermaid diagrams show as code blocks | Reject | Pre-render to PNG before embedding |
+| Mermaid diagrams show as code blocks | Warning | Expected for unsupported fallback; pre-render to PNG when visual output is required |
 | File opens in default mail client without errors | Accept | Test .eml file import |
 | Total .eml size >5MB | Warning | Compress images or link instead of embed |
 | Plain-text MIME part included as fallback | Accept | Recommended for accessibility |
@@ -164,4 +185,10 @@ Email clients can't execute JavaScript, so Mermaid diagrams convert to text-base
 
 - [md-to-html](../md-to-html/SKILL.md) - sister converter for web page output
 - [md-to-word](../md-to-word/SKILL.md) - sister converter for Word document output
-- `lint-clean-markdown` - validate the source with the project's linter or that skill
+- Markdown linting - validate the source with the project's linter or the `lint-clean-markdown` skill
+
+## Falsifiability
+
+- This skill is wrong if generated .eml files fail to render correctly in Outlook or Thunderbird, or if MIME structure is rejected by mail servers
+- The header format is stale if RFC 5322 compliance requirements change or major mail clients alter their parsing
+- Not earning tokens if users must manually fix the same MIME issues on every conversion

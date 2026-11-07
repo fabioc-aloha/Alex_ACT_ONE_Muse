@@ -44,6 +44,10 @@ const SUPERSCRIPT_MAP = {
  * Handles $..$ and common LaTeX commands outside math mode.
  */
 function convertLatexMath(content) {
+  return transformOutsideCodeFences(content, prose => transformOutsideInlineCode(prose, convertLatexProse));
+}
+
+function convertLatexProse(content) {
   // Convert $inline math$ (but not $$display math$$)
   content = content.replace(/(?<!\$)\$(?!\$)([^$\n]+?)\$(?!\$)/g, (_match, math) => {
     let result = math;
@@ -131,17 +135,9 @@ function applyOutsideFences(content, transformer) {
  * @returns {string}
  */
 function replaceEmDashes(content) {
-  return applyOutsideFences(content, (line) => {
-    // Preserve inline code spans (single backticks).
-    const parts = line.split(/(`[^`\n]*`)/g);
-    return parts.map((p, idx) => {
-      if (idx % 2 === 1) return p; // inside `code`
-      // " \u2014 " or "\u2014" between letters -> ", "
-      return p
-        .replace(/\s*\u2014\s*/g, ', ')
-        .replace(/,\s+,\s+/g, ', '); // collapse accidental ", , "
-    }).join('');
-  });
+  return transformOutsideCodeFences(content, prose => transformOutsideInlineCode(prose, text => text
+    .replace(/\s*\u2014\s*/g, ', ')
+    .replace(/,\s+,\s+/g, ', ')));
 }
 
 /**
@@ -275,16 +271,25 @@ function preprocessMarkdown(content, options = {}) {
     content = stripDecorativeRules(content);
   }
 
-  content = transformOutsideCodeFences(content, transformProseSyntax);
+  content = transformOutsideCodeFences(content, prose => transformOutsideInlineCode(prose, transformProseSyntax));
 
   // Line-level transforms
   const lines = content.split('\n');
   const result = [];
   let prevWasList = false;
   let prevWasBlank = false;
+  let fenceState = null;
+  const protectedLines = new Set();
 
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i];
+    const nextState = nextFenceState(line, fenceState);
+    if (fenceState || nextState) {
+      fenceState = nextState;
+      protectedLines.add(result.length);
+      result.push(line);
+      continue;
+    }
     const stripped = line.trim();
     const isList = /^[-*+]\s|^\d+\.\s|^[-*+]\s*\[[ xX]\]/.test(stripped);
     const isBlank = !stripped;
@@ -326,7 +331,7 @@ function preprocessMarkdown(content, options = {}) {
     final.push(result[i]);
     const stripped = result[i].trim();
     const isList = /^[-*+]\s|^\d+\.\s|^[-*+]\s*\u200B?[\u2610\u2611]/.test(stripped);
-    if (isList && i + 1 < result.length) {
+    if (isList && !protectedLines.has(i) && i + 1 < result.length) {
       const nextStripped = result[i + 1].trim();
       const nextIsList = /^[-*+]\s|^\d+\.\s|^[-*+]\s*\u200B?[\u2610\u2611]/.test(nextStripped);
       if (!nextIsList && nextStripped) {
@@ -381,9 +386,120 @@ function transformOutsideCodeFences(content, transform) {
   return chunks.join('\n');
 }
 
+function transformOutsideInlineCode(content, transform) {
+  const runs = /`+/g;
+  let cursor = 0;
+  let output = '';
+  let opener;
+  while ((opener = runs.exec(content))) {
+    let escapes = 0;
+    for (let i = opener.index - 1; i >= 0 && content[i] === '\\'; i--) escapes++;
+    if (escapes % 2) continue;
+    const closers = /`+/g;
+    closers.lastIndex = runs.lastIndex;
+    let closer;
+    while ((closer = closers.exec(content))) {
+      if (closer[0].length === opener[0].length) break;
+    }
+    if (!closer || /\r?\n[ \t]*\r?\n/.test(content.slice(runs.lastIndex, closer.index))) continue;
+    output += transform(content.slice(cursor, opener.index));
+    const end = closer.index + closer[0].length;
+    output += content.slice(opener.index, end);
+    cursor = end;
+    runs.lastIndex = end;
+  }
+  return output + transform(content.slice(cursor));
+}
+
+function transformOutsideMarkdownCode(content, transform, { inlineCode = true } = {}) {
+  const indentation = text => {
+    let columns = 0;
+    for (const character of text) columns += character === '\t' ? 4 - columns % 4 : 1;
+    return columns;
+  };
+  let listIndents = [];
+  let quoteDepth = 0;
+  let fence = null;
+  const output = [];
+  let plain = [];
+  let paragraph = false;
+  let indentedCode = false;
+  const flush = () => {
+    if (plain.length) {
+      const prose = plain.join('');
+      output.push(inlineCode ? transformOutsideInlineCode(prose, transform) : transform(prose));
+    }
+    plain = [];
+  };
+  for (const original of content.split(/(?<=\n)/)) {
+    let line = original;
+    let depth = 0;
+    let quote;
+    while ((!fence || depth < quoteDepth) && (quote = line.match(/^ {0,3}>[ \t]?/))) {
+      line = line.slice(quote[0].length);
+      depth++;
+    }
+    if (depth !== quoteDepth) {
+      listIndents = [];
+      paragraph = false;
+      indentedCode = false;
+      fence = null;
+      quoteDepth = depth;
+    }
+    if (fence) {
+      const leading = line.match(/^[ \t]*/)[0];
+      const indent = indentation(leading);
+      if (line.trim() && indent < fence.base) {
+        fence = null;
+      } else {
+        output.push(original);
+        const closer = line.slice(leading.length).match(/^(`{3,}|~{3,})[ \t]*\r?\n?$/);
+        if (indent <= fence.base + 3 && closer && closer[1][0] === fence.character &&
+            closer[1].length >= fence.length) fence = null;
+        paragraph = false;
+        continue;
+      }
+    }
+    if (!line.trim()) {
+      if (indentedCode) output.push(original);
+      else plain.push(original);
+      paragraph = false;
+      continue;
+    }
+    const leading = line.match(/^[ \t]*/)[0];
+    const indent = indentation(leading);
+    while (listIndents.length && indent < listIndents.at(-1)) listIndents.pop();
+    // List continuation indentation is not itself a code block.
+    const base = listIndents.at(-1) || 0;
+    if (indent >= base + 4 && (!paragraph || indentedCode)) {
+      flush();
+      output.push(original);
+      indentedCode = true;
+      continue;
+    }
+    indentedCode = false;
+    const list = line.slice(leading.length).match(/^(?:[-+*]|\d+[.)])[ \t]+/);
+    if (list) listIndents.push(indent + indentation(list[0]));
+    const candidate = line.slice(leading.length + (list?.[0].length || 0));
+    const opener = candidate.match(/^(`{3,}|~{3,})([^\r\n]*)/);
+    if ((list || indent - base <= 3) && opener &&
+        (opener[1][0] !== '`' || !opener[2].includes('`'))) {
+      flush();
+      output.push(original);
+      fence = { character: opener[1][0], length: opener[1].length, base: list ? listIndents.at(-1) : base };
+      paragraph = false;
+      continue;
+    }
+    plain.push(original);
+    paragraph = !/^#{1,6}\s/.test(line.slice(leading.length));
+  }
+  flush();
+  return output.join('');
+}
+
 function transformProseSyntax(content) {
   // LaTeX math -> Unicode
-  content = convertLatexMath(content);
+  content = convertLatexProse(content);
 
   // Page-break directives
   content = content.replace(/<!--\s*pagebreak\s*-->/gi, '\\newpage');
@@ -676,6 +792,7 @@ module.exports = {
   convertLatexMath,
   extractFrontmatter,
   applyOutsideFences,
+  transformOutsideMarkdownCode,
   replaceEmDashes,
   stripDecorativeRules,
   detectTocMarker,
