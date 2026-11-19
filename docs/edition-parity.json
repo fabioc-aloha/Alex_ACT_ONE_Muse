@@ -1,0 +1,63 @@
+{
+  "excluded": [
+    {
+      "nativeEquivalent": "The Muse harness manages its own runtime and instruction loading.",
+      "reason": "Copilot activation mechanics: copies always-on .instructions.md files into Copilot/Scout host locations.",
+      "skill": "bootstrap-core"
+    },
+    {
+      "nativeEquivalent": "Muse workspace conventions and the scaffold-platform script this edition ships.",
+      "reason": "Applies the Copilot repository scaffold and workspace settings.",
+      "skill": "bootstrap-project"
+    },
+    {
+      "nativeEquivalent": "Muse's native browser tools.",
+      "reason": "Written for VS Code 1.127+ browser-tool APIs. Preserved in archive/host-specific/ with an edition note; the patterns are host-agnostic.",
+      "skill": "browser-tools"
+    },
+    {
+      "nativeEquivalent": "Muse renders natively (artifacts, widgets, media generation); there is no plugin marketplace to install from.",
+      "reason": "Installs Copilot marketplace plugins that extend visual-authoring workflows.",
+      "skill": "install-visual-companions"
+    },
+    {
+      "nativeEquivalent": "The host is fixed by construction in this edition; see docs/muse-capability-map.md.",
+      "reason": "VS Code Copilot platform reference (deferred tools, skill picker); not a Muse concept.",
+      "skill": "platform-awareness"
+    },
+    {
+      "nativeEquivalent": "Muse generates images natively.",
+      "reason": "Needed REPLICATE_API_TOKEN and a paid Replicate account. The flagship has since retired the skill entirely (only a source note remains under its archive/retired-assets/); this edition keeps the preserved copy in archive/host-specific/.",
+      "skill": "replicate-imagery",
+      "status": "retired-upstream"
+    },
+    {
+      "nativeEquivalent": "Native mail connectors, plus the shared md-to-eml skill for composed email files.",
+      "reason": "Opens an unsent New Outlook draft via Windows automation; no Outlook on this host.",
+      "skill": "rich-email"
+    },
+    {
+      "nativeEquivalent": "No Muse-side counterpart; Muse connections are managed per connector.",
+      "reason": "Emits the Copilot CLI settings block for the public Microsoft ecosystem.",
+      "skill": "setup-enterprise-stack"
+    }
+  ],
+  "mirrors": {
+    "note": "This file is the machine-checkable record of how the Muse edition differs from the flagship. The excluded list must equal manifest.json's archived list; tests/edition-parity.test.mjs enforces that, and scripts/check-edition-parity.mjs checks the live cross-repo delta against this file.",
+    "repo": "fabioc-aloha/Alex_ACT_ONE"
+  },
+  "museOnly": [
+    {
+      "reason": "Satellite-native addition: read-only AI-tell audit agent for the Muse harness.",
+      "skill": "ai-tell-audit"
+    },
+    {
+      "reason": "Satellite-native addition: pushes via the Git Data API, the only authenticated push path from the Muse environment.",
+      "skill": "github-data-api-push"
+    },
+    {
+      "reason": "Satellite-native addition: briefs Muse subagents with explicit scope boundaries.",
+      "skill": "scoped-delegation"
+    }
+  ]
+}

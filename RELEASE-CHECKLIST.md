@@ -111,7 +111,39 @@ test because it reads as coverage.
 > Added 2026-09-07 alongside the first suite. Four mutations were run; each was
 > caught by the test that should have caught it.
 
-## 8. The tree is clean and the push is a fast-forward
+## 8. Check the humanizer source when the skill changes
+
+If the release changes `skills/humanizer/SKILL.md`, compare it with the
+current [Wikipedia guide](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing)
+before release. Check the skill's last comparison and next due date, and
+record what changed or that no catalog change was needed. The skill requires
+a manual check at least every 30 days and before a humanizer release; this
+is not an unattended job. If the guide cannot be checked, stop the release
+rather than claim the catalog is current.
+
+> Added 2026-11-18, adopted from the flagship checklist (there added
+> 2026-10-16). This edition ships the same Wikipedia-derived catalog, so the
+> same freshness rule applies.
+
+## 9. The edition parity check passes
+
+Fetch the flagship's current tree listing and run:
+
+```text
+node scripts/check-edition-parity.mjs <flagship-tree.json>
+```
+
+Exit 0: every difference between the editions is documented in
+`docs/edition-parity.json`. A nonzero exit names the drift; resolve it by
+porting, or by recording a decision in the parity file and `PORT-NOTES.md`,
+never by editing the checker to look away.
+
+> Added 2026-11-18. The editions' skill delta (eight archived host-specific
+> skills, three satellite-native additions) was previously recorded only in
+> prose, and the flagship retiring `replicate-imagery` upstream changed the
+> delta without anything noticing.
+
+## 10. The tree is clean and the push is a fast-forward
 
 ```text
 git status --short
@@ -120,7 +152,7 @@ git fetch origin && git rev-list --count HEAD..origin/main
 
 Clean tree, zero commits behind. Then push.
 
-## 9. After Mall delivery, verify a real installation
+## 11. After Mall delivery, verify a real installation
 
 Close any host that may lock the installed package, then run this from the
 release checkout:

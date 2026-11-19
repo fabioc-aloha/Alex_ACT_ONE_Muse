@@ -321,10 +321,23 @@ runtime launcher) is preserved for reference.
 - **v0.2.0 curation.** The sixty-skill set was triaged for Muse adoption:
   29 kept unchanged, 23 rewritten as trimmed "Muse delta" skills, 8 archived
   under `archive/host-specific/` (see [Curation](#curation)).
-- **Identity.** `plugin.json` name is `alex-act-one-Muse`, version `0.2.0`,
+- **Identity.** `plugin.json` name is `alex-act-one-Muse`, version `0.3.0`,
   repository `https://github.com/fabioc-aloha/Alex_ACT_ONE_Muse`. Status stays
   `development`.
 - Full change log: [PORT-NOTES.md](PORT-NOTES.md).
+
+### Version map
+
+This edition versions independently of the flagship; the table records
+which flagship release each Muse release mirrors, so a version number is
+never compared across repos directly. The repo name is spelled
+`Alex_ACT_ONE_Muse` (Muse, not Claude); the other spelling returns a 404.
+
+| Muse edition | Mirrors flagship | Notes |
+|---|---|---|
+| v0.1.0 | v0.3.6 | The straight port to the Muse host |
+| v0.2.0 | v0.6.0 | Curation: 29 kept, 23 delta-adapted, 8 archived |
+| v0.3.0 | v0.9.2 | Flint 1.0.1, converter safety, deterministic helpers |
 
 ## Tests
 
