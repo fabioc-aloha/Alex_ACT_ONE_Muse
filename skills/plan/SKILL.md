@@ -1,7 +1,7 @@
 ---
 name: plan
 description: "Use native planning for uncertain or consequential implementation work. Preserve read-only discussion, approval before execution, and task-specific verification without compulsory repository files or prewritten implementation. Muse delta: Muse natively confirms before mutating and reads before acting; this skill adds the planning authority contract — no compulsory repository plan file, no fixed task durations, no prewritten implementation — and demotes the project plan template to optional craft material."
-lastReviewed: 2026-11-07
+lastReviewed: 2026-11-24
 ---
 
 # Native-first Planning

@@ -1,14 +1,14 @@
 ---
 name: proactive-awareness
 description: "Applies cross-session context recovery, uncommitted-work detection, and focus routing once proactive behavior has been judged appropriate. Use when continuity, worktree state, or active goals may change the response. Muse delta: the whether-to-surface judgment is not native to Muse — that stays with the resident reliance-nudges inhibition rules; this skill is the read-only what-to-check contract (HANDOFF.md, authoritative task list, TODO.md fallback, git counts, goals) applied once that gate clears, with the detailed procedures consolidated in its references."
-lastReviewed: 2026-11-07
+lastReviewed: 2026-11-24
 ---
 
 # Read-only Project Recovery
 
 ## Muse delta
 
-- **What Muse already does natively**: Muse carries user context across turns, and its native session history, resume, and memory interfaces are available as secondary evidence. They are not the authoritative task backlog, and Muse has no defined native rule set for *whether* a proactive nudge is appropriate — that judgment lives in the resident `reliance-nudges` instruction (the silence and frustration floors), not in the system prompt.
+- **What Muse already does natively**: Muse carries user context across turns, and its native session history, resume, and memory interfaces are available as secondary evidence. Muse's official proactive-work skill and runtime proactivity system own the proactive loop itself (when private work runs, what it may do unasked, how results surface); this skill does not duplicate that machinery. They are not the authoritative task backlog, and Muse has no defined native rule set for *whether* a proactive nudge is appropriate — that judgment lives in the resident `reliance-nudges` instruction (the silence and frustration floors), not in the system prompt.
 - **What this skill uniquely adds**: the read-only recovery contract — recovery never authorizes writes or meditation; a policy-denied source stays denied; unobserved worktree state stays unknown; nudges disclose counts, not filenames — plus routing to the consolidated procedures in [project recovery](references/project-recovery.md) (PA1 cross-session recovery, PA2 uncommitted-work detection, PA4 focus routing).
 - **When to load it**: once the inhibition rules have judged a proactive behavior appropriate; when continuity, worktree state, or active goals may change the response.
 

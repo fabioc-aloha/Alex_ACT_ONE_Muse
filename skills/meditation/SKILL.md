@@ -1,10 +1,14 @@
 ---
 name: "meditation"
 description: "Review session outcomes, recommend reusable skills or automation, and reconcile project guidance, handoff, tasks, and change history."
-lastReviewed: 2026-09-18
+lastReviewed: 2026-11-24
 ---
 
 # Meditation
+
+## Muse delta
+
+Muse's background self-improvement system owns the user-level loop natively: memory maintenance, alignment synthesis, relationship records, and idea generation between conversations. This skill does not duplicate that. Its delta is the repository side the native loop never touches: reconciling the project's own continuity records (changelog, authoritative task list, HANDOFF.md, AGENTS.md routing) and recommending project-local capabilities from session outcomes. Run it for repo continuity; do not run it to redo memory work the native loop already did.
 
 Improve how future work gets done and leave the project ready for the next
 session. Look for useful project capabilities and recommendations, not another

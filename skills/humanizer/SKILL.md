@@ -1,7 +1,7 @@
 ---
 name: humanizer
 description: Use when the user wants to humanize, de-AI, de-slop, or un-ChatGPT a piece of text — review AI-associated patterns and add real voice — or wants a copywriter pass that reviews existing copy for a named audience (e.g., non-native English readers) using an idiom/tone/register/ambiguity/grammar/naturalness taxonomy and an approval-gated before/after table workflow. Uses a contextual catalog informed by Wikipedia's "Signs of AI writing" and produces a draft → self-audit → final rewrite. Optional voice-calibration from a user-provided writing sample. Adapted from Hermes Agent / blader/humanizer.
-lastReviewed: 2026-11-07
+lastReviewed: 2026-11-24
 ---
 
 # Humanizer: AI-Tell Removal and Audience Copy Review
