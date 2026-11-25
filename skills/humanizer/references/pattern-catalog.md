@@ -16,9 +16,9 @@
 
 ### 2. Undue Emphasis on Notability and Media Coverage
 
-**Words to watch:** independent coverage, local/regional/national media outlets, written by a leading expert, active social media presence
+**Words to watch:** independent coverage, local/regional/national media outlets, trade publications, cited/featured/profiled in, significant/substantial/secondary coverage, written by a leading expert, active social media presence, maintains a strong digital presence
 
-**Problem:** LLMs hit readers over the head with claims of notability, often listing sources without context.
+**Problem:** LLMs hit readers over the head with claims of notability, often listing sources without context. The current-era form (2025+ tools) focuses on characteristics of the sources themselves: their type, their availability in public searching, their classification against the media landscape.
 
 **Before:**
 
@@ -32,7 +32,7 @@
 
 **Words to watch:** highlighting/underscoring/emphasizing..., ensuring..., reflecting/symbolizing..., contributing to..., cultivating/fostering..., encompassing..., showcasing...
 
-**Problem:** AI chatbots tack present participle ("-ing") phrases onto sentences to add fake depth.
+**Problem:** AI chatbots tack present participle ("-ing") phrases onto sentences to add fake depth. Measured, not anecdotal: Reinhart et al. (PNAS, Feb 2025) found instruction-tuned LLMs use present participial clauses at 2 to 5 times the human rate and nominalizations at 1.5 to 2 times the human rate, in a noun-heavy style that does not adapt to genre as human writing does. Participial-clause and nominalization density are countable signals; a single -ing phrase is not a finding.
 
 **Before:**
 
@@ -140,6 +140,8 @@ rename a topic in general-purpose prose. Verify factual support separately.
 
 **Problem:** These words appear far more frequently in post-2023 text. They often co-occur.
 
+**Era note (refreshed 2026-11-24 from Wikipedia):** the overused set shifts by model era. GPT-4 era adds *bolstered*, *meticulous/meticulously*; GPT-4o era adds *align with*, *enhance*, *highlighting*, *showcasing*; the GPT-5 era (mid-2025 on) narrows to *emphasizing*, *enhance*, *highlighting*, *showcasing*, plus the canned notability phrasing of Pattern 2. Newer watch additions: *deep dive*, *robust*. Grok output overuses superficially scientific words (*causal*, *empirical*, *correlate*) and still overuses *underscore* as of 2026. As of October 2026 the most common signs in new AI text are Markdown presence, AI edit summaries, source-availability hedging (Pattern 21), vague association (supplemental pattern), and canned notability emphasis (Pattern 2).
+
 **Nuance on "load-bearing":** legitimate as canonical vocabulary in ACT-derived work, where it means "a claim that if wrong would break the argument" (analogous to a load-bearing wall). It becomes an AI-tell in three cases: used as a synonym for "important / key / central / vital" where those simpler words would do, repeated ≥3 times within a single document, or applied to soft nouns (a load-bearing feeling, a load-bearing moment). Heuristic: if "important" or "central" substitutes without loss, it was decorative. Count the repetitions before applying the ≥3 threshold; do not estimate them while reading: `grep -oi 'load-bearing' <file> | wc -l` prints the occurrence count.
 
 **Before:**
@@ -166,7 +168,7 @@ rename a topic in general-purpose prose. Verify factual support separately.
 
 ### 9. Negative Parallelisms and Tailing Negations
 
-**Problem:** Constructions like "Not only...but..." or "It's not just about..., it's..." are overused. So are clipped tailing-negation fragments such as "no guessing" or "no wasted motion" tacked onto the end of a sentence instead of written as a real clause.
+**Problem:** Constructions like "Not only...but..." or "It's not just about..., it's..." are overused. So are clipped tailing-negation fragments such as "no guessing" or "no wasted motion" tacked onto the end of a sentence instead of written as a real clause. Two more forms from the current Wikipedia catalog: the reversed variant "X rather than Y" (particularly common in Grok output), and negative parallelisms spread across two adjacent sentences instead of held inside one.
 
 **Before:**
 
@@ -236,7 +238,7 @@ rename a topic in general-purpose prose. Verify factual support separately.
 
 ### 14. Em Dash Overuse
 
-**Problem:** Earlier LLM text often overused em dashes (—), but Wikipedia's current guide treats this as a historical indicator. A dash alone is not a finding. Revise only when the punctuation hurts clarity or conflicts with the intended style.
+**Problem:** Earlier LLM text often overused em dashes (—), but Wikipedia's current guide treats this as a historical indicator. A dash alone is not a finding. Revise only when the punctuation hurts clarity or conflicts with the intended style. A July 2026 study found that of contemporary models only Claude used em dashes more than professional writers, and GPT-5.1 actively suppresses them; AI-generated em dashes also often sit between spaces, contrary to typographic convention.
 
 > **Note:** Alex ACT bans em-dashes in shipped prose outright. This pattern is relevant when humanizing _third-party_ text that already contains em-dashes, or when reviewing why heir-authored prose felt AI-flavored before the rule was internalized.
 
@@ -302,7 +304,7 @@ rename a topic in general-purpose prose. Verify factual support separately.
 
 ### 19. Curly Quotation Marks
 
-**Scope:** The Wikipedia guide notes that some chatbots use curly quotation marks, but also cautions that curly quotes are common in human-written, professionally typeset work. Neither curly quotes nor mixed quote styles establish authorship. Change them only when the destination's typography rules require it.
+**Scope:** The Wikipedia guide notes that some chatbots use curly quotation marks, but also cautions that curly quotes are common in human-written, professionally typeset work. Neither curly quotes nor mixed quote styles establish authorship. Change them only when the destination's typography rules require it. Model note (2026): ChatGPT and DeepSeek typically produce curly quotes and apostrophes; Gemini and Claude typically do not.
 
 **Before (for a publication that requires straight quotes):**
 
@@ -330,7 +332,7 @@ rename a topic in general-purpose prose. Verify factual support separately.
 
 ### 21. Knowledge-Cutoff and Source-Limit Disclaimers
 
-**Words to watch:** as of [date], Up to my last training update, While specific details are limited/scarce..., not widely documented in available sources, based on available information, and claims that a source should be treated as X rather than Y
+**Words to watch:** as of [date], Up to my last training update, While specific details are limited/scarce..., not widely documented in available sources, based on available information, based on publicly available sources, according to available sources, and claims that a source should be treated as X rather than Y
 
 **Problem:** Stock knowledge-cutoff disclaimers are a historical cue. A current concern is an unsupported claim that information is unavailable, followed by speculation about what it "likely" means. A genuine limit in the evidence is not itself a tell; state it plainly and do not fill the gap with a guess.
 
@@ -440,6 +442,30 @@ rename a topic in general-purpose prose. Verify factual support separately.
 **Before:**
 
 ```text
+### 30. Aphoristic Packaging (Verdict-Sentence Stacking)
+
+**Phrases to watch:** "X is the right read", "X is the part that gets oversold / overlooked / misunderstood", "That is what lets a team say yes", "The [noun] is the whole game", any run of short, polished, quotable verdict sentences stacked back to back. Also the setup-pivot frame: "X sounds great until you ask / until it meets / until you try..." — a polished wind-up that exists only to set up the author's counterpoint.
+
+**Problem:** the model packages observations as pull-quotes. Each sentence is shaped to sound like a takeaway, so a short passage reads like a string of slogans instead of a person reacting. This is the dominant tell in short-form writing (social replies, comments), where the essay patterns above have no room to appear: the tell is aphorism density, not any single phrase. A human comment usually reacts to one specific detail, in plain words, and leaves the thought a little loose.
+
+**Before:**
+
+> Deleting 9,193 lines to get adopted is the right read. Nobody wants another agent. Permissions unchanged is the detail that matters. That is what lets a team say yes.
+
+**After:**
+
+> 9,193 lines deleted in one commit is a strong argument. Most teams keep bolting assistants onto the product and then wonder why nobody opens them. Keeping the permissions as they were is probably what got it past security.
+
+**Fix:** keep at most one verdict sentence per short passage. Convert the rest into plain observation: name the specific detail, say what happened, use ordinary verbs. If a sentence would work as a pull-quote on a slide, rewrite it until it would not. (Added 2026-11-24 from Fabio's flags on social drafts.)
+
+## Sources to re-check
+
+1. **Wikipedia, "Signs of AI writing"** (WikiProject AI Cleanup) — the living catalog; last full re-read 2026-11-24.
+2. **Reinhart et al., PNAS 122(8), Feb 2025** — measured sentence-structure evidence behind Pattern 3.
+3. **Kobak et al., Science Advances 11(27), Jul 2025** — excess-vocabulary method behind the Pattern 7 era lists.
+4. **Wikipedia, "AI or not" quiz** — calibration drill for detection judgment.
+5. **Detector-vendor research (Pangram, GPTZero)** — second tier; commercial bias, corroborate first.
+
 ## Performance
 
 Speed matters.

@@ -1,12 +1,12 @@
 ---
 name: project-status
 description: "Report the current project's repository state, recent work, brain QA health (if applicable), and pending handoff items. Use for session orientation or an on-demand project checkpoint."
-lastReviewed: 2026-11-07
+lastReviewed: 2026-11-24
 ---
 
 # Status
 
-Produce a terse, read-only orientation report for the current project.
+Produce a terse, read-only orientation report for the current project. Generic "where do things stand" questions about the user's own state are covered by Muse's official self-awareness skill; this skill's delta is the repository checkpoint below (git state, handoff, brain-QA health).
 
 This prompt is self-contained: execute the numbered steps directly. If the
 generic skill tool does not list `status-reporting`, that is not evidence the
