@@ -30,6 +30,14 @@ Git core is stable; GitHub features (Actions, CLI) evolve. Verify installed Git/
 
 Return the actual command result and resulting branch/worktree state. Do not equate an exit code with broader integration or test success.
 
+## Verify the canonical source before asserting or building
+
+- Before you claim a file does or does not exist in a repo, query the remote listing. A local checkout can be stale, and a local directory listing is not evidence of remote state.
+
+- Before you build a deliverable from repo files, pull fresh copies first. Rebuilding from stale local copies ships yesterday's artifact.
+
+- When a remote check contradicts your local view, say so plainly and correct the record. The fix is checking first, not apologizing after.
+
 ## Would Revise If
 
 Revise if the recovery patterns produce data loss in a real recovery scenario, or if the 'safe operations' classification labels a destructive op as safe and that op runs without confirmation.
