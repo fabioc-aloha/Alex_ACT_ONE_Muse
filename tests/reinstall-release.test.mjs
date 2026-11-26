@@ -15,11 +15,16 @@ const ROOT_PATH = fileURLToPath(ROOT);
 const SCRIPT_PATH = fileURLToPath(SCRIPT);
 const VERSION = JSON.parse(readFileSync(new URL('../plugin.json', import.meta.url), 'utf8')).version;
 
+// This edition does not ship reinstall-and-check.ps1 (a flagship installer);
+// the suite is retained for parity and skips cleanly where the script is
+// absent instead of failing on a missing file.
+const skipRelease = !hasPwsh || !existsSync(SCRIPT_PATH);
+
 function writePowerShell(file, content) {
     writeFileSync(file, content.replace(/^\n/, ''), 'utf8');
 }
 
-test('reinstalls the released plugin and applies bootstrap migration', { skip: !hasPwsh }, (t) => {
+test('reinstalls the released plugin and applies bootstrap migration', { skip: skipRelease }, (t) => {
     const root = mkdtempSync(join(tmpdir(), 'alex-act-release-'));
     const copilotHome = join(root, '.copilot');
     const installedRoot = join(copilotHome, 'installed-plugins', 'alex-mall', 'alex-act-one');
