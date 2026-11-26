@@ -164,7 +164,7 @@ Red-700 circle r=10 at the top-right of the region being called out; white bold 
 ## Related skills
 
 - [`chart-big-idea`](../chart-big-idea/SKILL.md) — earn-a-figure gate + focus discipline (framing side)
-- [`flint-chart`](../flint-chart/SKILL.md) § Publication config preset — Vega-Lite config emitting charts obeying this guide
+- [Flint publication preset](../flint-chart/references/publication-preset.md) — a Vega-Lite starting point; the rendered SVG still needs print verification.
 - [`render-verify`](../render-verify/SKILL.md) § Prose-coupling check — verifies surrounding prose after the figure ships
 - [`figure-generator`](../figure-generator/SKILL.md) — the engineering discipline that emits conforming SVGs
 - `markdown-mermaid` (Alex ACT Core) — sibling for Mermaid diagrams (different rendering model, shared palette discipline)

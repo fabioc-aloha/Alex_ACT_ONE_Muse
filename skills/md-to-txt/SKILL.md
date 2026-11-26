@@ -12,6 +12,8 @@ lastReviewed: 2026-11-07
 - **What this skill uniquely adds:** the `scripts/md-to-txt.cjs` pipeline with its **option flags** and **format-aware defaults** (em-dash → comma ON for txt, decorative HRs preserved) — consistent, repeatable conversion Muse hand-stripping can't guarantee.
 - **Load when:** the user asks to convert to plain text or export markdown as a `.txt` file.
 
+If Pandoc is unavailable, load [Setup Dependencies](../setup-dependencies/SKILL.md#when-another-skill-is-blocked).
+
 Strip all Markdown formatting and produce clean plain text. Useful for clipboard export, email body fallback, accessibility, and as input to text analysis tools.
 
 ## Quick Start

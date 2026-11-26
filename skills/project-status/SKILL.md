@@ -19,7 +19,7 @@ Load and follow [proactive-awareness](../proactive-awareness/SKILL.md) for read-
 ## Steps
 
 1. **Identity**: Confirm which project this is and read the active branch (`git branch --show-current`).
-2. **Git state**: Report uncommitted file count and the latest commit subject.
+2. **Git & artifact state**: Report uncommitted file count and the latest commit subject. When an authorized remote operation or an authentication failure makes it relevant, use the [Git auth preview](../git-workflow/scripts/check-git-auth.cjs) with `--repository-root <repo> --user <account>`; do not infer an account from an organization owner. For artifact delivery or recovery, run the delivery check in [proactive-awareness](../proactive-awareness/SKILL.md#delivery-check-mode) against the [storage contract](../proactive-awareness/references/project-artifact-storage.md). Scope unavailable/unsupported states separately from clean results. Routine orientation does not require an unconditional full-session or network-auth scan.
 3. **Continuity**: Read `HANDOFF.md` if present for current state, blockers,
    next action, and verification. Read the authoritative task list linked from
    handoff or `AGENTS.md`; otherwise use root `TODO.md` if present. Report

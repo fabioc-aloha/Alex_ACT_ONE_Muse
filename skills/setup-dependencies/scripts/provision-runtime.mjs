@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnCommand } from '../../../scripts/process-launch.mjs';
 import deps from '../../../scripts/shared/dependencies.cjs';
 import runtimeStatus from '../../../scripts/shared/runtime-status.cjs';
+import versionAudit from '../../../scripts/shared/version-audit.cjs';
 
 // Read from the shared registry rather than restating the pins. Two copies of
 // the same three versions drift silently, and the copy a reader trusts is
@@ -96,6 +97,13 @@ try {
   const registryResult = await run('npm', ['config', 'get', 'registry'], { capture: true });
   const registry = registryResult.stdout.trim();
   if (!registry) throw new Error('npm returned an empty configured registry');
+  const tarballPrefix = options.tarballPrefix || deps.registryTarballPrefix(registry);
+  if (!options.tarballPrefix && tarballPrefix && !CHECK_UPDATES) {
+    const version = (await run('npm', ['--version'], { capture: true })).stdout.trim();
+    if (!/^\d+\.\d+\.\d+/.test(version) || Number(version.split('.')[0]) < 12) {
+      throw new Error('Detected Microsoft proxy routing requires npm 12 or later');
+    }
+  }
 
   console.log(`mode:     ${APPLY ? 'apply' : 'preview'}`);
   console.log(`registry: ${registry}`);
@@ -103,7 +111,9 @@ try {
   console.log('packages:');
   for (const packageSpec of PACKAGES) console.log(`  - ${packageSpec}`);
   console.log('policy:   exact versions; configured registry install; direct Node runtime');
-  if (options.tarballPrefix) console.log(`tarballs: ${options.tarballPrefix} -> ${registry} (per-command routing only)`);
+  if (tarballPrefix && !CHECK_UPDATES) {
+    console.log(`tarballs: ${tarballPrefix} -> ${registry} (${options.tarballPrefix ? 'explicit prefix' : 'detected Microsoft proxy'}; per-command routing only)`);
+  }
 
   if (CHECK_UPDATES) {
     console.log('\nstable version audit:');
@@ -114,13 +124,13 @@ try {
         pinned.name,
         'dist-tags.latest',
         '--json',
-        '--prefer-offline',
+        '--prefer-online',
       ], {
         capture: true,
         env: { NPM_CONFIG_REGISTRY: registry },
       });
-      const latest = JSON.parse(result.stdout.trim());
-      const current = latest === pinned.version;
+      const { latest, status } = versionAudit.auditVersion(pinned.version, JSON.parse(result.stdout.trim()));
+      const current = status === 'current';
       if (!current) updates += 1;
       console.log(`  ${current ? 'current' : 'UPDATE '} ${pinned.name}: ${pinned.version} -> ${latest}`);
     }
@@ -137,26 +147,28 @@ try {
 
   mkdirSync(RUNTIME_ROOT, { recursive: true });
   for (const pinned of PINNED_PACKAGES) {
-    const result = await run('npm', ['view', `${pinned.name}@${pinned.version}`, 'version', '--json'], { capture: true });
+    const result = await run('npm', ['view', `${pinned.name}@${pinned.version}`, 'version', '--json', '--prefer-online'], { capture: true });
     const value = JSON.parse(result.stdout);
     const versions = Array.isArray(value) ? value : [value];
     if (versions.length !== 1 || versions[0] !== pinned.version) throw new Error(`Registry did not confirm exact pin ${pinned.name}@${pinned.version}`);
   }
   console.log(`installing: ${PACKAGES.join(', ')}`);
-  await run('npm', [
+  const installation = await run('npm', [
       'install',
       '--save-exact',
-      '--prefer-offline',
+      '--prefer-online',
       '--no-audit',
       '--no-fund',
       '--loglevel=error',
       '--prefix',
       RUNTIME_ROOT,
-      ...(options.tarballPrefix ? [`--replace-registry-host=${options.tarballPrefix}`] : []),
+      ...(tarballPrefix ? [`--replace-registry-host=${tarballPrefix}`] : []),
       ...PACKAGES,
     ], {
-      env: { NPM_CONFIG_REGISTRY: registry }, timeout: 180000,
+      capture: true, env: { NPM_CONFIG_REGISTRY: registry }, timeout: 180000,
     });
+  if (installation.stdout) process.stdout.write(installation.stdout);
+  if (installation.stderr) process.stderr.write(installation.stderr);
 
   for (const pinned of PINNED_PACKAGES.filter(packageInfo => packageInfo.route)) {
     const state = runtimeStatus.checkRuntime(pinned.route, RUNTIME_ROOT);
@@ -166,5 +178,8 @@ try {
   console.log('\nProvisioned direct runtime. Reload the host, then verify its MCP connection in a new session.');
 } catch (error) {
   console.error(`FAIL  ${error.message}`);
+  if (/\bETARGET\b/.test(error.message)) {
+    console.error('A required version could not be resolved after requesting fresh metadata from the configured registry. Check the named dependency, including transitive dependencies, through that registry. No automatic retry, cache deletion, version substitution or registry switch was attempted.');
+  }
   process.exit(1);
 }

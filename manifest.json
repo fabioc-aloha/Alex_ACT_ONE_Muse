@@ -1,7 +1,7 @@
 {
   "$comment": "Asset manifest for the Muse edition. The Copilot edition's always-on instructions ship as opt-in modules under muse-opt-in/ and are never auto-applied; bootstrap-core in this edition activates them only by deliberate user choice.",
   "plugin": "alex-act-one-Muse",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "status": "development",
   "shape": "skills pack for the Muse personal assistant",
   "description": "Alex ACT ONE, Muse edition. A user-level skills pack for the Muse personal assistant covering critical thinking and problem framing, engineering craft, prose and documentation, document conversion, visual authoring, and agent brain authoring. Skills are plain SKILL.md playbooks read from the installed skills directory; the Copilot edition's always-on instructions are opt-in modules under muse-opt-in/.",
@@ -78,6 +78,10 @@
       {
         "name": "corpus-qa-sweep",
         "path": "skills/corpus-qa-sweep/SKILL.md"
+      },
+      {
+        "name": "creative-writing",
+        "path": "skills/creative-writing/SKILL.md"
       },
       {
         "name": "critical-thinking",
