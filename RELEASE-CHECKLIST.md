@@ -138,6 +138,17 @@ Exit 0: every difference between the editions is documented in
 porting, or by recording a decision in the parity file and `PORT-NOTES.md`,
 never by editing the checker to look away.
 
+When the release mirrors a new flagship version, start from the worksheet
+instead of a hand-built diff:
+
+```text
+node scripts/mirror-diff.mjs <old-flagship-tree.json> <new-flagship-tree.json>
+```
+
+It classifies every changed file against this edition (verbatim-held,
+delta-held, not in the edition) and emits the adopt / adapt / skip worksheet
+the mirror decision is recorded on.
+
 > Added 2026-11-18. The editions' skill delta (eight archived host-specific
 > skills, three satellite-native additions) was previously recorded only in
 > prose, and the flagship retiring `replicate-imagery` upstream changed the
