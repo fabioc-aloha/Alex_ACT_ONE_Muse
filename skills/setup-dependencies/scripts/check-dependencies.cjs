@@ -34,7 +34,7 @@ for (let index = 2; index < process.argv.length; index++) {
         selectedRuntime = process.argv[++index];
         if (!selectedRuntime || selectedRuntime.startsWith('--')) throw new Error('--runtime-root requires a path');
     } else if (arg === '--apply') {
-        throw new Error('check-dependencies.cjs is read-only. Preview install-and-check.ps1 -DependenciesOnly, or provision-runtime.mjs for MCP-only setup. Apply only after approval.');
+        throw new Error('check-dependencies.cjs is read-only. Preview provision-runtime.mjs for MCP setup, and run installs only after approval.');
     } else if (arg !== '--json') throw new Error(`Unknown argument: ${arg}`);
 }
 const MCP_RUNTIME = runtimeRoot(selectedRuntime);
@@ -280,5 +280,5 @@ if (missingMcp.length) {
 }
 
 console.log('\nRead-only inspection. Nothing was installed or changed.');
-console.log('Preview install-and-check.ps1 -DependenciesOnly from the installed package; add -Apply only after explicit approval.');
+console.log('Install only what you approved, using the commands above.');
 console.log('For MCP-only installation, preview provision-runtime.mjs and explicitly approve --apply.');
