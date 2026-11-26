@@ -74,7 +74,7 @@ function parseArgs(argv) {
 
 export function planSync({ repoRoot, skillsDir }) {
   const manifest = JSON.parse(readFileSync(join(repoRoot, 'manifest.json'), 'utf8'));
-  const skills = manifest.assets?.skills ?? [];
+  const skills = (manifest.assets?.skills ?? []).map((s) => (typeof s === 'string' ? s : s.name ?? s.skill));
   const existing = new Set(existsSync(skillsDir) ? readdirSync(skillsDir) : []);
   const statePath = join(skillsDir, '.install-state.json');
   const state = existsSync(statePath) ? JSON.parse(readFileSync(statePath, 'utf8')) : { files: {} };
