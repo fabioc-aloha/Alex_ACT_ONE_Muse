@@ -16,6 +16,8 @@ lastReviewed: 2026-11-07
 
 Convert Markdown documents with YAML frontmatter into RFC 5322-compliant `.eml` files ready for governance, newsletter, and stakeholder communication workflows.
 
+If a missing tool blocks the requested output, load [Setup Dependencies](../setup-dependencies/SKILL.md#when-another-skill-is-blocked).
+
 ## When to Use
 
 - Sending formatted content via email clients (Outlook, Thunderbird, etc.)

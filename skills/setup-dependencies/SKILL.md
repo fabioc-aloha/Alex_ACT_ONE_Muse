@@ -1,21 +1,37 @@
 ---
 name: setup-dependencies
-description: "Check which optional dependencies this plugin can use, report what each missing one costs, and install them with consent. Covers Pandoc, Mermaid CLI, svgexport, jszip, and the pinned MCP servers for charts, image generation, and browser verification. Use after installing the plugin, when a skill reports a missing tool, or when checking for MCP updates."
-lastReviewed: 2026-11-07
+description: "Check capability-specific dependencies, explain missing tools, and install with consent. Covers Pandoc, Pillow, Mermaid CLI, svgexport, jszip, and pinned chart/browser MCP servers. Use when another skill needs an unavailable dependency, after plugin installation, or when checking MCP updates."
+lastReviewed: 2026-11-25
 ---
 
 # Setup Dependencies
 
-> **Muse edition note:** this skill provisions the Copilot edition's MCP servers (`flint`, `playwright`, `replicate`) and is preserved for reference. In the Muse edition there is nothing to provision — those capabilities are native to the host; see `docs/muse-capability-map.md`. The reviewed pins table below is the Copilot edition's.
+> **Muse edition note:** in this edition the checker and the MCP provisioner below are live tooling: the Flint server is provisioned here and driven directly over stdio (see the `flint-chart` skill), and Playwright remains a reference pin for hosts that use it. The Copilot edition's PowerShell/Mall setup flows (`install-and-check.ps1`, `-DependenciesOnly`) are not shipped in this edition. Replicate was retired upstream in flagship 0.10.0 and is gone from the pins. See `docs/muse-capability-map.md` for which capabilities the host provides natively.
 
 
 Most of this plugin needs nothing beyond Node. Roughly three quarters of its
-skills run with no external tools at all. This skill handles the rest: seven
-document converters that need Pandoc, a few visual skills that use optional
-render helpers, and three MCP servers that back charts, image generation, and
+skills run with no external tools at all. This skill handles the rest: document
+converters that need Pandoc, a few visual skills that use optional
+render helpers, and two MCP servers that back charts and
 browser verification.
 
 Nothing here installs without consent. A dependency check is read-only.
+
+## When another skill is blocked
+
+Load this skill as soon as confirmed missing or unusable dependencies block the
+requested capability; do not wait for a separate setup request. Carry over the
+blocked skill, requested output, exact diagnostic, and selected runtime or
+interpreter. Run a read-only check first. Use a supported fallback without
+setup if it still meets the requested output; do not silently downgrade it.
+
+Distinguish a missing dependency from a host that has not registered or loaded
+it, a missing user input, or an unsupported feature. Report only what blocks
+the task and propose the narrowest applicable remedy. Get explicit approval
+before installing, updating, or registering anything. After an approved fix,
+verify the dependency in the same runtime and resume the original skill; if
+the dependency remains unavailable, report the blocker instead of retrying
+blindly.
 
 ## Check First
 
@@ -43,24 +59,24 @@ relative to a capability, so the report sorts every item into three tiers:
 
 | Tier | Meaning | Members |
 | --- | --- | --- |
-| **Required** | The skills that call it cannot run without it | Pandoc (7 converters), Pillow (annotate-screenshot), Flint MCP (chart rendering) |
-| **Recommended** | Those skills run and produce less | Mermaid CLI (diagrams stay unrendered), svgexport (no PNG export), jszip (Word loses table formatting), Playwright MCP (`render-verify` falls back to the host's browser tools) |
-| **Add-on** | Blocks nothing. Adds capability this package does not have | Replicate MCP (also needs a paid token), visual companions, Microsoft ecosystem plugins |
+| **Required** | The skills that call it cannot run without it | Pandoc (document conversion), Pillow (annotate-screenshot), Flint MCP (chart rendering) |
+| **Recommended** | Optional for the base workflow; required when the selected output depends on them | Mermaid CLI (Word diagrams or HTML PNG mode), svgexport (SVG-to-PNG conversion), jszip (Word formatting), Playwright MCP (browser verification when native tools are insufficient) |
+| **Add-on** | Blocks nothing. Adds capability this package does not have | Visual companions, Microsoft ecosystem plugins |
 
-The three MCP servers are provisioned by one command but they are not equally
+The two MCP servers are provisioned by one command but they are not equally
 important, and the report tiers them separately. Flint is the only one whose
 absence stops a skill outright: `flint-chart` and `flint-theme` call its tools
 throughout and have no fallback. Playwright has one, documented in
-`render-verify`'s own description. Replicate needs a paid account before it does
-anything at all.
+`render-verify`'s own description.
 
 The distinction matters when reporting to a user. A missing Pandoc means seven
 skills are unavailable and should be named. A missing jszip means one output is
 plainer. A missing add-on means nothing at all, and telling someone to install
 one to "fix" a problem is wrong.
 
-Plugin installation is not handled here. `install-visual-companions` and
-`setup-enterprise` own those flows because they carry the marketplace
+Companion plugin installation is not part of the root helper's ONE setup.
+`install-visual-companions` and `setup-enterprise` own those flows, including
+marketplace
 registration, the consent gates, and the post-install caveats — several
 companions pull roughly 100 MB of Chromium each. This skill reports the state so
 one command shows the whole picture; it does not duplicate their install logic.
@@ -70,41 +86,22 @@ follows `COPILOT_HOME` when set and `~/.copilot` otherwise, and different apps
 set different stores, so a plugin installed for one app may not appear for
 another. The report prints the store it read for that reason.
 
-### One add-on is closer to a dependency
-
-`replicate-imagery` describes itself as a thin router and delegates its
-substantive prompting guidance to Replicate's upstream skills, installed with
-`npx skills add replicate/skills`. It still runs without them: model selection,
-cost awareness, brand alignment, and the routing decision are all here. But the
-prompt craft it points at is not. Treat it as an add-on that the skill leans on
-harder than the rest.
-
 ## Install With Consent
 
-| Kind | What `--apply` does |
-| --- | --- |
-| npm packages (`jszip`, Mermaid CLI, svgexport) | Installs them |
-| System packages (Pandoc) | Prints the command for the current platform; does not run it |
-| MCP servers | Directs to the provisioner below; does not run it |
-
-Installing a system package silently is a surprise change to someone's machine.
-The command is printed so the user chooses to run it.
-
-```text
-node <this-skill>/scripts/check-dependencies.cjs --apply
-```
+The checker is read-only and rejects the retired `--apply` option before
+running probes. For MCP setup, use the provisioner below; preview first and
+apply only after explicit approval.
 
 ## MCP Servers
 
-Three pinned servers, provisioned together but tiered differently. They install
+Two pinned servers, provisioned together but tiered differently. They install
 into plugin-private state and are launched by a direct Node shim, never by npm
 or npx.
 
 | Pinned package | Tier | Role |
 | --- | --- | --- |
-| `flint-chart-mcp@1.0.1` with `flint-chart@1.0.1` | Required | Chart rendering, validated interactive show, and version-matched chart/theme/interaction/board resources. No fallback |
-| `@playwright/mcp@0.0.80` | Recommended | Browser verification. `render-verify` also works with the host's own browser tools |
-| `replicate-mcp@0.9.0` | Add-on | AI image generation. Also needs `REPLICATE_API_TOKEN` and a paid account |
+| `flint-chart-mcp@1.1.1` with `flint-chart@1.1.1` | Required | Chart rendering, validated interactive show, and version-matched chart/theme/interaction/board resources. No fallback |
+| `@playwright/mcp@0.0.84` | Recommended | Browser verification. `render-verify` also works with the host's own browser tools |
 
 Provisioning selects all MCP servers by default. Use `--server flint` to select
 only Flint and its independently exact-pinned library. The launcher checks both
@@ -130,10 +127,14 @@ timeout/startup failures remain explicit. A failed install or verification can
 leave partial package state and must not be reported as provisioned successfully.
 
 If registry metadata advertises backend tarballs that npm policy cannot fetch
-directly, do not enable remote fetching or change the registry. With explicit
-approval and npm 12+, `--registry-tarball-prefix <HTTPS-prefix/>` routes matching
-tarball URLs through the configured registry for that command only. Preview the
-exact prefix first; the installer does not invent it or persist npm settings.
+directly, do not enable remote fetching or change the registry. The provisioner
+recognizes only the configured `https://packagefeedproxy.microsoft.io/npm/`
+endpoint and previews its confirmed Microsoft backend prefix automatically.
+With npm 12+ and normal installation consent, matching tarballs are routed
+through that registry for the install command only. No corporate-network
+inference, persistent npm edits, retries, or broader routing occur.
+`--registry-tarball-prefix <HTTPS-prefix/>` overrides detection with a separately
+confirmed explicit prefix. Other registries require that explicit selection.
 
 The provisioner installs nothing globally and never passes `--registry` or edits
 `.npmrc`. Whatever registry the user has configured is the one it uses.
@@ -179,10 +180,6 @@ The registration points at whichever plugin copy the script was run from. Run it
 from the installed package, not a working checkout, unless the intent is to test
 uncommitted changes.
 
-`replicate` is skipped when `REPLICATE_API_TOKEN` is unset. Registering a server
-that cannot authenticate trades a clear "not configured" message for an opaque
-auth failure at call time.
-
 ### Why `alex-playwright` and not `playwright`
 
 Scout ships a built-in browser server already named `playwright`, so the package
@@ -207,7 +204,7 @@ them. Private runtime state must never run ahead of reviewed source.
 | A skill reports a missing tool | Run the dependency check; it names the install command for the current platform |
 | A plugin shows as missing but the user installed it | Check the store line in the report. Apps read different stores; the plugin may be installed for a different one |
 | Registry is unexpected | Stop. Correct npm configuration outside this skill, then preview again |
-| Provisioning fails | Report npm's error without adding a registry override |
+| Provisioning fails | Report npm's error; stop rather than changing registries, broadening prefix routing, or retrying automatically |
 | Runtime reports missing private state | Run the provisioner again; do not substitute npx |
 | Runtime reports a version mismatch | Re-provision from the reviewed source version; never launch stale state |
 | Skills load on Scout but their MCP tools are absent | Provisioning and registration are separate. Run `register-scout-mcp.mjs`, then restart Scout fully |

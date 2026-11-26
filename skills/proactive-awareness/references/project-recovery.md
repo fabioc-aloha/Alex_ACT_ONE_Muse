@@ -20,8 +20,19 @@ At the start of every relevant conversation:
 4. **Check dream reports (if available)** — If `.github/quality/dream-report.json` exists, note the last dream date and any issues. Skip silently if absent — not every project ships a dream pipeline.
 5. **Summarize briefly** — If relevant prior context exists in handoff, the task
    list, or session memory, offer a one-line recovery summary subject to the
-   inhibition rules. These checks are read-only; do not rewrite continuity
-   records or create episodic/native memory as part of recovery.
+   inhibition rules. Check whether prior sessions stranded project
+   deliverables outside the repository (session scratch or temporary
+   storage) and report any that were. Muse edition note: the flagship
+   automates this scan of the Copilot session-state store with a checker
+   script that is not shipped here; perform the inventory manually. These
+   checks are read-only; do not rewrite continuity records or create
+   episodic/native memory as part of recovery.
+
+For recovery scans, use the explicit session scope when known. Supported
+manifests include the repository recovery index and the existing project-local
+artifact recovery layouts. Validate recovered bytes before using their original
+hashes for accounting. An ignored copy, malformed record, unavailable session
+store, linked source, or unsupported format is not proof of clean delivery.
 
 ### Denied sources and unknown worktree state
 
@@ -35,6 +46,9 @@ At the start of every relevant conversation:
   ask for the task goal or next action without requesting restricted source
   contents or a summary of them. Do not make the user explain the denial to
   continue.
+- If an interactive form is unavailable, disallowed, or cannot reliably
+   deliver its answer, ask one plain-text question in chat and wait for a reply.
+   Continue from the confirmed goal only; the denied source stays out of scope.
 - Preserve the boundary between supplied fixture facts and live observations.
   Do not infer staged/unstaged state, change age, filenames, counts, or task
   completion from the word "modified." State any unobserved details as unknown;

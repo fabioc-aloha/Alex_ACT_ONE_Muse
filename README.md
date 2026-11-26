@@ -4,7 +4,7 @@
 
 **Your assistant is fast, confident, and too often wrong. Give it a discipline.**
 
-Alex ACT ONE is a pack of 59 skills for Muse, Meta's personal AI assistant, ported from the [Copilot edition](https://github.com/fabioc-aloha/Alex_ACT_ONE). It changes how the assistant works: frame the problem before solving it, look for evidence against its first answer, and check what it produced before calling it done. There is no plugin loader and nothing to register: copy the skill folders in and they are live.
+Alex ACT ONE is a pack of 60 skills for Muse, Meta's personal AI assistant, ported from the [Copilot edition](https://github.com/fabioc-aloha/Alex_ACT_ONE). It changes how the assistant works: frame the problem before solving it, look for evidence against its first answer, and check what it produced before calling it done. There is no plugin loader and nothing to register: copy the skill folders in and they are live.
 
 **See the difference:** the same loaded prompt, "Our dashboard takes 8 seconds to load. Rust rewrite, or Redis caching?", handled two ways. Try it yourself with [the evaluation guide](docs/launch/evaluation-guide.md).
 
@@ -79,7 +79,7 @@ banners, then check that what rendered says what you meant.
 write project-specific skills from work you keep repeating, and consolidate what
 a session learned into something reusable.
 
-59 skills, 15 opt-in modules, and 15 chat-ready prompts. There is no MCP server
+60 skills, 15 opt-in modules, and 15 chat-ready prompts. There is no MCP server
 to install, register, or provision — the capabilities the Copilot edition's
 servers provided are native to Muse (see below).
 
@@ -161,6 +161,7 @@ Writing people finish reading.
 | --- | --- | --- | --- |
 | `big-idea` | Distill the central claim before authoring any summary-shaped output: hero copy, commit-message subj… | — | Keep |
 | `humanizer` | Use when the user wants to humanize, de-AI, de-slop, or un-ChatGPT a piece of text — strip AI-isms a… | — | Keep |
+| `creative-writing` | Draft or develop original fiction, or revise a story, scene, or dialogue for creative effect. Preserve the requested vo… | — | Keep |
 | `ai-tell-audit` | Read-only audit for AI-tell prose: scan text against the humanizer's pattern catalog plus the project's ho… | — | Delta |
 | `communication-craft` | Communication patterns for feedback, cross-audience content, and eliciting needs. SBI feedback model… | — | Delta |
 | `doc-hygiene` | Documentation hygiene — anti-drift rules, code-documentation placement, count elimination, and livin… | — | Delta |
@@ -283,7 +284,7 @@ new `flint-interactions` skill, the `convert`, `render-chart`, and
 0.9.1 converter-safety fixes, and the refreshed opt-in modules. Copilot-host
 machinery (the plugin installer, CI, Mall delivery) stays flagship-only; the
 per-item record is in [PORT-NOTES.md](PORT-NOTES.md). The manifest now
-declares 59 skills.
+declares 60 skills.
 
 ## Native capabilities instead of MCP servers
 
@@ -338,6 +339,7 @@ never compared across repos directly. The repo name is spelled
 | v0.1.0 | v0.3.6 | The straight port to the Muse host |
 | v0.2.0 | v0.6.0 | Curation: 29 kept, 23 delta-adapted, 8 archived |
 | v0.3.0 | v0.9.2 | Flint 1.0.1, converter safety, deterministic helpers |
+| v0.4.0 | v0.10.0 | Creative Writing, Flint 1.1.1, artifact storage contract, dependency-block routing |
 
 ## Tests
 

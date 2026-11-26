@@ -5,6 +5,84 @@ What changed between the Copilot edition
 Muse edition (`alex-act-one-Muse` v0.1.0). Target host: Muse, Meta's personal
 AI assistant.
 
+## Mirror to flagship 0.10.0 (this edition's v0.4.0, November 2026)
+
+The flagship shipped 0.10.0 on 2026-11-25 (tag `v0.10.0`, commit
+`2fe945f8`). Method, same as the 0.9.2 mirror: the flagship delta
+(v0.9.2 → v0.10.0) was classified file by file against this edition —
+copied where this edition held the flagship text verbatim, merged where
+this edition carries Muse-delta rewrites, and skipped where the change
+is Copilot-host machinery. One skill added, none removed from this
+edition; the active set is now 60.
+
+Ported:
+
+- **Creative Writing (new skill).** Original fiction drafting and
+  targeted revision, host-neutral, adopted verbatim; registered in the
+  manifest and the README table, tier Keep. It routes AI-tell-only work
+  to `humanizer`, which this edition already ships.
+- **Flint 1.1.1.** The language reference and publication preset were
+  copied verbatim; the shared pin registry (`scripts/shared/dependencies.cjs`)
+  and the provisioning scripts now pin `flint-chart@1.1.1` +
+  `flint-chart-mcp@1.1.1` and `@playwright/mcp@0.0.84`. The `flint-chart`
+  skill's install pins and contract line moved to 1.1.1, it gained the
+  missing-inputs check and the no-silent-substitution rule for live
+  boards, and a review note scopes its catalog claims (preset counts,
+  chart-type availability) as reviewed against 1.0.1, with the installed
+  runtime's own resources as the final authority. The offline Showcase
+  and Interaction Lab HTML resources are bundled with the skill, as
+  upstream (11.9 MB): this edition's link-integrity checks require them,
+  and they run in a browser without a checkout or server.
+- **Artifact storage contract.** `proactive-awareness` gained the shared
+  storage and delivery contract reference and a read-only delivery-check
+  mode; `git-workflow`, `meditation`, `plan`, `project-status`, and
+  `render-verify` now route to it. The contract text is adopted with one
+  adaptation: the flagship's session-artifact checker scans the Copilot
+  host's session-state store, so the checker script is not shipped and
+  the inventory check is manual in this edition (noted in the contract,
+  the `proactive-awareness` skill, and `project-recovery`).
+- **Dependency-block routing.** `setup-dependencies` gained the
+  "when another skill is blocked" protocol that eleven skills now link
+  to (the convert family, `annotate-screenshot`, the Flint skills); its
+  checker is read-only (the retired `--apply` is rejected), and
+  `provision-runtime.mjs` gained the shared `version-audit.cjs` helper
+  (also copied) and the registry tarball-prefix routing. The Copilot
+  edition's PowerShell/Mall setup sections (`install-and-check.ps1`,
+  `-DependenciesOnly`) are not shipped here.
+- **Git auth checker.** `git-workflow` gained the bundled
+  `check-git-auth.cjs` (preview-first, no tokens printed) and its
+  non-interactive/multi-account guidance, copied verbatim.
+- **Humanizer.** Four pattern-catalog clarifications merged (significance
+  labels, trailing participles, cross-sentence contrasts, source-scope
+  phrases) and the source-comparison record moved to 2026-11-25
+  (next due 2026-12-25). The flagship's new pattern 30 was adapted from
+  this edition's own pattern 30 (PR #10) and is not duplicated back;
+  this edition's evidence-cited participle text was kept over the
+  flagship's softened rewrite.
+- **Converter and reference updates.** Fail-fast Mermaid PNG handling in
+  `md-to-html`, the 1600px/3x render change and fail-fast SVG conversion
+  in `md-to-word` (scripts and skills copied verbatim), the
+  `compile-brain` resource-portability section, `docs-shell` link fixes,
+  and the chart-family reference re-pointing in `chart-big-idea`,
+  `chart-vocabulary`, `render-chart`, and `print-svg-style-guide`
+  (including the `replicate-imagery` retirement wording).
+
+Skipped, with reasons:
+
+- `proactive-awareness/scripts/check-session-artifacts.cjs` — scans
+  `~/.copilot/session-state/`, a Copilot-only store (see the contract
+  adaptation above).
+- `plan/references/scoped-delegation.md` — the flagship file was itself
+  adapted from this edition's `scoped-delegation` skill; `plan` links to
+  the sibling skill instead of carrying a second copy.
+- The flagship's `package/alex-act-one/` distribution tree,
+  `install-and-check.ps1`, `archive/verification/**` evidence dumps, and
+  its docs/tests churn for the Copilot installer and unified setup —
+  flagship distribution and verification machinery, not edition content.
+- Flagship changes inside the archived exclusions (`bootstrap-core`,
+  `bootstrap-project`, `rich-email`) — archived here by design; the
+  parity record is unchanged.
+
 ## Mirror to flagship 0.9.2 (this edition's v0.3.0, November 2026)
 
 The flagship shipped 0.7.0, 0.8.0, 0.9.0, 0.9.1, and 0.9.2 after this

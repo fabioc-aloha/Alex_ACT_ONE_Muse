@@ -27,6 +27,19 @@ figures, dashboards, diagrams, and printable output. Charts are the
 deepest-worked case because this plugin produces them, and their catalog is the
 longest; a shorter general catalog follows it.
 
+For project deliverables, apply the
+[shared storage contract](../proactive-awareness/references/project-artifact-storage.md):
+inspect the final repository copy and its resources, not only a temporary
+preview or MCP display. Preserve required supporting sources and report blocked
+delivery explicitly. This check grants no relocation or publication authority.
+
+For Flint MCP Apps, record separately whether `show` returned, the actual host
+displayed the card, the requested interaction worked, and an export was saved.
+Inspect state after the gesture and reset. Check fullscreen only if the host
+offers it and it is in scope. An offline demo is not evidence for a native host.
+For an exported SVG or PNG, open the saved file and check it against the chart
+claim; a displayed preview or tool reply is not file delivery.
+
 ## When to invoke
 
 **Mandatory:**
@@ -356,7 +369,7 @@ verified.
 | `Access to "file:" protocol is blocked`         | Flag missing — the default blocks `file://` navigation entirely                                  | Add `--allow-unrestricted-file-access`                                                                                                  |
 | `Browser distribution '<channel>' is not found` | No bundled browser — the selected channel is not installed on this machine                       | Switch `--browser` to a channel that is present (`msedge` / `chrome` / `firefox` / `webkit`), or run `npx playwright install <channel>` |
 | Server reports a version like `1.62.0-alpha-…`  | That is the underlying **Playwright library** version, not the `@playwright/mcp` package version | Do not pin against what the handshake reports                                                                                           |
-| Tools never appear at all                       | Config in the wrong path or under the wrong top-level key                                        | Same trap as `flint` — see the per-host table in the `flint-chart` skill                                                                |
+| Tools never appear at all                       | Config in the wrong path or under the wrong top-level key                                        | Check the active client's registration, config path, and server-map key                                                                |
 | Untracked `.playwright-mcp/` in `git status`    | Working-directory artifacts                                                                      | Gitignore it                                                                                                                            |
 
 ## Anti-patterns
@@ -390,7 +403,7 @@ verified.
 
 - [`chart-big-idea`](../chart-big-idea/SKILL.md) — Step 0.5 earn-a-figure gate + Step 4.5 focus discipline. Framing side of the same discipline.
 - [`chart-vocabulary`](../chart-vocabulary/SKILL.md) — Module 2 CSAR evaluation loop asks *did the AI pick the right chart family*. This skill's Prose-coupling check asks *did the render match the message*. Both fire on an AI-generated chart; different failure modes.
-- [`flint-chart`](../flint-chart/SKILL.md) — spec authoring + Publication config preset. Verification runs against what this skill produces.
+- [`flint-chart`](../flint-chart/SKILL.md) — spec authoring and delivery. For print output, see the [publication preset](../flint-chart/references/publication-preset.md) and verify the rendered artifact.
 - [`print-svg-style-guide`](../print-svg-style-guide/SKILL.md) — the visual grammar the shipped SVG obeys. The failure-catalog entries in this skill fire when that grammar is violated.
 - [`figure-generator`](../figure-generator/SKILL.md) — where the "fix in the generator, never in the SVG" rule for the SVG XML invalid catalog entry lives.
 - [`corpus-qa-sweep`](../corpus-qa-sweep/SKILL.md) — the corpus-scale companion. That skill sweeps every item against machine-checkable invariants and triages the flags; this one judges a single artifact against the failure catalog. Sweep to find candidates, then verify one.

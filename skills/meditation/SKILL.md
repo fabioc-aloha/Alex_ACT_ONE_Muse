@@ -28,6 +28,12 @@ meditate: completed work and changed task state belong in the existing project
 records even when no new skill is justified. With no changed state or worthwhile
 recommendation, make no duplicate entry or timestamp-only edit.
 
+Reconcile relevant artifact locations and indexes under the
+[shared storage contract](../proactive-awareness/references/project-artifact-storage.md)
+only within the request's approved repository scope. Preserve historical
+reports and frozen evidence as artifacts, not handoff prose. Ask before
+recovering materially uncertain or sensitive external content.
+
 ## Authority and Scope
 
 An explicit request to meditate authorizes routine continuity writes in the

@@ -18,9 +18,23 @@ setup, and `render-verify`; it does not replace Flint's language reference.
 For the conceptual grammar, compiler model, data-access boundary, backend
 contract, rendered-demo evidence, and tagged Microsoft links, read
 [`references/flint-language-reference.md`](references/flint-language-reference.md).
-It describes the published `1.0.1` contract that Illustrator pins. Use the MCP
+It describes the published `1.1.1` contract that Illustrator pins. Use the MCP
 resource, `list_chart_types`, `list_interaction_presets`, and `list_themes` as
 the final authority for the runtime actually installed in the host.
+
+Muse edition review note: this skill's catalog claims (preset counts,
+chart-type availability, enum values) were reviewed against Flint `1.0.1`.
+The pinned runtime is now `1.1.1`; where a version-scoped claim below and the
+installed runtime's own resources disagree, the installed runtime wins.
+
+## Check for missing inputs
+
+If essential data is missing, ask only for the missing inputs. If an
+interactive form is unavailable, disallowed, or cannot reliably deliver its
+answer, ask one plain-text question in chat and wait for a reply. No Flint
+tool is needed to clarify. Do not validate, render, or display a chart until
+the required data is confirmed. A data reply does not expand the requested
+output or grant permission to write files.
 
 ## What you produce (and what you do NOT)
 
@@ -96,7 +110,7 @@ directly (not to render via MCP).
   the project's approved compatibility decision.
 
    ```bash
-  npm install --save-exact flint-chart@1.0.1
+  npm install --save-exact flint-chart@1.1.1
    ```
 
   Add renderer peer dependencies only through the same project dependency
@@ -136,7 +150,10 @@ First decide which workflow the user is asking for:
   Chart.js. Use `validate_chart` to check a spec without rendering,
   `list_chart_types` for the supported chart catalog,
   `list_interaction_presets` for the presets a chart type supports, and
-  `validate_board` before showing a multi-chart board.
+  `validate_board` before showing a multi-chart board. If the user requested
+  a live board or interactivity the host cannot display, report that as
+  unavailable and offer static per-chart exports as an alternative; do not
+  silently substitute them.
 - **Project integration, only when the user asks for code:** add Flint to an
   app, notebook, script, or agentic product, install/import the library, and
   call an assembler in code. Keep the same `ChartAssemblyInput` contract, then
@@ -152,7 +169,7 @@ For JavaScript or TypeScript projects, use the approved project dependency
 workflow and preserve the lockfile:
 
 ```bash
-  npm install --save-exact flint-chart@1.0.1
+  npm install --save-exact flint-chart@1.1.1
 ```
 
 Do not add or upgrade renderer dependencies unless the user explicitly requests

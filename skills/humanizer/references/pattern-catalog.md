@@ -1,3 +1,5 @@
+# Humanizer Pattern Catalog
+
 ## CONTENT PATTERNS
 
 ### 1. Undue Emphasis on Significance, Legacy, and Broader Trends
@@ -19,6 +21,11 @@
 **Words to watch:** independent coverage, local/regional/national media outlets, trade publications, cited/featured/profiled in, significant/substantial/secondary coverage, written by a leading expert, active social media presence, maintains a strong digital presence
 
 **Problem:** LLMs hit readers over the head with claims of notability, often listing sources without context. The current-era form (2025+ tools) focuses on characteristics of the sources themselves: their type, their availability in public searching, their classification against the media landscape.
+
+Labels such as "independent coverage" or "trade publications" can make a
+list sound like an argument for significance without telling the reader what
+the coverage established. Keep those distinctions when source independence or
+type matters; otherwise name what a relevant source actually reported.
 
 **Before:**
 
@@ -169,6 +176,10 @@ rename a topic in general-purpose prose. Verify factual support separately.
 ### 9. Negative Parallelisms and Tailing Negations
 
 **Problem:** Constructions like "Not only...but..." or "It's not just about..., it's..." are overused. So are clipped tailing-negation fragments such as "no guessing" or "no wasted motion" tacked onto the end of a sentence instead of written as a real clause. Two more forms from the current Wikipedia catalog: the reversed variant "X rather than Y" (particularly common in Grok output), and negative parallelisms spread across two adjacent sentences instead of held inside one.
+
+The same contrast can span adjacent sentences or appear as "X rather than Y."
+Revise it when it manufactures a distinction or repeats the point. Keep it
+when the contrast rules out a plausible alternative the reader needs to know.
 
 **Before:**
 
@@ -336,6 +347,10 @@ rename a topic in general-purpose prose. Verify factual support separately.
 
 **Problem:** Stock knowledge-cutoff disclaimers are a historical cue. A current concern is an unsupported claim that information is unavailable, followed by speculation about what it "likely" means. A genuine limit in the evidence is not itself a tell; state it plainly and do not fill the gap with a guess.
 
+Phrases such as "based on publicly available sources" can hide what was
+actually checked. Name the source or search scope when it matters; never turn
+"I didn't find it in this source" into "it isn't documented anywhere."
+
 **Before:**
 
 > The supplied handbook does not give a publication date. It was probably released around 2002 because the formatting looks old.
@@ -480,5 +495,4 @@ When users hit a slow page, they leave.
 
 When users hit a slow page, they leave.
 ```
-
 ---

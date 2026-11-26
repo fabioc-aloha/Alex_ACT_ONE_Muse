@@ -1,0 +1,75 @@
+# Project artifact storage and delivery
+
+Choose the active project's Git worktree root from the session working
+directory, not from the installed plugin or its common Git directory. If the
+project or an approved external destination is ambiguous, ask before producing
+a deliverable.
+
+## Storage contract
+
+Requested documents, plans, reports, code, useful one-off helpers, generated
+outputs, and their required supporting sources belong in the project repository.
+Respect an explicitly requested destination. Use the project's existing
+documentation, scripts, assets, and evidence conventions; do not invent a
+second backlog or archive everything indiscriminately.
+
+Private planning storage is for internal reasoning, not the sole copy of a
+requested plan. Session persistence and a chat artifact link are not repository
+delivery. Configure producers and subagents with the repository destination
+before they run. If a tool can only produce externally, copy the approved output
+and its dependencies into the repository, then verify the final repository
+version. Do not delete the original before verifying the copy.
+
+Disposable tool arguments, locks, caches, runtime databases, authentication
+state, and installed runtime/configuration copies are not project artifacts.
+Never archive credentials, personal source material without its approved
+storage boundary, or another project's files under this policy. Minimize and
+document redactions. Preserve frozen evidence and record original and recovered
+hashes separately when authorized edits are necessary.
+
+## Delivery check
+
+Before presenting a project artifact or declaring completion:
+
+1. Enumerate the deliverables and required dependencies for the approved task.
+   Reuse a project index or manifest when present.
+2. Confirm every final file exists within the approved worktree or explicitly
+   approved external destination. Resolve real paths, including junctions,
+   symlinks, and nonexistent parents; a string prefix is not containment.
+3. Validate the actual required format and local links/resources using existing
+   tooling. For rendered output, inspect the final repository version.
+4. Check Git ignore state. Add discoverable repository links and distinguish
+   written, staged, committed, pushed, and remotely verified states.
+5. Report each missing, blocked, deliberately excluded, or unverified item.
+   A stale hash or a successful temporary preview is not final-file evidence.
+   Confirm no deliverables for the active repository were left unaccounted in
+   session scratch, temporary storage, or a chat artifact instead of the
+   repository; only the repository copy counts as delivered. Muse edition
+   note: the flagship's session-artifact checker scans the Copilot host's
+   session-state store and is not shipped here; this inventory check is
+   manual in this edition.
+
+These are instruction-level safeguards and an explicit verification procedure,
+not universal filesystem enforcement. Tests establish only their stated scope.
+Do not claim a host hook ran without observing invocation and failure handling.
+
+## Draft-to-delivery handoff
+
+When a task asks for a set of linked files, prepare the draft and name the
+required parts before reviewing it. For a report with a chart, check that the
+report opens, its chart link resolves, and the final chart's data, units, and
+main claim agree with the report and source. A rendered preview or an embedded
+image alone does not satisfy a separately requested chart file.
+
+If any required part is missing, stale, or unverified, keep the set in draft
+and name the blocker. Repeat affected checks when a reviewed file changes.
+When all required checks pass, present the set as ready for review. Verification
+does not authorize publication, sending, or any move to an external destination.
+
+## Authority
+
+Storage requirements grant no implementation, installation, deletion, commit,
+push, publication, global activation, or cross-project authority. Plan-only and
+read-only requests remain so. If the host blocks an otherwise requested document
+write, report the limitation and obtain the appropriate mode or approval; never
+evade it through shell, MCP, or another file writer.

@@ -16,12 +16,12 @@ This skill is the **selection and evaluation reference**. It sits upstream of th
 | **Pick the chart family + type** | **this skill** |
 | Author the Flint spec + render | [`flint-chart`](../flint-chart/SKILL.md) |
 | Structural / hand-authored SVG | [`figure-generator`](../figure-generator/SKILL.md) + [`print-svg-style-guide`](../print-svg-style-guide/SKILL.md) |
-| AI-generated illustration / hero image | [`replicate-imagery`(../../archive/host-specific/replicate-imagery/SKILL.md) |
+| AI-generated illustration / hero image | Separately configured host image tool; ONE bundles no image-generation provider |
 | Terminal, log, PR comment, or context window | [`ascii-chart`](../ascii-chart/SKILL.md) |
 | Verify after render | [`render-verify`](../render-verify/SKILL.md) |
 | Deliver / browse the gallery | [`docs-shell`](../docs-shell/SKILL.md) |
 
-`flint-chart` §0.2 (Question → family → chart) is a compact router pointing into this catalog; when a decision needs more than the router's ~7 rows, read this file. When picking a chart to hand-author rather than render via Flint, this catalog is still the reference — the delivery skill differs, the taxonomy does not.
+Flint's [chart selection reference](../flint-chart/references/chart-selection.md) gives a short route from question to chart family. Use this catalog when that route is too coarse or when hand-authoring a chart. The taxonomy is shared; confirm Flint availability separately in the installed catalog.
 
 ## When to Use
 
@@ -237,7 +237,7 @@ Run this algorithm when choosing charts for a dashboard, report, or book figure:
 6. Author + render:
    → statistical charts: flint-chart (Vega-Lite / ECharts / Chart.js via Flint MCP)
    → structural / hand-authored SVG: figure-generator + print-svg-style-guide
-   → AI-generated illustration: replicate-imagery
+   → AI-generated illustration: separately configured host image tool (not bundled by ONE)
    → no renderer available (terminal, log, PR, context window): ascii-chart
 
 7. Verify: render-verify (Prose-coupling + failure catalog)

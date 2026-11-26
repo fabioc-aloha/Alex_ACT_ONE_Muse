@@ -12,9 +12,9 @@ lastReviewed: 2026-08-18
 - **What this skill uniquely adds:** the **upscale-then-annotate ordering rule**, **supersampled shape rendering** (Pillow doesn't anti-alias shapes), **measured (not eyeballed) callout placement**, the **render-and-look verification loop**, and the color/font conventions below.
 - **Load when:** marking up a screenshot, dashboard capture, chart image, or any PNG/JPG whose source resolution you do not control.
 
-```bash
-pip install Pillow -q
-```
+Check Pillow in the selected existing Python environment first. If it is missing
+or cannot import, load [Setup Dependencies](../setup-dependencies/SKILL.md#when-another-skill-is-blocked)
+with the selected interpreter and diagnostic before attempting annotation.
 
 Not for artifacts you can regenerate. If you own the generator, put the callout in the source and re-render — a vector figure beats any raster markup. See [`figure-generator`](../figure-generator/SKILL.md).
 
